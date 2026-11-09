@@ -1,0 +1,806 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>Review|Unity 26Q3: การเติบโตของ Vector เกินความคาดหมาย</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">FundaAI</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/U?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$U</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/APP?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$APP</span>
+<span class="rn-deck">🚀 ข้อมูลการใช้จ่ายช่วงต้นไตรมาส 4 บ่งชี้ว่า Unity อาจทำได้เหนือไกด์อีกครั้ง</span>
+</div>
+<h1>🎮 Review|Unity 26Q3: การเติบโตของ Vector เกินความคาดหมาย</h1>
+<div class="rn-byline"><b>FundaAI</b><span class="rn-sep">·</span>2026-11-06<span class="rn-sep">·</span><span class="rn-th">อ่าน 7 นาที</span><span class="rn-en">7 min read</span></div>
+</div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🚀 Vector โตเร็วเป็นสองเท่าของไกด์ — รายได้ Vector +40% QoQ (+126% YoY) เทียบไกด์ราว 20% ดันรายได้รวม $622m (+32% YoY) สูงกว่าช่วงบนของไกด์ราว 9%</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="ภาพรวมผลประกอบการ" data-en="ภาพรวมผลประกอบการ" data-th-full="ภาพรวมผลประกอบการ" data-en-full="ภาพรวมผลประกอบการ" title="ภาพรวมผลประกอบการ">ภาพรวมผลประกอบการ</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="ไฮไลต์จากการประชุมรายได้" data-en="ไฮไลต์จากการประชุมรายได้" data-th-full="ไฮไลต์จากการประชุมรายได้" data-en-full="ไฮไลต์จากการประชุมรายได้" title="ไฮไลต์จากการประชุมรายได้">ไฮไลต์จากการประชุมรายได้</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="D28 และการปรับปรุงผลิตภัณฑ์เพิ่มเติม" data-en="D28 และการปรับปรุงผลิตภัณฑ์เพิ่มเติม" data-th-full="D28 และการปรับปรุงผลิตภัณฑ์เพิ่มเติม" data-en-full="D28 และการปรับปรุงผลิตภัณฑ์เพิ่มเติม" title="D28 และการปรับปรุงผลิตภัณฑ์เพิ่มเติม">D28 และการปรับปรุงผลิตภัณฑ์เพิ่มเติม</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="การเติบโตของลูกค้าและ Take Rate" data-en="การเติบโตของลูกค้าและ Take Rate" data-th-full="การเติบโตของลูกค้าและ Take Rate" data-en-full="การเติบโตของลูกค้าและ Take Rate" title="การเติบโตของลูกค้าและ Take Rate">การเติบโตของลูกค้าและ Take Rate</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="Runtime Data" data-en="Runtime Data" data-th-full="Runtime Data" data-en-full="Runtime Data" title="Runtime Data">Runtime Data</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="สิ่งที่เราจับตา" data-en="สิ่งที่เราจับตา" data-th-full="สิ่งที่เราจับตา" data-en-full="สิ่งที่เราจับตา" title="สิ่งที่เราจับตา">สิ่งที่เราจับตา</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="ข้อพิพาทกับ AppLovin อาจเริ่มส่งผลในครึ่…" data-en="ข้อพิพาทกับ AppLovin อาจเริ่มส่งผลในครึ่…" data-th-full="ข้อพิพาทกับ AppLovin อาจเริ่มส่งผลในครึ่…" data-en-full="ข้อพิพาทกับ AppLovin อาจเริ่มส่งผลในครึ่…" title="ข้อพิพาทกับ AppLovin อาจเริ่มส่งผลในครึ่…">ข้อพิพาทกับ AppLovin อาจเริ่มส่งผลในครึ่…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="รีวิวที่แนบมาท้ายฉบับ" data-en="Review|APP 26Q3" data-th-full="รีวิวที่แนบมาท้ายฉบับ" data-en-full="Review|APP 26Q3: From Being Caught Off Guard to Responding Effectively" title="รีวิวที่แนบมาท้ายฉบับ">รีวิวที่แนบมาท้ายฉบับ</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s9" data-sec="s9" aria-controls="rn-p-s9" aria-selected="false" data-th="ℹ️ เกี่ยวกับ FUNDA" data-en="ℹ️ เกี่ยวกับ FUNDA" data-th-full="ℹ️ เกี่ยวกับ FUNDA" data-en-full="ℹ️ เกี่ยวกับ FUNDA" title="ℹ️ เกี่ยวกับ FUNDA">ℹ️ เกี่ยวกับ FUNDA</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s10" data-sec="s10" aria-controls="rn-p-s10" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span>ภาพรวมผลประกอบการ</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>รายได้ $622m เพิ่มขึ้น 32% YoY สูงกว่าช่วงบนของไกด์รายได้รวมราว 9%</li><li>รายได้ Vector โต 40% QoQ เทียบกับไกด์ราว 20%</li><li>Adjusted EBITDA $257m อัตรากำไร 41%</li><li>ไกด์ Vector ไตรมาส 4: +21% ถึง 23% QoQ</li></ul></div>
+<ul>
+<li>รายได้ <strong>$622m</strong> เพิ่มขึ้น <strong>32% YoY</strong> และสูงกว่าช่วงบนของไกด์รายได้รวมราว <strong>9%</strong></li>
+<li>รายได้ของ Vector เติบโต <strong>40% QoQ</strong> เทียบกับไกด์ที่ราว <strong>20%</strong></li>
+<li>Adjusted EBITDA <strong>$257m</strong> อัตรากำไร <strong>41%</strong></li>
+<li>ไกด์การเติบโตของรายได้ Vector ในไตรมาส 4 อยู่ที่ <strong>21% ถึง 23% QoQ</strong></li>
+</ul>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ไตรมาสนี้ Vector โตเร็วเป็นสองเท่าของไกด์ และกำไรตามมาด้วย</p><ul class="rn-sum-list"><li>รายได้รวมเหนือช่วงบนของไกด์ราว 9%</li><li>ไกด์ Vector ไตรมาส 4 อยู่ที่ 21%–23% QoQ</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$622m</div><div class="rn-stat-c">รายได้รวม +32% YoY</div></div><div class="rn-stat"><div class="rn-stat-v">+40%</div><div class="rn-stat-c">Vector QoQ (ไกด์ ~20%)</div></div><div class="rn-stat"><div class="rn-stat-v">$257m</div><div class="rn-stat-c">Adj. EBITDA อัตรากำไร 41%</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span>ไฮไลต์จากการประชุมรายได้: Vector ทำได้เหนือคาด และโมเดลดีขึ้นต่อเนื่อง</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Vector โต 126% YoY และ 40% QoQ ซึ่งเป็นสองเท่าของไกด์ 20%</li><li>สามเสาหลัก: โมเดล AI ที่เรียนรู้ด้วยตัวเอง ผลิตภัณฑ์ใหม่ที่ยึดลูกค้าเป็นศูนย์กลาง และข้อมูลคุณภาพสูง</li><li>ROAS ที่ดีขึ้นทำให้ลูกค้าใช้จ่ายบนแพลตฟอร์มมากขึ้น</li></ul></div>
+<p><em>สถานะปุ่มในหน้าเว็บต้นฉบับ: สมัครรับแล้ว (Subscribed)</em></p>
+<p><strong>Vector ทำได้เหนือความคาดหมายอย่างมาก:</strong> “รายได้ของ Vector เติบโต <strong>126%</strong> เมื่อเทียบรายปี และ <strong>40%</strong> เมื่อเทียบรายไตรมาส ซึ่งเป็นสองเท่าของไกด์ที่เราให้ไว้ว่าจะโต <strong>20%</strong> ต่อไตรมาส ผลงานของ Vector ยังคงขับเคลื่อนด้วยสามเสาหลัก ได้แก่ การปรับแต่งโมเดล AI แบบเรียนรู้ด้วยตัวเองอย่างต่อเนื่อง การออกผลิตภัณฑ์ใหม่ที่ยึดลูกค้าเป็นศูนย์กลาง และข้อมูลคุณภาพสูงที่ไม่เหมือนใคร”</p>
+<p><strong>โมเดลดีขึ้นเรื่อย ๆ เมื่อได้ข้อมูลที่ดีกว่า:</strong> “เมื่อโมเดลของเรารีเทรนบนชุดข้อมูลที่ใหญ่ขึ้นและคุณภาพสูงขึ้นอย่างต่อเนื่อง ก็ปลดล็อกความแม่นยำในการเจาะกลุ่มเป้าหมายที่เหนือกว่า ... ผลตอบแทนจากค่าโฆษณา (ROAS) ที่ดีขึ้นทำให้ลูกค้าได้ผู้เล่นใหม่มากขึ้นอย่างมีกำไรมากขึ้น ซึ่งก็หนุนให้ลูกค้าใช้จ่ายบนแพลตฟอร์มของเรามากขึ้นอีก”</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">โมเดลรีเทรนบนข้อมูลที่ใหญ่และดีขึ้น ส่งผลให้เจาะกลุ่มแม่นขึ้นและ ROAS สูงขึ้น</p><ul class="rn-sum-list"><li>ROAS ที่ดีขึ้นหนุนให้ลูกค้าใช้จ่ายมากขึ้นอีก</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">+126%</div><div class="rn-stat-c">Vector YoY</div></div><div class="rn-stat"><div class="rn-stat-v">+40%</div><div class="rn-stat-c">Vector QoQ</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span>D28 และการปรับปรุงผลิตภัณฑ์เพิ่มเติม</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ผลงานไตรมาส 3 มาจากอัปเดตโมเดล ประสิทธิภาพโครงสร้างพื้นฐาน และ ROAS แบบ Day 28</li><li>ฝ่ายบริหารมองว่า Day 28 เป็น table stakes ของผู้เล่นระดับใหญ่</li><li>ยังมีรายการการเปลี่ยนแปลงเชิงพื้นฐานอีกยาวที่ส่งผลได้เท่า D28</li></ul></div>
+<p><strong>โมเดล โครงสร้างพื้นฐาน และ D28 คือตัวขับผลงานที่เหนือคาดในไตรมาสนี้:</strong> “ผลงานของ Vector ที่เหนือคาดในไตรมาส 3 มาจากการอัปเดตโมเดลที่ได้ผลดีมาก ความก้าวหน้าครั้งใหญ่ด้านประสิทธิภาพของโครงสร้างพื้นฐาน และโมเมนตัมที่แข็งแกร่งต่อเนื่องของผลิตภัณฑ์ ROAS แบบ Day 28”</p>
+<p><strong>การปรับปรุงครั้งถัดไปอาจส่งผลได้มากเท่ากับ D28:</strong> “ในแต่ละไตรมาส เราอาจมีการเปลี่ยนแปลงที่สำคัญต่อผลิตภัณฑ์หกหรือสิบเรื่อง แล้วแต่ไตรมาส ... ข้อเสนอ Day 28 ... เรามองว่าเป็นผลิตภัณฑ์ที่เป็น ‘table stakes’ พื้นฐาน จริงไหม? คุณไม่อาจหวังจะเป็นผู้เล่นระดับใหญ่ได้เลยถ้าไม่มีผลิตภัณฑ์แบบนี้ ... ยังมีรายการการเปลี่ยนแปลงเชิงพื้นฐานอีกยาวเหยียดที่รอเราอยู่ และจะส่งผลได้มากเท่ากับที่ Day 28 เคยทำ”</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">การเปลี่ยนแปลงสำคัญต่อผลิตภัณฑ์เกิดขึ้นราว 6–10 เรื่องต่อไตรมาส</p><ul class="rn-sum-list"><li>การปรับปรุงครั้งถัดไปอาจส่งผลได้เท่ากับ D28</li></ul></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span>การเติบโตของลูกค้าและ Take Rate</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>จำนวนบัญชีผู้ลงโฆษณาบน Vector +27% QoQ</li><li>90% ของการเติบโตมาจากผู้ลงโฆษณารายเดิม</li><li>การเติบโตมาจากจำนวนติดตั้งและมูลค่าผู้เล่น ไม่ใช่ take rate</li></ul></div>
+<p><strong>ผู้ลงโฆษณารายเดิมใช้จ่ายเพิ่ม ขณะที่รายใหม่ทยอยเข้ามา:</strong> “จริง ๆ แล้ว Vector เพิ่มจำนวนบัญชีผู้ลงโฆษณา <strong>27%</strong> QoQ ในไตรมาส 3 ... สิ่งที่ผมอยากเสริมคือ <strong>90%</strong> ของการเติบโตที่เราเห็นในไตรมาสนี้มาจากผู้ลงโฆษณารายเดิม ส่วนผู้ลงโฆษณารายใหม่ที่เข้ามาเพิ่งเริ่มใช้จ่ายกับเรา และเราคาดว่านั่นจะเป็นแรงหนุนการเติบโตที่เราจะได้รับต่อไป”</p>
+<p><strong>การเติบโตมาจากจำนวนการติดตั้งและมูลค่าผู้เล่นเป็นหลัก:</strong> “การเติบโตที่เร่งขึ้นของ Vector ส่วนใหญ่เป็นผลจากปริมาณการติดตั้งที่มากขึ้นและมูลค่าผู้เล่นที่สูงขึ้น ไม่ใช่การเปลี่ยนแปลง take rate ... รายได้ยังขยายตัวต่อไปได้โดยไม่กระทบอัตรากำไรของลูกค้าเรา”</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">การเติบโตมาจากปริมาณและมูลค่า ไม่ได้บีบอัตรากำไรของลูกค้า</p><ul class="rn-sum-list"><li>ผู้ลงโฆษณารายใหม่เพิ่งเริ่มใช้จ่าย จึงยังเป็นแรงหนุนข้างหน้า</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">+27%</div><div class="rn-stat-c">บัญชีผู้ลงโฆษณา QoQ</div></div><div class="rn-stat"><div class="rn-stat-v">90%</div><div class="rn-stat-c">การเติบโตจากรายเดิม</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span>Runtime Data</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>opt-in เรื่อง runtime ของโปรเจกต์ใหม่ยังสูงกว่า 90%</li><li>ผู้ใช้จ่ายสูงสุด 1,000 รายบน Vector แชร์ runtime data แล้ว 30%</li></ul></div>
+<p><strong>การแชร์ Runtime Data ขยายตัวต่อเนื่อง:</strong> “... อัตราการ opt-in เรื่อง runtime ของโปรเจกต์ที่สร้างใหม่ยังคงสูงกว่า <strong>90%</strong> ในบรรดาผู้ใช้จ่ายสูงสุด 1,000 รายบน Vector ตอนนี้ <strong>30%</strong> แชร์ runtime data กับเราแล้ว และเราคาดว่าตัวเลขนี้จะเพิ่มขึ้นเรื่อย ๆ ตามกาลเวลา”</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">การแชร์ runtime data ขยายต่อเนื่อง และฝ่ายบริหารคาดว่าจะเพิ่มขึ้นอีก</p></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">&gt;90%</div><div class="rn-stat-c">opt-in โปรเจกต์ใหม่</div></div><div class="rn-stat"><div class="rn-stat-v">30%</div><div class="rn-stat-c">ของ Top 1,000 แชร์แล้ว</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span>สิ่งที่เราจับตา: Vector ไตรมาส 4 อาจเหนือไกด์อย่างมากอีกครั้ง</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ผลจริงยังเหนือที่ FUNDA คาดไว้ในบทพรีวิว</li><li>ฟีดแบ็กผู้ลงโฆษณาช่วงต้น Q4 ชี้ว่า Vector อาจโตเหนือไกด์ 21%–23% QoQ อีก</li></ul></div>
+<p>บทพรีวิวของเราชี้ไปที่การเติบโตแรงของ Unity Ads อยู่แล้ว แต่ผลจริงก็ยังเหนือความคาดหมายของเราอยู่ดี จากฟีดแบ็กของผู้ลงโฆษณาเรื่องการใช้จ่ายช่วงต้นไตรมาส 4 เราเชื่อว่ารายได้ Vector อาจโตเหนือไกด์ของฝ่ายบริหารที่ <strong>21%–23% QoQ</strong> อย่างมากอีกครั้ง</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">FUNDA เชื่อว่า Vector อาจเหนือไกด์ไตรมาส 4 อย่างมากอีกครั้ง</p></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">21%–23%</div><div class="rn-stat-c">ไกด์ Vector Q4 QoQ</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span>ข้อพิพาทกับ AppLovin อาจเริ่มส่งผลในครึ่งแรกของปี 27</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ถ้าฟีดแบ็กที่ได้รับถูกต้อง ข้อพิพาทอาจเริ่มส่งผลในครึ่งแรกของปี 27</li><li>รายละเอียดอยู่ในรีวิว AppLovin ของ FUNDA วันที่ 5 พฤศจิกายน</li></ul></div>
+<p>เราได้พูดถึงพลวัตการแข่งขันที่เปลี่ยนไประหว่างสองบริษัทนี้ไว้ในรีวิว AppLovin ของเราเมื่อวันที่ 5 พฤศจิกายนแล้ว ถ้าฟีดแบ็กที่เราได้รับพิสูจน์ว่าถูกต้อง ข้อพิพาทระหว่าง AppLovin กับ Unity อาจเริ่มส่งผลในครึ่งแรกของปี 27 ดูรายละเอียดเพิ่มเติมในรีวิวฉบับนั้น</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ผลกระทบเชิงการแข่งขันจากข้อพิพาทกับ AppLovin ยังเป็นประเด็นที่ต้องติดตาม</p></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">08</span><span><span class="rn-th">รีวิวที่แนบมาท้ายฉบับ: Review|APP 26Q3 — จากการถูกจับไม่ทันตั้งตัว สู่การตอบสนองอย่างมีประสิทธิภาพ</span><span class="rn-en">Review|APP 26Q3: From Being Caught Off Guard to Responding Effectively</span></span></h2>
+
+<p><em>5 พฤศจิกายน</em></p>
+<div class="figure"><img src="data:image/jpeg;base64,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" alt="figure 1"><div class="figure-caption">รูปที่ 1: แบนเนอร์โปรโมต (ภาพกราฟิก) ของ FUNDA — พื้นเทาอ่อน ด้านบนมีโลโก้ “FUNDA REPORT” และสโลแกน “The full-stack research platform” ด้านล่างเป็นแถบสีน้ำเงินมีโลโก้ AppLovin | ป้ายในภาพ: FUNDA REPORT = FUNDA REPORT (ชื่อแบรนด์) · The full-stack research platform = แพลตฟอร์มวิจัยแบบฟูลสแต็ก · APPLOVIN = AppLovin (ชื่อบริษัท)</div></div>
+<p>I. ภาพรวมผลประกอบการ (Results at a glance)</p>
+<p>อ่านเรื่องเต็ม (Read full story) — <strong>ถ้อยแถลงความเป็นอิสระของนักวิเคราะห์:</strong> ความเห็นที่แสดงในรายงานนี้สะท้อนมุมมองส่วนตัวและเป็นอิสระของนักวิเคราะห์เกี่ยวกับหลักทรัพย์และผู้ออกหลักทรัพย์ที่กล่าวถึงในที่นี้อย่างถูกต้อง ค่าตอบแทนของนักวิเคราะห์ไม่ว่าส่วนใดไม่เคย ไม่ได้ และจะไม่เกี่ยวข้องทั้งทางตรงหรือทางอ้อมกับคำแนะนำหรือมุมมองเฉพาะที่แสดงในรายงานนี้ บริษัทยึดมั่นในขั้นตอนการกำกับดูแลที่เข้มงวดเพื่อรักษาความถูกต้องสมบูรณ์ ความปลอดภัย และความชอบด้วยกฎหมายของแหล่งข้อมูลและสารสนเทศที่ใช้</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s9" role="tabpanel" aria-labelledby="rn-t-s9" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">09</span><span>ℹ️ เกี่ยวกับ FUNDA</span></h2>
+
+<p><strong>เกี่ยวกับ FUNDA</strong></p>
+<p>Consensus AI Technology Pte. Ltd. (“บริษัท” หรือ “FUNDA”) เป็นบริษัทวิจัยอิสระที่จดทะเบียนในสิงคโปร์ บริษัทไม่มีความเกี่ยวข้องกับผู้ค้าหลักทรัพย์ วาณิชธนกิจ หรือบริษัทจัดการสินทรัพย์ใด ๆ และไม่ได้จดทะเบียนเป็นที่ปรึกษาการลงทุนหรือโบรกเกอร์-ดีลเลอร์ในเขตอำนาจใด ๆ บริษัทไม่มีความสัมพันธ์ด้านวาณิชธนกิจหรือการรับประกันการจำหน่ายหลักทรัพย์กับบริษัทที่ครอบคลุมในรายงานนี้ และไม่รับการสนับสนุนหรือเงินทุนจากบริษัทจดทะเบียน</p>
+<p><strong>ไม่ใช่คำแนะนำการลงทุน และความเป็นกลางของรายงาน</strong></p>
+<p>เนื้อหาของรายงานนี้และข้อมูลในรายงานมีไว้เพื่อให้ข้อมูลเท่านั้น และไม่ถือเป็นคำแนะนำการลงทุนหรือฐานในการตัดสินใจทางธุรกิจ ความเห็นที่แสดงในที่นี้เป็นเพียงความเห็นส่วนตัวของผู้เขียนแต่ละท่าน ณ จุดเวลาหนึ่ง และไม่ได้สะท้อนจุดยืนของ FUNDA ในฐานะแพลตฟอร์มที่ดำเนินงานอย่างอิสระ FUNDA คงสถานะบุคคลที่สามที่เป็นกลาง และไม่ให้การรับประกันใด ๆ ทั้งโดยชัดแจ้งหรือโดยนัยเกี่ยวกับความถูกต้อง ความครบถ้วน หรือความเหมาะสมของความเห็นดังกล่าว</p>
+<p><strong>ไม่ใช่การเสนอหรือชักชวน:</strong> รายงานนี้ไม่ถือเป็นการเสนอ ชักชวน แนะนำ หรือให้คำแนะนำให้ซื้อ ขาย หรือถือหลักทรัพย์หรือตราสารทางการเงินใด ๆ และไม่ถือเป็นคำแนะนำด้านกฎหมาย ภาษี หรือบัญชี</p>
+<p><strong>ข้อมูลจากบุคคลที่สาม:</strong> ข้อมูลของบุคคลที่สามทั้งหมดที่อ้างถึงในรายงานนี้ได้มาจากแหล่งสาธารณะหรือแหล่งที่ได้รับอนุญาต บริษัทไม่ให้การรับรองหรือรับประกันใด ๆ ทั้งโดยชัดแจ้งหรือโดยนัยเกี่ยวกับความถูกต้องหรือความครบถ้วนของข้อมูลเหล่านั้น</p>
+<p><strong>ไม่มีส่วนร่วมในการตัดสินใจ:</strong> บริษัทไม่มีส่วนร่วมทั้งทางตรงและทางอ้อมในกระบวนการตัดสินใจลงทุนของลูกค้าหรือผู้อ่าน ผู้อ่านควรตัดสินใจลงทุนอย่างเป็นอิสระตามวัตถุประสงค์การลงทุนและสถานะทางการเงินของตนเอง และปรึกษาที่ปรึกษาด้านการเงินหรือกฎหมายที่เป็นมืออาชีพก่อนทำธุรกรรมใด ๆ</p>
+<p><strong>ถ้อยแถลงเรื่องความทันสมัยของข้อมูล</strong></p>
+<p>เนื่องจากสภาพแวดล้อมตลาดและแนวโน้มเทคโนโลยีเปลี่ยนแปลงอย่างรวดเร็ว รายงานนี้สะท้อนสภาวะตลาด ณ วันก่อนการเผยแพร่ ข้อมูลที่เกี่ยวข้องอาจล้าสมัยเมื่อเวลาผ่านไป FUNDA ไม่มีหน้าที่ต้องอัปเดตเนื้อหาของรายงานนี้แบบเรียลไทม์</p>
+<p><strong>ทรัพย์สินทางปัญญา ความลับ และข้อจำกัดการใช้เชิงพาณิชย์</strong></p>
+<p>รายงาน ข้อมูล โมเดล และเนื้อหาทั้งหมดที่บริษัทให้ไว้เป็นทรัพย์สินทางปัญญาเฉพาะของบริษัท และได้รับความคุ้มครองตามกฎหมายลิขสิทธิ์และทรัพย์สินทางปัญญา</p>
+<p><strong>ความเป็นเจ้าของสิทธิ:</strong> เว้นแต่จะระบุเป็นอย่างอื่นโดยชัดแจ้งในข้อตกลงเป็นลายลักษณ์อักษร สิทธิในทรัพย์สินทางปัญญาทั้งหมด (รวมถึงลิขสิทธิ์) ที่เกิดจากหรือเกี่ยวข้องกับรายงานนี้เป็นของบริษัทแต่เพียงผู้เดียว</p>
+<p><strong>การใช้ที่ได้รับอนุญาต:</strong> ลูกค้าสถาบันอาจใช้รายงานนี้ภายในองค์กรได้ภายในขอบเขตที่นโยบายกำกับดูแลภายในของตนอนุญาต อย่างไรก็ตาม ห้ามเปิดเผยหรือแบ่งปันกับบุคคลที่สามใด ๆ โดยเด็ดขาด</p>
+<p><strong>ข้อห้ามการใช้เชิงพาณิชย์:</strong> หากไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรโดยชัดแจ้งจากบริษัทล่วงหน้า ห้ามบุคคลหรือนิติบุคคลใดทำซ้ำ เผยแพร่ซ้ำ แจกจ่าย ขายต่อ บรรจุใหม่ หรือใช้รายงานนี้หรือส่วนใดส่วนหนึ่งเพื่อวัตถุประสงค์เชิงพาณิชย์หรือแสวงหากำไรไม่ว่าในลักษณะใด</p>
+<p><strong>การดำเนินการทางกฎหมาย:</strong> บริษัทขอสงวนสิทธิ์ที่จะดำเนินการเยียวยาทางกฎหมายและเรียกร้องสิทธิ์ทั้งหมดที่มีต่อการใช้เชิงพาณิชย์ การแจกจ่ายซ้ำ หรือการละเมิดสิทธิในทรัพย์สินทางปัญญาของบริษัทโดยไม่ได้รับอนุญาต</p>
+<p><strong>ข้อความที่มองไปข้างหน้าและข้อสงวนสิทธิ์:</strong> รายงานนี้อาจมีข้อความที่มองไปข้างหน้า รวมถึงการพยากรณ์ ประมาณการ และการวิเคราะห์แนวโน้มอุตสาหกรรม ข้อความเหล่านี้อยู่ภายใต้ความเสี่ยงและความไม่แน่นอนที่อาจทำให้ผลที่เกิดขึ้นจริงแตกต่างอย่างมีนัยสำคัญจากที่คาดไว้ บริษัทไม่ต้องรับผิดต่อความสูญเสียทางตรง ทางอ้อม หรือที่เป็นผลสืบเนื่องใด ๆ ที่เกิดจากการใช้หรือการอาศัยเนื้อหาของรายงานนี้</p>
+<p><strong>ชวนเพื่อนและรับรางวัล</strong> หากคุณชอบ FUNDA ลองแชร์ให้เพื่อน แล้วรับรางวัลเมื่อพวกเขาสมัครสมาชิก (ปุ่ม: Invite Friends = ชวนเพื่อน)</p>
+<p>ปุ่มท้ายหน้า: LIKE = ถูกใจ · COMMENT = ความเห็น · RESTACK = รีสแต็ก</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec" id="rn-p-s10" role="tabpanel" aria-labelledby="rn-t-s10" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🚀 Vector โตเร็วเป็นสองเท่าของไกด์</strong> — รายได้ Vector <strong>+40% QoQ</strong> (+126% YoY) เทียบไกด์ราว 20% ดันรายได้รวม <strong>$622m (+32% YoY)</strong> สูงกว่าช่วงบนของไกด์ราว 9%</li>
+<li><strong>💰 กำไรตามมาด้วย</strong> — Adjusted EBITDA <strong>$257m</strong> อัตรากำไร <strong>41%</strong> แปลว่าการเติบโตไม่ได้มาแลกกับความสามารถทำกำไร</li>
+<li><strong>🧠 สามเสาหลักของ Vector</strong> — โมเดล AI ที่เรียนรู้ด้วยตัวเอง ผลิตภัณฑ์ใหม่ที่ยึดลูกค้าเป็นศูนย์กลาง และข้อมูลคุณภาพสูงที่ไม่เหมือนใคร วนเป็นลูปที่ ROAS ดีขึ้น → ลูกค้าใช้จ่ายมากขึ้น</li>
+<li><strong>🔧 D28 คือ table stakes ไม่ใช่จุดสิ้นสุด</strong> — ฝ่ายบริหารบอกว่ายังมีรายการการเปลี่ยนแปลงเชิงพื้นฐานอีกยาวที่ส่งผลได้เท่า Day 28 และไตรมาสหนึ่งมีการเปลี่ยนแปลงสำคัญ 6–10 เรื่อง</li>
+<li><strong>👥 การเติบโตคุณภาพดี</strong> — บัญชีผู้ลงโฆษณา <strong>+27% QoQ</strong> แต่ <strong>90%</strong> ของการเติบโตมาจากรายเดิม รายใหม่เพิ่งเริ่มใช้จ่ายจึงยังเป็นแรงหนุนข้างหน้า</li>
+<li><strong>📈 โตจากปริมาณ ไม่ใช่ขึ้นราคา</strong> — ตัวขับคือจำนวนติดตั้งและมูลค่าผู้เล่น ไม่ใช่ take rate ลูกค้าจึงไม่ถูกบีบอัตรากำไร</li>
+<li><strong>📡 Runtime data ขยายต่อ</strong> — opt-in ของโปรเจกต์ใหม่สูงกว่า <strong>90%</strong> และ <strong>30%</strong> ของผู้ใช้จ่ายสูงสุด 1,000 รายแชร์ข้อมูลแล้ว</li>
+<li><strong>🔭 ไตรมาส 4 อาจเหนือไกด์อีก</strong> — จากฟีดแบ็กผู้ลงโฆษณาช่วงต้นไตรมาส FUNDA เชื่อว่า Vector อาจโตเหนือไกด์ <strong>21%–23% QoQ</strong> อย่างมากอีกครั้ง</li>
+<li><strong>⚔️ ติดตามข้อพิพาทกับ AppLovin</strong> — ถ้าฟีดแบ็กถูกต้อง ผลกระทบอาจเริ่มปรากฏในครึ่งแรกของปี 27 (รายละเอียดอยู่ในรีวิว APP 26Q3 วันที่ 5 พฤศจิกายน)</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>FUNDA, <em>Review|Unity 26Q3: Vector Growth Exceeds Expectations</em> (Substack, 6 พฤศจิกายน 2026) — <code>2026-11-06_-_ReviewUnity_26Q3_Vector_Growth_Exceeds_Expectations_-_id2550.pdf</code></li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+FundaAI<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+<script src="/inputs/Dashboards/hub-bottombar.js?v=51" data-il-bare></script>
+</body></html>
