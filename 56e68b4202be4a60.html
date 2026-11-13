@@ -1,0 +1,981 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>TMTB Morning Wrap: SK Hynix, Seagate, NXP, Vertiv, GE Vernova และ Etsy ประกาศงบ</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">TMT Breakout</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/SKHY?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$SKHY</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/STX?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$STX</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NXPI?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NXPI</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/VRT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$VRT</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GEV?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GEV</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ETSY?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ETSY</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MU?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MU</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/SNDK?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$SNDK</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/WDC?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$WDC</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NOW?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NOW</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AVGO?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AVGO</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GOOGL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GOOGL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MSFT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MSFT</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/APP?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$APP</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CBRS?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CBRS</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CLS?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CLS</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/TSLA?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$TSLA</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/DASH?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$DASH</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CART?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CART</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/META?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$META</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/PANW?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$PANW</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ORCL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ORCL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NVDA?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NVDA</span>
+<span class="rn-deck">สรุปเช้าวันที่ 28 ต.ค. — QQQ +40bps ก่อนประชุม FOMC, หุ้น semis ได้แรงหนุนจากงบ SK Hynix และ KOSPI ที่พุ่ง 7%</span>
+</div>
+<h1>☀️ TMTB Morning Wrap: SK Hynix, Seagate, NXP, Vertiv, GE Vernova และ Etsy ประกาศงบ</h1>
+<div class="rn-byline"><b>TMT Breakout</b><span class="rn-sep">·</span>2026-10-28<span class="rn-sep">·</span><span class="rn-th">อ่าน 41 นาที</span><span class="rn-en">41 min read</span></div>
+</div>
+<div class="rn-lede"><p>สวัสดีตอนเช้า QQQ +40bps ก่อนถึง FOMC ในวันนี้ซึ่งตลาดคาดว่าจะคงดอกเบี้ย ส่วนผลตอบแทนพันธบัตรนิ่งๆ ขณะที่น้ำมัน -1%</p>
+<p>ฝั่งเทค Semis +1% ต่อเนื่อง ได้แรงหนุนจาก KOSPI ของเกาหลีที่พุ่ง 7% โดยรวมงบที่ออกข้ามคืนในกลุ่มนี้ออกมาคละกัน SKHY, VRT, GEV, FLEX, APH ดีกว่าคาดหมด ส่วน STX, NXPI, TER, FFIV ออกมาคละกัน SNDK/MU +4% ตามงบที่แข็งแรงของ Hynix ซึ่งสูงกว่าเกณฑ์ที่ฝั่ง buyside คาดไว้ทั้งตัวเลขและการคืนทุน (Kioxia +14% / Samsung +4% ข้ามคืน) ส่วน Software -1% โดย NOW -2% นำลงก่อนประกาศงบคืนนี้ (เมื่อวาน Bernstein ราดน้ำเย็นใส่ความหวังของฝั่งบูลที่หวังตัวเลข cRPO ก้อนโต โดยชี้ว่ามีแรงฉุด 80-100bps จากการต่อสัญญาของ VA)</p>
+<p>เอเชียส่วนใหญ่ขึ้น: TPX -0.14%, NKY +1.08%, Hang Seng +0.23%, HSCEI +0.32%, SHCOMP +0.91%, Shenzhen +1.98%, Taiwan TAIEX +2.04%, Korea KOSPI +6.63%</p>
+<p>วันนี้เป็นอีกวันที่วุ่นวายในหมวดเทค ORCL จัด analyst day ราวเที่ยง, MNDY analyst day ตอน 2 โมงบ่าย, AAPL มีงานเปิดตัวผลิตภัณฑ์ตอนบ่ายโมง และ Fed ตอน 2 โมงบ่าย จากนั้นหลังตลาดปิดจะมี MSFT, GOOGL, NOW, EBAY, CVNA, FTNT และตัวอื่นๆ ตามมา…</p>
+<p>วันนี้มีเรื่องต้องไล่เยอะมาก ผมจะเริ่มจากงบก่อน: SKHY, STX, NXPI, VRT, GEV, ETSY แล้วค่อยไปต่อที่หัวข้อประจำ (กดลิงก์เพื่อข้ามไปยังส่วนที่ต้องการได้เลย)</p>
+<p>ไปกันเลย…</p>
+<p>ตารางด้านล่างคือภาพรวมการเคลื่อนไหวก่อนตลาดเปิดที่ผมสรุปไว้ในภาพประกอบต้นฉบับ (ผมถอดตัวเลขทั้งหมดมาเป็นตารางให้แล้ว)</p>
+<p><strong>TMT Pre-mkt Movers/Shakers — ผู้ชนะ (Winners)</strong></p>
+<table><thead><tr><th>หุ้น</th><th>%</th><th>หุ้น</th><th>%</th></tr></thead><tbody><tr><td>VRT</td><td>16.5%</td><td>JBL</td><td>3.3%</td></tr><tr><td>FLEX</td><td>10.3%</td><td>IREN</td><td>3.2%</td></tr><tr><td>SKHY</td><td>7.2%</td><td>BE</td><td>2.9%</td></tr><tr><td>APH</td><td>6.6%</td><td>VNET</td><td>2.9%</td></tr><tr><td>ETSY</td><td>5.5%</td><td>CRWV</td><td>2.9%</td></tr><tr><td>HUT</td><td>4.3%</td><td>NBIS</td><td>2.8%</td></tr><tr><td>SNDK</td><td>4.1%</td><td>AEHR</td><td>2.4%</td></tr><tr><td>MU</td><td>3.5%</td><td>CRDO</td><td>2.3%</td></tr><tr><td>WULF</td><td>3.3%</td><td>AMKR</td><td>2.3%</td></tr><tr><td></td><td></td><td>CLS</td><td>2.2%</td></tr></tbody></table>
+<p><strong>TMT Pre-mkt Movers/Shakers — ผู้แพ้ (Losers)</strong></p>
+<table><thead><tr><th>หุ้น</th><th>%</th><th>หุ้น</th><th>%</th></tr></thead><tbody><tr><td>ENPH</td><td>-20.4%</td><td>APP</td><td>-2.3%</td></tr><tr><td>LOGI</td><td>-12.2%</td><td>SONY</td><td>-2.2%</td></tr><tr><td>NXPI</td><td>-7.9%</td><td>NOW</td><td>-2.1%</td></tr><tr><td>FFIV</td><td>-7.5%</td><td>DOCU</td><td>-2.0%</td></tr><tr><td>HOOD</td><td>-6.2%</td><td>COIN</td><td>-2.0%</td></tr><tr><td>RUN</td><td>-5.6%</td><td>SPOT</td><td>-1.9%</td></tr><tr><td>TEL</td><td>-2.8%</td><td>TTAN</td><td>-1.9%</td></tr><tr><td>STX</td><td>-2.5%</td><td>TER</td><td>-1.7%</td></tr><tr><td>ON</td><td>-2.3%</td><td>WIX</td><td>-1.7%</td></tr><tr><td></td><td></td><td>DKNG</td><td>-1.7%</td></tr></tbody></table>
+<p><strong>Futures และ Mega-Cap</strong></p>
+<table><thead><tr><th>Futures</th><th>%</th><th>Mega-Cap</th><th>%</th></tr></thead><tbody><tr><td>SP500</td><td>0.25%</td><td>AVGO</td><td>1.6%</td></tr><tr><td>Nasdaq</td><td>0.43%</td><td>GOOGL</td><td>1.2%</td></tr><tr><td>Russell</td><td>0.02%</td><td>TSLA</td><td>0.9%</td></tr><tr><td>ARKK</td><td>-0.02%</td><td>NVDA</td><td>0.8%</td></tr><tr><td>FXI</td><td>-0.06%</td><td>META</td><td>0.2%</td></tr><tr><td>UST 2 year</td><td>1.0bps</td><td>SPCX</td><td>0.2%</td></tr><tr><td>UST 10 year</td><td>0.0bps</td><td>AMZN</td><td>0.1%</td></tr><tr><td>BTC</td><td>0.49%</td><td>MSFT</td><td>-0.1%</td></tr><tr><td>Crude</td><td>-0.72%</td><td>AAPL</td><td>-0.3%</td></tr></tbody></table>
+<p><strong>AI Subsectors</strong></p>
+<table><thead><tr><th>กลุ่มย่อย</th><th>%</th></tr></thead><tbody><tr><td>Electric Grid Enablers</td><td>2.91%</td></tr><tr><td>AI Power</td><td>2.75%</td></tr><tr><td>Neoclouds/Miners</td><td>2.75%</td></tr><tr><td>Google AI Infra</td><td>2.62%</td></tr><tr><td>Memory Exposed</td><td>2.20%</td></tr><tr><td>Broad AI Index</td><td>1.99%</td></tr><tr><td>Global Memory</td><td>1.87%</td></tr><tr><td>Optical</td><td>1.71%</td></tr><tr><td>AI Tech Beneficiaries</td><td>1.61%</td></tr><tr><td>AMZN Trainium Infra</td><td>1.41%</td></tr><tr><td>Nuclear</td><td>0.45%</td></tr><tr><td>AI Adopters</td><td>-0.16%</td></tr><tr><td>DC Buildout</td><td>-0.24%</td></tr><tr><td>AI Software</td><td>-0.59%</td></tr></tbody></table>
+<p><strong>TMT Subsectors</strong></p>
+<table><thead><tr><th>กลุ่มย่อย</th><th>%</th></tr></thead><tbody><tr><td>TMT Momentum Pair</td><td>2.46%</td></tr><tr><td>AI</td><td>1.94%</td></tr><tr><td>HF VIP Long</td><td>0.77%</td></tr><tr><td>China Sales Exposed</td><td>0.72%</td></tr><tr><td>Retail Favorite</td><td>0.65%</td></tr><tr><td>Strong Balance Sheet</td><td>0.61%</td></tr><tr><td>Non Profitable Tech</td><td>0.53%</td></tr><tr><td>Profitable Secular Growth</td><td>0.42%</td></tr><tr><td>Bitcoin Related</td><td>0.37%</td></tr><tr><td>High Short Interest</td><td>0.34%</td></tr><tr><td>Megacap</td><td>0.32%</td></tr><tr><td>Weak Balance Sheet</td><td>-0.01%</td></tr><tr><td>GARP</td><td>-0.14%</td></tr><tr><td>TMT Quality</td><td>-0.27%</td></tr></tbody></table>
+<p><strong>TMT Sectors และ Asia Overnight</strong></p>
+<table><thead><tr><th>TMT Sectors</th><th>%</th><th>Asia Overnight</th><th>%</th></tr></thead><tbody><tr><td>Hardware</td><td>1.2%</td><td>SK Hynix</td><td>5.2%</td></tr><tr><td>Semis</td><td>0.7%</td><td>Softbank</td><td>4.9%</td></tr><tr><td>Internet</td><td>-0.4%</td><td>Samsung</td><td>4.2%</td></tr><tr><td>Software</td><td>-1.0%</td><td>TSMC</td><td>0.6%</td></tr></tbody></table></div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🧠 SKHY ปิดช่องโหว่เรื่องจุดสูงสุดของวัฏจักรได้ส่วนหนึ่ง — รายได้ KRW104.6T และ OP KRW83.3T ชนะทั้ง Street และ bogey ด้วยราคา และไกด์ bit DRAM ไตรมาส 4 +ระดับกลาง 20% ดัน 4Q สูงกว่า Street ~10-20%; LTA ครอบคลุม &gt;50% ของกำลังการผลิตปี &#x27;27/&#x27;28 ใน 14 ลูกค้า คืนทุน FY26 ราว ~KRW100T (~10% ของ market cap) แต่ฝั่งหมียังชี้ราคาที่เริ่มชะลอและไม่มีกรอบคืนทุนหลัง FY26</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="SKHY +7%: ราคาขับเคลื่อนงบเหนือคาด" data-en="SKHY +7%: ราคาขับเคลื่อนงบเหนือคาด" data-th-full="SKHY +7%: ราคาขับเคลื่อนงบเหนือคาด" data-en-full="SKHY +7%: ราคาขับเคลื่อนงบเหนือคาด" title="SKHY +7%: ราคาขับเคลื่อนงบเหนือคาด">SKHY +7%: ราคาขับเคลื่อนงบเหนือคาด</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="STX -2.5%" data-en="STX -2.5%" data-th-full="STX -2.5%" data-en-full="STX -2.5%" title="STX -2.5%">STX -2.5%</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="NXPI -8%" data-en="NXPI -8%" data-th-full="NXPI -8%" data-en-full="NXPI -8%" title="NXPI -8%">NXPI -8%</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="VRT +16%: ชนะรายได้ ~15% เหนือ Street" data-en="VRT +16%: ชนะรายได้ ~15% เหนือ Street" data-th-full="VRT +16%: ชนะรายได้ ~15% เหนือ Street" data-en-full="VRT +16%: ชนะรายได้ ~15% เหนือ Street" title="VRT +16%: ชนะรายได้ ~15% เหนือ Street">VRT +16%: ชนะรายได้ ~15% เหนือ Street</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="GEV +5%" data-en="GEV +5%" data-th-full="GEV +5%" data-en-full="GEV +5%" title="GEV +5%">GEV +5%</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="ETSY +9%" data-en="ETSY +9%" data-th-full="ETSY +9%" data-en-full="ETSY +9%" title="ETSY +9%">ETSY +9%</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="OpenAI / GOOGL / NVDA" data-en="OpenAI / GOOGL / NVDA" data-th-full="OpenAI / GOOGL / NVDA" data-en-full="OpenAI / GOOGL / NVDA" title="OpenAI / GOOGL / NVDA">OpenAI / GOOGL / NVDA</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="AVGO: Barclays ขึ้นเป็นบูลมากขึ้น เมื่อด…" data-en="AVGO: Barclays ขึ้นเป็นบูลมากขึ้น เมื่อด…" data-th-full="AVGO: Barclays ขึ้นเป็นบูลมากขึ้น เมื่อด…" data-en-full="AVGO: Barclays ขึ้นเป็นบูลมากขึ้น เมื่อด…" title="AVGO: Barclays ขึ้นเป็นบูลมากขึ้น เมื่อด…">AVGO: Barclays ขึ้นเป็นบูลมากขึ้น เมื่อด…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s9" data-sec="s9" aria-controls="rn-p-s9" aria-selected="false" data-th="APP: DB ลด PT เป็น $450 เมื่อ Consumer r…" data-en="APP: DB ลด PT เป็น $450 เมื่อ Consumer r…" data-th-full="APP: DB ลด PT เป็น $450 เมื่อ Consumer r…" data-en-full="APP: DB ลด PT เป็น $450 เมื่อ Consumer r…" title="APP: DB ลด PT เป็น $450 เมื่อ Consumer r…">APP: DB ลด PT เป็น $450 เมื่อ Consumer r…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s10" data-sec="s10" aria-controls="rn-p-s10" aria-selected="false" data-th="APP/U: ได้ยินว่า Clev คละกันกับ APP โดยบ…" data-en="APP/U: ได้ยินว่า Clev คละกันกับ APP โดยบ…" data-th-full="APP/U: ได้ยินว่า Clev คละกันกับ APP โดยบ…" data-en-full="APP/U: ได้ยินว่า Clev คละกันกับ APP โดยบ…" title="APP/U: ได้ยินว่า Clev คละกันกับ APP โดยบ…">APP/U: ได้ยินว่า Clev คละกันกับ APP โดยบ…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s11" data-sec="s11" aria-controls="rn-p-s11" aria-selected="false" data-th="CBRS: MS เห็นความร่วมมือกับ Oracle ช่วยก…" data-en="CBRS: MS เห็นความร่วมมือกับ Oracle ช่วยก…" data-th-full="CBRS: MS เห็นความร่วมมือกับ Oracle ช่วยก…" data-en-full="CBRS: MS เห็นความร่วมมือกับ Oracle ช่วยก…" title="CBRS: MS เห็นความร่วมมือกับ Oracle ช่วยก…">CBRS: MS เห็นความร่วมมือกับ Oracle ช่วยก…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s12" data-sec="s12" aria-controls="rn-p-s12" aria-selected="false" data-th="CXMT / Memory" data-en="CXMT / Memory" data-th-full="CXMT / Memory" data-en-full="CXMT / Memory" title="CXMT / Memory">CXMT / Memory</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s13" data-sec="s13" aria-controls="rn-p-s13" aria-selected="false" data-th="CLS: BNP เป็นบวกมากขึ้นหลัง Investor Day…" data-en="CLS: BNP เป็นบวกมากขึ้นหลัง Investor Day…" data-th-full="CLS: BNP เป็นบวกมากขึ้นหลัง Investor Day…" data-en-full="CLS: BNP เป็นบวกมากขึ้นหลัง Investor Day…" title="CLS: BNP เป็นบวกมากขึ้นหลัง Investor Day…">CLS: BNP เป็นบวกมากขึ้นหลัง Investor Day…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s14" data-sec="s14" aria-controls="rn-p-s14" aria-selected="false" data-th="TSLA: Wolfe เห็น Robotaxi + การควบรวม SP…" data-en="TSLA: Wolfe เห็น Robotaxi + การควบรวม SP…" data-th-full="TSLA: Wolfe เห็น Robotaxi + การควบรวม SP…" data-en-full="TSLA: Wolfe เห็น Robotaxi + การควบรวม SP…" title="TSLA: Wolfe เห็น Robotaxi + การควบรวม SP…">TSLA: Wolfe เห็น Robotaxi + การควบรวม SP…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s15" data-sec="s15" aria-controls="rn-p-s15" aria-selected="false" data-th="DASH/CART" data-en="DASH/CART" data-th-full="DASH/CART" data-en-full="DASH/CART" title="DASH/CART">DASH/CART</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s16" data-sec="s16" aria-controls="rn-p-s16" aria-selected="false" data-th="META: Needham บอกว่าภาระผูกพันนอกงบดุล $…" data-en="META: Needham บอกว่าภาระผูกพันนอกงบดุล $…" data-th-full="META: Needham บอกว่าภาระผูกพันนอกงบดุล $…" data-en-full="META: Needham บอกว่าภาระผูกพันนอกงบดุล $…" title="META: Needham บอกว่าภาระผูกพันนอกงบดุล $…">META: Needham บอกว่าภาระผูกพันนอกงบดุล $…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s17" data-sec="s17" aria-controls="rn-p-s17" aria-selected="false" data-th="PANW: DB บอกว่าการเปลี่ยนแปลง proxy หนุน…" data-en="PANW: DB บอกว่าการเปลี่ยนแปลง proxy หนุน…" data-th-full="PANW: DB บอกว่าการเปลี่ยนแปลง proxy หนุน…" data-en-full="PANW: DB บอกว่าการเปลี่ยนแปลง proxy หนุน…" title="PANW: DB บอกว่าการเปลี่ยนแปลง proxy หนุน…">PANW: DB บอกว่าการเปลี่ยนแปลง proxy หนุน…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s18" data-sec="s18" aria-controls="rn-p-s18" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span>SKHY +7%: ราคาขับเคลื่อนงบเหนือคาด</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>รายได้ไตรมาส 3 KRW104.6T และ OP KRW83.3T (OPM ราว ~80%) ชนะ Street และ bogey</li><li>ไกด์ bit DRAM ไตรมาส 4 +ระดับกลาง 20% q/q ดันไตรมาส 4 สูงกว่า Street ก่อนงบ ~10-20%</li><li>LTA ครอบคลุม &gt;50% ของกำลังการผลิตปี 27/28 ใน 14 ลูกค้า; DRAM/HBM ขายหมดถึงปี 2029</li><li>คืนทุน FY26 ราว ~KRW100T (~US$75B, ~10% ของ market cap)</li></ul></div>
+<p><strong>SKHY +7%: ชนะด้วย ASP, ไกด์ bit 4Q ระดับกลาง 20%, &quot;ขายหมดถึงปี 2029&quot; และแผนคืนทุนปี FY26 ราว KRW100T (10% ของ market cap) ที่ช่วยลดทอนเรื่องเล่าฝั่งหมีเกี่ยวกับจุดสูงสุดของวัฏจักร</strong></p>
+<p>โดยรวมแข็งแรงจริงๆ ทุกด้าน รายได้และ OP ชนะทั้ง Street และ bogey พร้อมแผนคืนทุนที่ดีกว่าคาด รายได้ไตรมาส 3 อยู่ที่ KRW104.6T (+32% q/q, +328% y/y) และ OP ที่ KRW83.3T (OPM ราว ~80% ซึ่งเป็นสถิติใหม่) ชนะ Street ระดับกลางถึงสูงของหลักเดียวจากการที่ ASP ของ DRAM ขึ้นระดับสูง 20% ส่วน EPS พลาดเพราะขาดทุนนอกการดำเนินงานจากอัตราแลกเปลี่ยนและการลงทุน KRW32.6T bogey อยู่ราว KRW 102-103T สำหรับรายได้ และระดับกลางถึงสูง 70% สำหรับ OP จึงถือว่าดีกว่ามาก</p>
+<p>ที่ชนะคือเรื่องราคาล้วนๆ (ASP ของ DRAM +ระดับสูง 20%, NAND +ระดับกลาง 20% เทียบกับโมเดลที่ระดับกลาง 10% ถึงต่ำ 20%) แต่ตัวเลขที่ใหญ่กว่าคือไตรมาส 4: ไกด์ bit DRAM +ระดับกลาง 20% q/q ซึ่งทำให้รายได้/OP ไตรมาส 4 สูงกว่า Street ก่อนประกาศงบราว ~10-20%</p>
+<p>ฝ่ายบริหารฟังดูดีในการประชุมสาย: LTA ครอบคลุม &gt;50% ของกำลังการผลิตปี &#x27;27/&#x27;28 ใน 14 ลูกค้าแล้ว (เมื่อเดือน ก.ค. ฝ่ายบริหารยังไม่ยอมระบุขนาดความครอบคลุม) DRAM/HBM &quot;ขายหมดแล้วโดยปริยาย&quot; ถึงปี 2029 และปริมาณกับราคา HBM ปี 2027 ล็อกแล้ว โดยช่องว่างมาร์จิ้นระหว่าง HBM กับสินค้าโภคภัณฑ์จะ &quot;แคบลงอย่างมีนัยสำคัญ&quot;</p>
+<p>การคืนทุนผู้ถือหุ้นปี FY26 ราว ~KRW100T (~US$75B, ~10% ของ market cap) สูงกว่า bogey ของ buyside หุ้นในเกาหลีปิดบวก ~11% แต่ยังต่ำกว่าจุดสูงสุดเดือน มิ.ย. อยู่ราว 50% ที่ราว ~2-3 เท่าของ EPS ปี &#x27;27 น่าจะช่วยเรื่องความรู้สึกต่อหุ้น memory โดยเฉพาะที่นักลงทุน semi กำลังมองหาที่ลงเงินก้อนใหม่ในสัปดาห์นี้ ขณะที่ analog/HDD ดูไม่ดีเท่าเดิมหลัง NXPI/STX MU +4% / SNDK +5% / Kioxia +12%</p>
+<h3>🧩 ประเด็นหลักของงบ SKHY</h3>
+<p><strong>LTA</strong> คือการเปิดเผยที่เพิ่มขึ้นมากที่สุด เมื่อเดือน ก.ค. ฝ่ายบริหารบอกว่าไม่สามารถระบุได้ว่า LTA จะครอบคลุมยอดขายเท่าใด ตอนนี้คือ 14 ลูกค้าหลัก (เทียบกับ ~10 ในไตรมาสก่อน) รวมถึง CSP ระดับโลกรายใหญ่ ครอบคลุม &gt;50% ของกำลังการผลิตปี 2027 และ 2028 โดยตั้งเป้าความครอบคลุมใกล้เคียงกันไว้ในระยะกลางถึงยาว สัญญาอายุห้าปีและเงินมัดจำถูกเอ่ยถึงไปแล้วเมื่อเดือน ก.ค. สิ่งใหม่คือระดับความครอบคลุม จำนวนลูกค้า การเจรจาต่อสัญญากับลูกค้าบางราย และโครงสร้างราคาที่เจาะจงขึ้น (ปรับตามภาวะตลาดภายในกรอบราคาที่ตกลงกับลูกค้าแต่ละราย) เมื่อรวมปริมาณที่อยู่ระหว่างหารือบนพื้นฐานแผนซื้อที่ชัดเจนของลูกค้า DRAM และ HBM จึง &quot;ขายหมดแล้วโดยปริยาย&quot; ถึงปี 2029 กำลังการผลิตนอก LTA ถูกเว้นไว้โดยตั้งใจเพื่อรองรับอัพไซด์ราคา spot และสินค้ารุ่นถัดไป</p>
+<p><strong>การคืนทุน</strong> การคืนทุนปี FY26 ราว ~KRW100T: เงินปันผล ≥KRW30T และบายแบ็ก ≥KRW60T รวมโปรแกรม KRW40T ของเดือน ส.ค. (เสร็จสิ้นเมื่อสัปดาห์ก่อนและจะถูกยกเลิกหุ้น) นี่คือตัวเลขของ FY26 ปีเดียว ไม่ใช่ตัวเลขหลายปี แม้พาดหัวข่าวบางแห่งจะทำให้เข้าใจเช่นนั้น ไตรมาส 3: DPS KRW20K (ปกติ KRW10K + พิเศษจาก Kioxia KRW10K) = KRW14T บวกการซื้อหุ้น KRW20T ครึ่งหนึ่งยกเลิกและอีกครึ่งใช้เป็นค่าตอบแทนผู้บริหาร/พนักงาน (ไม่นับรวมใน KRW100T) นัยคือไตรมาส 4 ยังเหลืออีกราว ~KRW35T รวมส่วนที่เหลือของเงินปันผลพิเศษ Kioxia ในปันผลสิ้นปี bogey อยู่ราว ~KRW30T บวกกับ KRW40T ของเดือน ส.ค. (สื่อเกาหลีเคยปล่อยข่าวว่า KRW50-60T) บายแบ็กจะทำต่อทุกไตรมาส โดยกำหนดขนาดตามราคาและมูลค่า และฝ่ายบริหารบอกตรงๆ ว่าหุ้นถูกประเมินต่ำเกินไป ถูกวางกรอบว่าเป็นการทำตามพันธสัญญาคืนทุน &gt;50% ของ FCF ยังไม่มีกรอบเกินจาก FY26 และการทบทวน IPO ของ Solidigm ถูกยกเลิกเพราะตลาดผันผวน</p>
+<p><strong>HBM</strong> ปริมาณและราคา HBM ปี 2027 สรุปกับลูกค้ารายใหญ่แล้ว และสะท้อนมูลค่าที่สูงขึ้นของ HBM4 ฝ่ายบริหารคาดว่าช่องว่างความสามารถทำกำไรระหว่าง HBM กับ DRAM ทั่วไปจะ &quot;แคบลงอย่างมีนัยสำคัญ&quot; (นั่นคือตอนนี้ HBM ทำกำไรน้อยกว่า DRAM โภคภัณฑ์หลังราคาพุ่งปีนี้) และรายได้กับกำไรของ HBM จะเพิ่มขึ้นมากในปี 2027 โมเดลที่อัปเดตให้ ASP HBM ผสมเพิ่ม +~55-60% ในปีหน้า (HBM4 ที่ลูกค้าหลักราว ~US$3.3/Gb เทียบกับ ~US$2.1 ในวันนี้) การดำเนินงาน: HBM4 เข้าสู่ MP เต็มรูปแบบในไตรมาส 3 และแซง HBM3E ทั้งใน bit และรายได้ในไตรมาส 4 ยีลด์ HBM4 ดีกว่าแผน (เป้าถูกปรับขึ้น) และ HBM3E ผ่านเป้ายีลด์ระดับสุกงอมแล้ว M15X ถูกเร่งให้เต็มกำลังการผลิตภายในสิ้นปี HBM4E เริ่มส่งตัวอย่างในไตรมาส 2 พร้อมโปรเจกต์ custom HBM ที่กำลังดำเนินอยู่ บริบทเพิ่มเติม: ข้อโต้แย้งหลักของฝั่งหมีที่อยู่เบื้องหลังการทำผลงานต่ำกว่า MU/Samsung ของ SKHY ล่าสุดคือโควตา Rubin HBM4 ของบริษัทจะย้ายไป Samsung เพราะเรื่อง pin speed การที่ NVDA ผ่อนสเปก Rubin (เหลือ ~10.6Gbps จาก 11.7Gbps ตามรายงานหนึ่ง และมีข่าวลือว่าต่ำกว่านั้น) ประกอบกับความเห็นเรื่องยีลด์วันนี้ และสมุดคำสั่งซื้อปี 2027 ที่ล็อกแล้ว ช่วยคลายข้อกังวลนี้ได้</p>
+<p><strong>Stack Count</strong> ฝ่ายบริหารมองว่าการที่ลูกค้าย้ายไปใช้สแตกที่ต่ำลง (เช่น HBM4 แบบ 12 ชั้นเป็น HBM4E แบบ 8 ชั้น) เป็นอาการของภาวะขาดแคลน ไม่ใช่ปัจจัยลบด้านอุปสงค์ เพราะลูกค้าต้องการ cube มากขึ้นจากอุปทานที่จำกัด ความหนาแน่นต่อไดที่สูงขึ้นชดเชยผลกระทบต่อ bit ได้มาก cube ที่มากขึ้นแปลว่า base die และงาน back-end มากขึ้น และความต้องการของลูกค้ายังคง &gt;2 เท่าของสิ่งที่ SKHY จัดหาได้ แผนการส่งมอบ HBM ไม่เปลี่ยน และความสามารถทำกำไรของ HBM ควรอยู่เหนือจุดสูงสุดของวัฏจักรก่อนหน้ามาก</p>
+<p><strong>ราคา</strong> ASP ของ DRAM +ระดับสูง 20% q/q (เทียบกับ ~+30% ในไตรมาสก่อน) จากความแข็งแกร่งของ DRAM ทั่วไปและ mix HBM4 ที่รวยขึ้น ASP ของ NAND +ระดับกลาง 20% (เทียบกับ +ระดับกลาง 50% ในไตรมาสก่อน) จากการขึ้นราคาทั่วด้านและ mix ของ eSSD ทั้งคู่ชนะโมเดล (ระดับกลาง 10% ถึงต่ำ 20%) แม้เงินวอนจะแข็งขึ้น การส่งมอบ DDR5 สำหรับเซิร์ฟเวอร์เพิ่ม 40%+ q/q และเซิร์ฟเวอร์คือ ~55% ของรายได้ DRAM ตามการประเมินหนึ่ง อัตราการขึ้นราคากำลังชะลอ โดยเฉพาะ NAND แต่เทียบกับฐานที่ราคา DRAM เซิร์ฟเวอร์ขึ้นไปแล้ว ~200% YTD</p>
+<p><strong>อุปสงค์ AI</strong> อิงข้อมูลมากกว่ากรอบ &quot;แข็งแรงไปจนเลยปีหน้า&quot; ของเดือน ก.ค.: รายได้คลาวด์ของ hyperscaler +30-80% y/y, backlog ของคลาวด์ 2-5 เท่า y/y, ผู้ใช้ที่จ่ายเงินเพิ่มขึ้น, capex ของ CSP ทั่วโลกปี 2027 +60%+ โดยกำลังไฟที่จองไว้แล้ว +100%+ (ประมาณการจากบุคคลที่สาม), โครงสร้างพื้นฐาน AI DC โตราว ~40% CAGR ถึงปี 2030 ข้อโต้แย้งใหม่: ฐานผู้ซื้อกำลังกว้างขึ้น (องค์กร, sovereign, on-prem) ดังนั้นเมื่อผู้ซื้อรายหนึ่งชะลอ รายอื่นจะเข้ามาเติมแทน ยอดขายพีซี/สมาร์ตโฟนจะลดลงเพราะต้นทุนและการขาดแคลน memory แต่ AI ชดเชยได้มากกว่า อุปทานจะยังขาดกว่าอุปสงค์ไปจนถึงปี 2030</p>
+<p><strong>อุปทาน</strong> capex ปี 2027 จะเพิ่ม &quot;อย่างมีนัยสำคัญ&quot; (mix ล้ำสมัย, การ ramp Yongin Fab 1, โครงสร้างพื้นฐานในและต่างประเทศ) เทียบกับแผนปี 2026 ที่ ≥KRW40T (~KRW31T ใช้ไปแล้วถึงไตรมาส 3) คำโต้ในประเด็นอุปทานล้นตลาดเจาะจงกว่าถ้อยคำ &quot;ทยอย ramp&quot; ของเดือน ก.ค.: fab มากขึ้น ≠ bit มากขึ้น (HBM และความซับซ้อนของกระบวนการกินทรัพยากร, การ shrink ให้ยีลด์ bit น้อยลง), โครงเปล่า Yongin/M17 เร่งขึ้นแต่ห้องคลีนรูมเปิดเป็นเฟส โดยการย้ายเครื่องมือเข้าผูกกับอุปสงค์ และที่ใหม่คือ SKHY ตรวจสุขภาพการเงินและความสามารถหาทุนของลูกค้าก่อนผูกมัดกำลังการผลิต ซึ่งเป็นการพยักหน้ารับความกังวลเรื่องการจัดหาเงินทุนของ neocloud อย่างชัดเจน ด้านเทคโนโลยี SKHY จะยืด 6F² ด้วยการ scaling ของ EUV ก่อนย้ายไป 4F² หรือ 3D DRAM (CXMT เพิ่งโอ้อวดความคืบหน้าของ 4F²)</p>
+<p><strong>NAND</strong> bit ลดลงเล็กน้อยเทียบกับไกด์ +LSD% เพราะ SKHY ให้ความสำคัญกับ eSSD แบบ 321L TLC; ASP +ระดับกลาง 20% ไตรมาส 4 bit +MSD% เมื่อ 321L ผ่าน 50% ของกำลังการผลิตในประเทศ การแบ่งชั้น KV-cache คือตัวขับ eSSD ตัวใหม่ (ซอฟต์แวร์ SALT-KV และ CMM-Hybrid บน CXL) โดยมี HBF ในระยะยาว</p>
+<p><strong>Below the Line</strong> EPS ที่พลาดมาจากรายการนอกการดำเนินงานทั้งหมด: ขาดทุนสุทธินอกการดำเนินงาน KRW32.6T รวมขาดทุนจากอัตราแลกเปลี่ยน KRW11.6T (เงินวอนแข็ง) และขาดทุนจากการประเมินมูลค่าเงินลงทุน KRW22.9T ซึ่งกลับรายการบางส่วนของกำไรจากเงินลงทุนก้อนใหญ่ในไตรมาส 2 กำไรสุทธิ KRW39.8T (มาร์จิ้น 38%) Street จะมองข้ามไป แต่ EPS ที่รายงานจะยังผันผวนต่อไป</p>
+<h3>⚖️ บูล vs แบร์: SKHY</h3>
+<p><strong>ฝั่งบูล</strong> มองในภาพกว้างว่า memory ไม่ใช่วัฏจักรโภคภัณฑ์แบบดั้งเดิมอีกต่อไป แต่เป็นปัจจัยการผลิตที่ถูกจำกัดกำลังผลิตของโครงสร้างพื้นฐาน AI การ inference แบบ agentic และ long-context ดันความเข้มข้นของ memory ขึ้นพร้อมกันในทุกชั้น: HBM บนตัวเร่ง, DDR5 สำหรับเซิร์ฟเวอร์และ SOCAMM บน CPU head node, และ eSSD สำหรับการถ่าย KV-cache ออก อุปทานตอบสนองได้ไม่เร็ว: HBM กินเวเฟอร์ราว 3 เท่าต่อ bit เมื่อเทียบกับ DRAM มาตรฐาน, การ shrink ตอนนี้ให้ bit น้อยลงต่อโหนด, ห้องคลีนรูมใช้เวลาสร้างสองปีขึ้นไป และมีกำลังการผลิต NAND นอกจีนเพิ่มน้อยมาก SKHY คือวิธีที่บริสุทธิ์ที่สุดในการถือสิ่งนี้: ผู้นำส่วนแบ่ง HBM ที่มีสัดส่วนรายได้จาก AI สูงสุดในบิ๊กทรี (~70% ตามการประเมินหนึ่ง), เป็นซัพพลายเออร์รายแรกของลูกค้าตัวเร่งหลัก และมียีลด์นำอุตสาหกรรม LTA คือสิ่งที่ฝั่งบูลเชื่อว่าตลาดยังตีมูลค่าต่ำเกินไป: 14 ลูกค้า สัญญาห้าปี เงินมัดจำ และราคาที่ปรับในกรอบที่ตกลงกัน ครอบคลุมมากกว่าครึ่งของกำลังการผลิตปี 2027-28 สิ่งนี้ขยับ SKHY จากสินค้าโภคภัณฑ์ราคา spot ไปสู่รายได้โครงสร้างพื้นฐานที่มีสัญญา และควรลดส่วนลดจุดสูงสุดของกำไรลงเมื่อเวลาผ่านไป เหมือนโครงสร้าง take-or-pay ที่หนุนมัลติเพิลสูงในอุตสาหกรรมทุนหนักอื่นๆ</p>
+<p>ไตรมาสนี้ให้ฝั่งบูลเกือบทุกอย่างที่ต้องการ ที่ชนะมาจากราคา และไกด์ bit ไตรมาส 4 +ระดับกลาง 20% ทำให้ไตรมาส 4 สูงกว่า Street ก่อนประกาศงบราว 10-20% ก่อนมีการขึ้นราคาเพิ่มเติม การเจรจา HBM ปี 2027 ซึ่งเป็นตัวแปรใหญ่สุดของตัวเลขปี &#x27;27 ปิดแล้ว และตั้งราคา HBM ขึ้นไปใกล้ความสามารถทำกำไรของสินค้าโภคภัณฑ์ นั่นเป็นเหตุผลที่โมเดล OP ปี &#x27;27 ที่อัปเดตออกมาสูงกว่า Street ราว ~5-25% และตัวเลข buyside ขยับขึ้นแต่น้อยกว่าเล็กน้อย ส่วน HBM4 overhang ที่อยู่เบื้องหลังผลงานแย่ของเดือน ต.ค. ดูเหมือนคลี่คลายแล้ว: ยีลด์ดีกว่าแผน, HBM4 แซงในไตรมาส 4, NVDA ผ่อนสเปก Rubin และโควตาปี 2027 ของ SKHY ถูกล็อก การคืนทุนชนะ bogey โดยฝ่ายบริหารเรียกหุ้นว่าถูกประเมินต่ำเกินไปและให้คำมั่นว่าจะบายแบ็กทุกไตรมาส จากนี้ประมาณการยังขึ้นต่อได้หากราคาสัญญา 1H27 ยังไต่ขึ้น, การต่อ LTA ผลักดันทัศนวิสัยออกไปไกลขึ้น และอุปสงค์ KV-cache ทำให้ NAND กลายเป็นขาที่สองของ AI มัลติเพิลขยายได้เมื่อ LTA พิสูจน์ว่าเหนียวแน่นผ่านช่วงราคาทรงตัว: FCF ปี &#x27;27-&#x27;28 เท่ากับราวครึ่งถึงสองในสามของ market cap ปัจจุบัน และด้วยการจ่าย &gt;50% SKHY อาจซื้อหุ้นคืนได้ราว ~20-30% ของจำนวนหุ้นภายในปี 2028 ที่ราว ~2-3 เท่าของกำไร ขณะที่ MU กับ SNDK เทรดที่ราว ~5-6 เท่าของ CY27</p>
+<p><strong>ฝั่งแบร์</strong> มองในภาพกว้างว่าไม่มีอะไรในวัฏจักรนี้ที่ยกเลิกเศรษฐศาสตร์พื้นฐานของ memory: มาร์จิ้นระดับสถิติดึงอุปทานเข้ามา และหุ้น memory ถึงจุดสูงสุดเมื่อมาร์จิ้นสูงสุด ไม่ใช่เมื่อกำไรสูงสุด GM 85.7% ของ SKHY สูงกว่าสถิติของวัฏจักรก่อนหน้าราว ~20 จุด ราคา DRAM เพิ่มราว 3 เท่าในปีนี้ และการตอบสนองด้านกำลังการผลิตก็มองเห็นได้แล้ว: capex ปี 2027 ของ SKHY เพิ่มขึ้นมาก, Yongin Fab 1 ramp ในปี 2027 โดยมี M17 ตามมา, Samsung ทำงานได้ดีขึ้นหลังรีเซ็ตผู้บริหาร และ CXMT ยังเพิ่มกำลังการผลิตต่อไปพร้อมโอ้อวด 4F² การเช็กช่องทางบางส่วนชี้ว่าอุปทาน DRAM โตสูงกว่ากรอบอุปสงค์ระดับกลาง 20% ของฝ่ายบริหารมาก ข้อโต้แย้ง &quot;AI แตกต่าง&quot; ยังต้องการให้ capex ของ AI ทบต้นต่อบนฐานมหึมา ขณะที่ memory กลายเป็นหนึ่งในรายการใหญ่ที่สุดใน bill of materials ของ AI (รายได้ memory ของอุตสาหกรรมใกล้ ~US$1.7T ในปี 2027) ซึ่งเชิญให้เกิดการโต้แย้ง ผู้ซื้อส่วนเพิ่มคือผู้ที่อ่อนแอที่สุด: neocloud ซึ่งเป็นราวหนึ่งในห้าของ capex ของ AI data center ตามการประเมินบางส่วน พึ่งพาเงินทุนภายนอกที่แพงขึ้นเรื่อยๆ และจุดแรกที่การชะลอ capex จะโผล่คือ bit นอก LTA ที่ตั้งราคา spot ฝั่งหมียังคิดว่า LTA ปกป้องปริมาณมากกว่าราคา: ราคาปรับตามภาวะตลาดภายในกรอบที่ไม่เปิดเผยขอบล่าง และลูกค้าจะผลักดันให้เจรจาใหม่ถ้า spot ตกต่ำกว่าสัญญามาก</p>
+<p>ไตรมาสนี้ให้ฝั่งหมีมีของให้ชี้เยอะ การเติบโตของราคากำลังชะลอ (DRAM จาก ~+30% เป็น +ระดับสูง 20%, NAND จาก +ระดับกลาง 50% เป็น +ระดับกลาง 20%) และส่วนใหญ่คาดว่าราคา DRAM จะชะลอเหลือ ~+7-15% ในไตรมาส 4 และเหลือหลักหน่วยต่ำภายใน 2H27 ดังนั้นเครื่องยนต์กำไรกำลังย้ายจากราคาไปเป็น bit ในจังหวะที่ SKHY เพิ่ม bit +ระดับกลาง 20% ในไตรมาสเดียว ลูกค้ากำลังประหยัด: การลดจำนวนสแตก, สเปก Rubin ที่ผ่อนลง และยอดพีซี/สมาร์ตโฟนที่ลดลง ล้วนเป็นสัญญาณของความยืดหยุ่นต่อราคา ไม่ว่าฝ่ายบริหารจะเรียกอย่างไร &quot;ขายหมดถึงปี 2029&quot; พึ่งพาปริมาณที่ยังอยู่ระหว่างหารือส่วนหนึ่ง และไม่มีกรอบการคืนทุนหลัง FY26 คุณภาพกำไรผันผวนกว่าที่บรรทัด OP บอก: EPS พลาดราว ~35% จากรายการอัตราแลกเปลี่ยนและการลงทุน KRW32.6T, IPO ของ Solidigm ถูกถอนเข้าตลาดที่อ่อนแรง, จำนวนหุ้น diluted ไตรมาส 3 กลับเพิ่มเพราะการเพิ่มทุน ADR ของเดือน ก.ค. มากกว่าบายแบ็ก และมีการซื้อหุ้นอีก KRW10T เป็นค่าตอบแทนพนักงานนอก KRW100T สัดส่วนรายได้ HBM ก็ถอยลงเพราะ DRAM ทั่วไปโตเร็วกว่ายอดขายรวม ดังนั้นกำไรของ SKHY จึงพึ่งราคา DRAM โภคภัณฑ์มากกว่าที่เรื่องเล่า &quot;คูเมือง HBM&quot; บอก</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ชนะด้วยราคา และไกด์ bit ไตรมาส 4 คือตัวเลขที่ใหญ่กว่า</p><ul class="rn-sum-list"><li>EPS พลาดเพราะขาดทุนนอกการดำเนินงาน KRW32.6T (FX KRW11.6T + มูลค่าเงินลงทุน KRW22.9T)</li><li>ฝั่งหมีชี้ราคาที่ชะลอ GM 85.7% และอุปทานใหม่ (Yongin, Samsung, CXMT)</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">KRW104.6T</div><div class="rn-stat-c">รายได้ไตรมาส 3 (+32% q/q, +328% y/y)</div></div><div class="rn-stat"><div class="rn-stat-v">KRW83.3T</div><div class="rn-stat-c">OP ไตรมาส 3 (OPM ราว ~80%)</div></div><div class="rn-stat"><div class="rn-stat-v">&gt;50%</div><div class="rn-stat-c">สัดส่วนกำลังการผลิตปี 27/28 ที่ LTA ครอบคลุม</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span>STX -2.5%: ชนะ Street แต่ไม่ถึงเกณฑ์ buyside</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>รายได้ $4.23B และ EPS $7.68 ชนะ Street แต่ต่ำกว่า bogey</li><li>Exabyte 220 EB (+1% q/q) ขาดจาก Street ~15 EB; ราคาเป็นตัวขับเกือบทั้งหมด</li><li>ต้นทุน/TB ลดเพียง ~6% y/y และเพิ่ม ~3% q/q</li><li>ไกด์เดือน ธ.ค. $4.8B / EPS $9.20 สูงกว่า Street แต่ต่ำกว่า bogey $10-10.50</li></ul></div>
+<p><strong>STX -2.5%: ชนะ Street แต่ไม่ถึงเกณฑ์ buyside ทุกบรรทัด และไกด์เดือน ธ.ค. ($4.8B / EPS $9.20) สูงกว่า Street มากแต่ต่ำกว่า bogey ที่ ~$4.9–5.05B / $10–10.50 Exabyte นิ่ง q/q เป็นเรื่องยากสำหรับหุ้นที่ยังมีคนถืออยู่ค่อนข้างหนาแน่น ต่อจากงบที่ดีกว่าของ WDC ถือ capex ที่ 4-6%</strong></p>
+<p>ช่างเป็นเรื่องราวของสองหุ้น semis จริงๆ: WDC ทุบตัวเลขเมื่อสัปดาห์ก่อนและวันนี้ลงเท่ากับ STX จากงบที่ไม่ได้ดีเท่า แม้ STX จะถือ capex ไว้ ขณะที่หนึ่งในข้อโต้แย้งต่อ WDC คือความเข้มข้นของ capex ที่เพิ่มขึ้นในอีกสองสามปีข้างหน้า (ฝ่ายบริหาร STX คงดูราคาหลังตลาดปิดของ WDC อยู่) เพื่อให้เห็นภาพ WDC ไกด์รายได้เดือน ธ.ค. สูงกว่า Street ~12% และ EPS ~21% ส่วน STX อยู่ที่ ~7% และ ~8%</p>
+<p>ฝ่ายบริหารฟังดูดีในการประชุมสาย โดยบอกว่า &quot;ส่วนใหญ่&quot; ของอุปทาน EB nearline ถูกจัดสรรภายใต้ LTA ถึง CY28 แล้ว และข้อตกลงคลาวด์บางฉบับยาวไปถึง CY30 (ไตรมาสก่อน: &quot;ส่วนใหญ่&quot; ถูกจัดสรรถึง CY28 โดยการหารือวางแผนขยายไปถึง CY29) เรื่อง build vs. buy สำหรับ head และ media (อ่านว่า: ข่าวหน่วย head ของ TDK) Dave กล่าวว่า HAMR ล้ำสมัยไม่สามารถซื้อได้ และ STX ใช้เทคโนโลยีเก่าจากภายนอกเป็นรายกรณีเพื่อช่วยย้ายการผลิตของตัวเองไป HAMR เท่านั้น</p>
+<p>รายได้ไตรมาส ก.ย. $4.23B (+61% y/y, +17% q/q) เทียบกับ Street $4.14B และ bogey ราว ~$4.27–4.31B GM 57.8% สูงกว่า Street ราว ~20bps แต่ต่ำกว่า bogey ที่ ~59.8–60.3% อยู่ราว ~200–250bps EPS $7.68 เทียบกับ Street $7.42 และ bogey ราว ~$8.00–8.25</p>
+<p>ข้อโต้แย้งหลักคือปริมาณ Exabyte อยู่ที่ 220 EB, +1% q/q (+21% y/y) ขาดจาก Street ที่ ~235 ราว ~15 EB; nearline 198 EB ก็ +1% q/q เช่นกัน ดังนั้นการเพิ่มขึ้น q/q เกือบทั้งหมดมาจากราคา/mix: รายได้ต่อ TB โดยนัยเพิ่ม ~16% q/q เป็น ~$19.2 (+33% y/y) WDC ทำ exabyte +7% q/q เมื่อสัปดาห์ก่อน ทำให้การถกเรื่อง exabyte ย้ายมาตกที่ STX หลังจากเป็นข้อติหลักของ WDC ฝ่ายบริหารอธิบายว่า exabyte พลาดเพราะวางแผน staging ของ Mozaic 4 ล่วงหน้าก่อนการ qual ของลูกค้า (สินค้าคงคลัง +$129M q/q เป็น $1.70B) บอกว่าไม่มีปัญหาด้านยีลด์หรือความพร้อมของ data center และไกด์ว่าจะ &quot;ก้าวขึ้นอย่างมีนัยสำคัญ&quot; ในเดือน ธ.ค.</p>
+<p>ข้อติอีกเรื่อง: ต้นทุน/TB ลดลงเพียง ~6% y/y (เทียบกับ ~16% ในไตรมาสก่อน) และเพิ่มขึ้น ~3% q/q ซึ่งเป็นการลดต้นทุนที่อ่อนที่สุดในหลายไตรมาส และฟังดูไม่เหมือนว่าจะพลิกกลับในเร็ววัน ไกด์เดือน ธ.ค.: $4.8B ±$100M (+13% q/q) เทียบกับ Street $4.50B และ bogey ราว ~$4.9–5.05B EPS $9.20 เทียบกับ Street $8.54 และ bogey $10–10.50 มาร์จิ้นการดำเนินงานถูกไกด์ &quot;เข้าใกล้กลาง 50%&quot; บน opex ราว ~$300M ซึ่งโดยนัยคือ GM ราว ~60–61% เทียบกับ Street 59.7% และ bogey ราว ~62–63.5%</p>
+<h3>🧩 ประเด็นหลักของงบ STX</h3>
+<p><strong>ราคา</strong> เรื่องราวของไตรมาสนี้ $/TB รวมเพิ่ม ~16% q/q เป็น ~$19.2 หรือ +33% y/y เทียบกับ ~10% ในไตรมาสก่อน และ ~20% ที่ Street อ่านจากไกด์เดือน ก.ย.; $/TB ของ DC เพิ่ม ~31% y/y และรายได้ Edge IoT ($784M, +52% y/y เทียบกับ +20% ในไตรมาสก่อน, สูงกว่า Street ~17%) เกิดขึ้นบน EB ที่นิ่ง (ฝ่ายบริหารเคยผูกราคา edge กับราคา NAND ที่สูงในงานประชุมเดือน ก.ย.) ฝ่ายบริหารบอกว่าอัพไซด์ส่วนใหญ่มาจากการ &quot;ต่อสัญญาและขึ้นราคา&quot; มากกว่า EB เพิ่มหรือ spot โดยการเพิ่ม &quot;กระจายค่อนข้างทั่วทั้งพอร์ตโฟลิโอ&quot; ส่วนหนึ่งของการกระโดดคือการส่งผ่านต้นทุนส่วนประกอบ ดังนั้น 16% q/q จึงไม่ใช่ run-rate (โมเดล buyside ตอนนี้อยู่ที่ HSD%/LDD% q/q) แต่ฝ่ายบริหารคาดว่าจะมีการก้าวขึ้น &quot;เมื่อสัญญาใหม่ครบกำหนด&quot; และไม่ &quot;เห็นแนวโน้มเปลี่ยนมากนักในตอนนี้&quot; STX ยังตั้งราคาได้เหนือ WDC ในไตรมาสนี้ (ASP nearline ของ WDC +9% q/q, +29% y/y)</p>
+<p><strong>มาร์จิ้น</strong> GM 57.8% (+510bps q/q, +1,770bps y/y) มาจาก incremental GM ราว ~89% q/q และ OM แตะ 50.7% บน opex ราว ~$300M (~7% ของรายได้) ไกด์เดือน ธ.ค. สื่อถึง GM ~60% (เทียบกับ Street ~58.4–59.0%) และ OM ~54% (CFO: &quot;ระหว่าง 50% ถึง 55%&quot;) หรือ incremental GM ~76% q/q โดย GM ขยายทุกไตรมาสของ FY27 และการก้าวขึ้นของเดือน ธ.ค. &quot;ในตอนนี้มาจากราคาเป็นหลัก&quot; ฝ่ายบริหารบรรยาย incremental GM ว่าสูงกว่า 60% มากในเดือน ก.ค. และอยู่ในช่วง 70%+ ในเดือน ก.ย. เทียบกับกรอบ 50% ใน analyst day เดือน ก.พ. 2025</p>
+<p><strong>ต้นทุน</strong> ต้นทุน/TB ลดลงเพียง ~6% y/y (เทียบกับ ~16% ในไตรมาสก่อน) และเพิ่มขึ้น ~3% q/q ซึ่งเป็นการลดต้นทุนที่อ่อนที่สุดในหลายไตรมาส ฝ่ายบริหารบอกว่าต้นทุนของสิ่งที่ STX ผลิตเอง (head, media) ลดลง &quot;เร็วเท่าที่เราเคยมีมา&quot; แต่ส่วนประกอบที่จัดหาจากภายนอก (DRAM, อิเล็กทรอนิกส์อื่น และชิ้นส่วนจัดหา) แพงกว่าเมื่อปีก่อน ทับบน scrap ช่วงเปลี่ยนผ่านปกติและ &quot;การสูญเสีย&quot; ของยีลด์ ฝ่ายบริหารไม่ยอมระบุตัวเลขผลกระทบต่อ GM (อยู่ในไกด์เดือน ธ.ค.แล้ว); ต้นทุนส่วนเพิ่มของไตรมาส ธ.ค. น่าจะราว ~$200M (~11% ของ COGS) ส่วนที่ชดเชย: &quot;ต้นทุนของเทคโนโลยี HAMR ไม่ได้เพิ่มขึ้นมากนักจากรุ่นหนึ่งไปอีกรุ่น&quot; ดังนั้น 4TB เป็น 5TB/disk สื่อถึงต้นทุน/TB ที่ลดลงราว ~20% (การคำนวณของ Street หนึ่งแสดงว่าลดลง ~17% y/y แต่ COGS ต่อ EB ที่รายงานและช่วง Q&amp;A ชี้ไปที่ระดับกลางหลักเดียว)</p>
+<p><strong>Callback</strong> ประเด็นสำคัญ: ฝ่ายบริหารไม่มองต้นทุนส่วนประกอบภายนอกที่สูงขึ้นว่าเป็นครั้งเดียว มันกลายเป็นส่วนประจำของการเจรจาสัญญาแล้ว ดังนั้นการลดต้นทุน/TB น่าจะเบาบางต่อไปในระยะใกล้ และการขยาย GM เป็นเรื่องของราคา (ฝ่ายบริหารเน้นว่าการขยายมาร์จิ้นไตรมาส ก.ย. เกินกว่าเงินเฟ้อต้นทุนมาก) อีกเรื่อง: OEM องค์กรรับการจัดสรรสัดส่วนใหญ่ขึ้นที่ความจุต่อหน่วยต่ำกว่า ซึ่งกดทอน mix EB ที่รายงาน; อุปทานถูกจัดสรรผ่าน PO และข้อตกลงแทนการกันไว้สำหรับดีล spot; ลูกค้าให้ความสำคัญกับการรักษาโควตา EB; ฝ่ายบริหารไม่กังวลมากนักกับกำลังผลิตที่เพิ่มของคู่แข่งญี่ปุ่นซึ่งการเติบโตของอุปสงค์ควรดูดซับได้; และ STX ยังเป็นซัพพลายเออร์รายเดียวที่มี HAMR ในการผลิต และไม่เห็นการเข้าซื้อใดที่จะเร่งโรดแมปของตัวเอง</p>
+<p><strong>Capex</strong> Capex $211M (5% ของรายได้ เทียบกับ Street ~$195M) ฝ่ายบริหารย้ำ 4–6% สำหรับ FY27 และเรียกช่วงนั้นว่า &quot;เหลือเฟือ&quot; สำหรับการเติบโต EB ~25% หลัง FY27 เพราะ EB มาจากความหนาแน่นพื้นที่ (areal density) ไม่ใช่จำนวนหน่วย (และเครื่องมือใหม่มีความสามารถมากกว่าเครื่องที่แทนที่) ในทางตรงข้าม WDC ชี้ว่าความเข้มข้นของเงินทุนจะสูงกว่าเป้า 4–6% ในอีกสองสามปีข้างหน้า และ Toshiba กำลังเพิ่มกำลังการผลิต; คำตอบของ Dave คือ &quot;แนวทางเทคโนโลยีของคู่แข่งอาจต่างจากของเรา และคุณอาจเห็นสิ่งนั้นในอีกไม่กี่ปีข้างหน้า&quot; STX ไม่ได้เข้าร่วมการแข่งขันด้านกำลังการผลิต ซึ่งหนุนกรณีดูโอโพลีที่มีเหตุผลสำหรับมัลติเพิล</p>
+<p><strong>การแข่งขัน</strong> เรื่อง Toshiba ฝ่ายบริหารไม่ยอมคาดเดา แต่บอกว่าการนำกำลังการผลิต HDD จำนวนมากออนไลน์ &quot;ยากกว่ากันหลายระดับ&quot; จาก &quot;การเสียบเครื่องไม่กี่เครื่อง&quot; และคาดว่าอุปทานจะ &quot;ค่อนข้างตึง&quot; ถึง CY28 เรื่อง build vs. buy สำหรับ head และ media (อ่านว่า: ข่าวหน่วย head ของ TDK) Dave กล่าวว่า HAMR ล้ำสมัยไม่สามารถซื้อได้ และ STX ใช้เทคโนโลยีเก่าจากภายนอกเป็นรายกรณีเพื่อช่วยย้ายการผลิตของตัวเองไป HAMR เท่านั้น เรื่องที่ยังใช้ 10 platter ขณะที่ 40TB ของ WDC ใช้ 11 นั้น &quot;ไม่มีเหตุผลทางเทคนิค&quot; ที่จะไม่เพิ่ม platter แต่แพลตฟอร์มเดียวช่วยให้ qual ง่ายและหลีกเลี่ยงเครื่องมือกลใหม่</p>
+<p><strong>HAMR</strong> ตามแผนที่จะเป็น ~50% ของ run-rate EB nearline เมื่อสิ้น CY26 (Mozaic 4 ราวครึ่งหนึ่งของส่วนนั้น) โดย Mozaic 4 (สูงสุด 44TB) กำลัง ramp ที่ CSP รายใหญ่สองราย และจะมี qual ของ CSP/OEM เพิ่มในอีกสองสามเดือนข้างหน้า ส่วนเพิ่มเติม: Dave &quot;มองโลกในแง่ดีกว่าที่เราเป็นในไตรมาสก่อน&quot; เรื่อง 5TB/disk (Mozaic 5, 50TB+ บน 10 disk) เห็นความสามารถในการเปลี่ยนผ่านนั้น &quot;เร็วกว่าที่เราวางแผนไว้เดิมเล็กน้อย&quot; (การส่งมอบ qual ยังคงใกล้สิ้น CY27, รายละเอียดเพิ่มใน FY28) คาดว่า 6TB/disk จะตามมา &quot;ค่อนข้างเร็ว&quot; และ STX เคยแสดง 8TB/disk ในห้องแล็บ MSFT ยัง qual โซลูชัน HAMR บวก SMR แบบร่วมของ STX/AVGO ซึ่งเป็นพิมพ์เขียวของการซ้อนกำไรความจุจาก SMR ทับบน HAMR</p>
+<p><strong>อุปสงค์/AI</strong> DC คือ 90% ของ EB และ 81% ของรายได้ ($3.45B, +63% y/y เทียบกับ +57% ในไตรมาสก่อน); รายได้ nearline ของคลาวด์โตเป็นไตรมาสที่ 12 ติดต่อกัน และรายได้ DC ของ OEM องค์กรแตะระดับสูงสุดอันดับสองในรอบกว่าทศวรรษ (เพิ่มสองหลักทั้ง q/q และ y/y) ฝ่ายบริหารผูกอุปสงค์กับงาน inference และ agentic ที่เก็บและใช้ข้อมูลซ้ำ, สถาปัตยกรรม KV-cache และการสร้าง sovereign/on-prem; physical AI &quot;ยังไม่&quot; ปรากฏโดยตรง อุปสงค์โต &quot;เร็วกว่าที่เราคาดไว้อีกเล็กน้อย&quot; ช่องว่างอุปสงค์-อุปทาน &quot;น่าจะกำลังกว้างขึ้น&quot; ไม่มีการสลับหรือเลื่อน (&quot;ทุกอย่างที่เราผลิตได้เกินแผนมีคนจองหมด&quot;) และเรื่องที่ hyperscaler ล่าช้าด้านที่ดิน กำลังไฟ หรือโครงอาคาร &quot;คำตอบสำหรับคำถามของคุณคือไม่&quot;</p>
+<p><strong>การคืนทุน</strong> FCF สถิติใหม่ $1.48B (+32% q/q, &gt;3 เท่า y/y, มาร์จิ้น 35%) เทียบกับ Street ~$1.44B STX ชำระหนี้ $1.2B ในไตรมาส และอีก $750M ในเดือน ต.ค. (เงินต้น ~$1.6B, net leverage 0.2x) กลับสู่ investment grade และคาดว่าจะมีเงินสดสุทธิเมื่อสิ้น CY26 คืนทุน $568M (~2 เท่าของ มิ.ย., ราว ~$400M เป็นบายแบ็ก) ขึ้นปันผล ~3% เป็น $0.76 และจะเพิ่มบายแบ็ก &quot;อย่างมีนัยสำคัญ&quot; ตั้งแต่ไตรมาสเดือน มี.ค. (เหลือวงเงิน $4.4B) ข้อสังเกต: เมื่อถูกถามเรื่องคืน ~100% ของ FCF Dave วางกรอบ 75% เป็นโมเดลที่ STX &quot;ควรจะกลับไปทำได้... ในช่วงเวลาหนึ่ง&quot; โดยส่วนที่เกินจากนั้นเป็นเชิงฉวยโอกาส</p>
+<h3>⚖️ บูล vs แบร์: STX</h3>
+<p><strong>ฝั่งบูล</strong> มอง STX เป็นหุ้นสาธารณะที่บริสุทธิ์ที่สุดบน byte ที่ถูกที่สุดใน AI data center ในอุตสาหกรรมที่เปลี่ยนจากสินค้าโภคภัณฑ์ที่หดตัวและผูกกับพีซี มาเป็นโอลิโกโพลีสองราย (บวกรายที่สามขนาดเล็ก) ที่ขายเข้าข้อตกลงจัดสรรหลายปี ราว 80% ของข้อมูลคลาวด์อยู่บน HDD และเมื่อราคา NAND เพิ่มหลายเท่า y/y ช่องว่างราคาต่อ TB ระหว่าง NAND กับ HDD ขยายเป็น ~17 เท่า (และอาจถึง 20–25 เท่าใน CY27) การทดแทนจึงไม่ใช่ภัยคุกคามระยะใกล้ การขาดแคลน flash ถ้ามีผลก็ดันชั้น warm และ cold ให้ไปอยู่บนดิสก์มากขึ้น อุปสงค์กว้างขึ้นเมื่อ inference และ AI แบบ agentic เปลี่ยนข้อมูลจากเก็บแล้วลืมเป็นเก็บแล้วใช้ซ้ำ (ชั้น KV-cache, log, วิดีโอ, ข้อมูลเซนเซอร์ physical AI) และเมื่อการสร้างขององค์กรและ sovereign เพิ่มลูกค้านอกเหนือจาก hyperscaler ด้านอุปทาน STX เป็นผู้ขายรายเดียวที่มี HAMR ในการผลิตปริมาณมาก และโรดแมป areal density ของบริษัท (4TB/disk วันนี้, 5TB ที่อาจ ramp เร็วกว่าแผน, 6TB &quot;ค่อนข้างเร็ว&quot; ตามมา, 8TB แสดงให้ดูแล้ว) ทำให้เติบโต EB ได้ ~25% ต่อปีบนจำนวนหน่วยคงที่และ capex 4–6% โดยก้าว 4TB เป็น 5TB ลดต้นทุน/TB ~20% (และ 5TB เป็น 6TB อีก ~17%) แม้ราคาต่อ TB จะเพิ่มขึ้น การตั้งราคาตามมูลค่าบน LTA ระยะยาวบวกการลดต้นทุนเชิงโครงสร้าง คือวิธีที่ฝั่งบูลไปถึง GM 70%+ และมาร์จิ้น FCF 50%</p>
+<p>ไตรมาสนี้ให้ฝั่งบูลเกือบทุกอย่างที่ต้องการ: ราคาเร่งเป็น +33% y/y พร้อมสัญญาณการก้าวขึ้นเพิ่มเมื่อสัญญาหมุนเวียน, ไกด์เดือน ธ.ค. สื่อถึง GM ~60% และ OM ~54% บน opex ที่นิ่ง, และช่องว่างอุปสงค์-อุปทานยังขยายโดยไม่มีสัญญาณของการย่อย สำคัญไม่แพ้กัน STX ปฏิเสธที่จะไล่กำลังการผลิต ซึ่งฝั่งบูลอ่านว่าเป็นการยืนยันว่าอุตสาหกรรมจะไม่ทำลายขาขึ้นของราคาด้วยสงคราม capex ประมาณการขึ้นต่อได้ใน 3 ด้าน: (1) ราคาสัญญา CY28 ที่เจรจาในอีกสองถึงสามไตรมาสข้างหน้าในตลาดที่ตึงกว่าตลาดที่กำหนดเงื่อนไข CY27 (อย่างน้อยหนึ่งโมเดลของ Street ยังสมมติ ASP CY28 คงที่) (2) EB กลับมาเร่ง เมื่อ Mozaic 4 ที่ staging ไว้ส่งมอบและ Mozaic 5 อาจ ramp เร็วกว่าแผน ซึ่งเริ่มเครื่องยนต์ลดต้นทุนใหม่ด้วย และ (3) การคืนทุน ด้วยเงินสดสุทธิภายในสิ้นปีและบายแบ็กที่อาจซื้อหุ้นคืนได้ในระดับต่ำสองหลักของจำนวนหุ้นตลอด CY27–28</p>
+<p><strong>ฝั่งแบร์</strong> มองว่า STX เป็นบริษัทฮาร์ดแวร์วัฏจักรที่พิมพ์มาร์จิ้นสูงสุดที่ราคาสูงสุด และตลาดถูกแล้วที่ไม่ให้มัลติเพิลระดับโครงสร้าง ตอนนี้ราคาทำงานเกือบทั้งหมด: $/TB +33% y/y เทียบกับ EB +21% (และ +16% เทียบกับ +1% q/q) โดยการเติบโตของ EB ลดจาก +34% เมื่อไตรมาสก่อน ราคานั้นถูกตั้งท่ามกลางภาวะขาดแคลนสุดขีดทั่วทั้ง storage (NAND เพิ่มหลายเท่า y/y) ซึ่งเป็นปัจจัยนำเข้าที่ผันผวนตามวัฏจักรที่สุด หากกำลังการผลิต memory ใหม่ของจีนและการย่อย capex ของ AI ดึงราคา flash ลงใน 2H27 ร่มราคาเหนือ HDD ก็หดลงในจังหวะที่อุปทานตอบสนอง และอุปทานกำลังตอบสนอง: Toshiba วางแผนเพิ่มกำลังการผลิต HDD สำหรับ AI data center เป็นสองเท่าภายใน FY27 และตั้งเป้าส่วนแบ่ง ~30% (จากเพิ่งเกิน 10%), WDC จะรันความเข้มข้นของเงินทุนเหนือช่วง 4–6% เป็นเวลาสองสามปี และดูโอโพลีทั้งสองกำลังเพิ่ม areal density (platter แต่ละรุ่นเพิ่มความจุ ~20–33% ต่อไดรฟ์บนจำนวนหน่วยเท่าเดิม) ฝั่งหมียังเน้นว่าทัศนวิสัยเป็นเรื่องการจัดสรร ไม่ใช่ราคา: เงื่อนไข BTO ล็อกไว้เพียง ~12 เดือนข้างหน้า ราคา CY28 ยังไม่เจรจา และฝ่ายบริหารเองก็บอกว่าอาจถอยหากลูกค้าหยุดดึงตามแผน เติมความกระจุกตัวของลูกค้า (คลาวด์ระดับโลกคือ &quot;ส่วนใหญ่&quot; ของรายได้และ EB ของ DC) ความเสี่ยงด้านเงินทุน AI ที่ hyperscaler และ neocloud และประวัติที่ P/E ของ STX เคยอยู่ระหว่าง ~4 เท่าถึง ~28 เท่า (มัธยฐาน ~8 เท่าตามมาตรวัดระยะยาวหนึ่ง แม้ forward P/E จะเฉลี่ย ~14.5 เท่าตั้งแต่ปี 2016) ฝั่งหมีจึงเห็นหุ้นที่ควรเทรดตามเลขคณิตจากจุดสูงสุดถึงจุดต่ำสุด ไม่ใช่ EPS CY27 คูณมัลติเพิลระดับโครงสร้าง</p>
+<p>ไตรมาสนี้ให้ประเด็นพูดคุยแก่ฝั่งหมีหลายเรื่อง EB ที่พลาด ~5–6% และคำอธิบาย (staging ก่อน qual, mix ของ OEM ที่ความจุต่อไดรฟ์ต่ำกว่า) แสดงว่าการเติบโตของปริมาณสะดุดและพึ่ง qualification มากกว่า CAGR ราบรื่นระดับกลาง 20% ที่สื่อ และสินค้าคงคลังเพิ่ม ~8% q/q เครื่องยนต์ลดต้นทุนสะดุด โดยต้นทุน/TB เพิ่ม ~3% q/q และต่ำลงเพียง ~6% y/y จากเงินเฟ้อที่ฝ่ายบริหารบอกว่าไม่ใช่ครั้งเดียว ฝั่งหมีอ่านว่าส่วนหนึ่งของ &quot;ราคา&quot; +16% q/q คือการส่งผ่านต้นทุน เศรษฐศาสตร์หน่วยดีขึ้นช้ากว่าที่บรรทัด GM บอก และ WDC ซึ่งประเมินว่ารัน ต้นทุน/TB ต่ำกว่า STX ราว ~10% เข้าไตรมาสเดือน ธ.ค. ทั้งที่ใช้ ePMR 11 disk แทน HAMR สำหรับไดรฟ์ 40TB อาจมีเส้นโค้งต้นทุนระยะใกล้ที่ดีกว่า ไกด์เดือน ธ.ค. ยังสื่อถึง incremental GM ที่ลดเหลือ ~76% q/q จาก ~89% ข้อความการคืนทุนค่อนข้างระมัดระวัง และ capex สูงกว่า Street</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ราคาเด่น แต่ปริมาณและต้นทุนทำให้ไม่ถึงเกณฑ์ buyside</p><ul class="rn-sum-list"><li>Capex คงที่ 4-6% ต่างจาก WDC — สนับสนุนกรณีดูโอโพลีที่มีเหตุผล</li><li>HAMR ~50% ของ run-rate EB nearline เมื่อสิ้น CY26 และ 5TB/disk อาจมาเร็วกว่าแผน</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">~$19.2</div><div class="rn-stat-c">รายได้ต่อ TB (+16% q/q, +33% y/y)</div></div><div class="rn-stat"><div class="rn-stat-v">57.8%</div><div class="rn-stat-c">GM (+510bps q/q)</div></div><div class="rn-stat"><div class="rn-stat-v">$1.48B</div><div class="rn-stat-c">FCF สถิติใหม่</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span>NXPI -8%: ไตรมาส 3 อยู่ปลายล่างของ bogey และไกด์ไตรมาส 4 ต่ำกว่า</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ไตรมาส 3 $3.79B / EPS $4.20 ชนะ Street เล็กน้อยแต่ต่ำกว่า bogey</li><li>ไกด์ไตรมาส 4 $3.85B / EPS $4.36 ตรง Street ต่ำกว่าความหวัง buyside</li><li>กรอบปี 2027: DD revenue, GM 60% เป็น exit rate, opex ~23% ใน 1H27</li><li>Auto $2.07B (+13% y/y); ยังไม่มีการเติมสต็อกรถยนต์</li></ul></div>
+<p><strong>NXPI -8%: ไตรมาส 3 ลงที่ปลายล่างของ bogey และไกด์ไตรมาส 4 ต่ำกว่าทั้ง Street และเกณฑ์ buyside ที่ ~$3.9–3.95B DD กรอบปี 2027 ไม่ใช่ beat-and-raise แบบ TXN ที่ฝั่งบูลอยากได้ หลังจากหุ้นวิ่งขึ้นเข้าสู่งบ</strong></p>
+<p>ยังไม่ดีพอเทียบกับสิ่งที่ฝั่งบูลต้องการ ไตรมาส 3 ชนะเล็กน้อย ($3.79B/$4.20 เทียบกับ Street $3.755B/$4.12) และไตรมาส 4 ถูกไกด์ตรงตามคาด ($3.85B/$4.36 เทียบกับ Street ~$3.865B/$4.34-4.36) ต่ำกว่า bogey ของ buyside ที่หวังการเติบโต q/q +MSD%</p>
+<p>รายได้ไตรมาส 3 $3.79B (+19% y/y, +8% q/q) เทียบกับ Street $3.77B และ bogey ราว ~$3.79–3.82B GM 58.6% เท่า Street แต่ต่ำกว่า bogey ที่ ~58.8–59.1% ราว ~20–50bps EPS $4.20 เทียบกับ Street $4.12 และ bogey $4.20–4.25 ส่วนมากของ segment ตรงตาม Street: Auto +7% q/q เทียบกับไกด์ MSD, Industrial &amp; IoT +39% y/y และ Comm Infra &amp; Other (ที่ data center อยู่) +54% y/y สูงกว่า ~$10M</p>
+<p>ไกด์ไตรมาส 4 คือปัญหาหลัก ค่ากลาง $3.85B คือ +2% q/q ตรงตามฤดูกาลระยะยาวของไตรมาส 4 แต่ต่ำกว่า Street $3.87B และ +3–4% q/q ที่ buyside ต้องการ ไกด์ GM 59.0% ตรงตาม Street และอยู่ที่ปลายล่างของ bogey; EPS $4.36 เทียบกับ Street $4.38 ไตรมาส 4 เมื่อคิดเป็นรายปีอยู่ที่ ~$15.4B ดังนั้น $16.1B ของ Street สำหรับ C27 (และเป้า ~$16B ปี 2027 ที่ยังอยู่ใน deck) ต้องการการเติบโตราว ~4–5% จาก exit rate</p>
+<h3>🧩 ประเด็นหลักของงบ NXPI</h3>
+<p><strong>ปี 2027</strong> ฝ่ายบริหารให้กรอบที่เร็วผิดปกติ: การเติบโตของรายได้ระดับ DD (Street ~+11-12%, ~$15.9-16.0B), GM ถึง 60% &quot;ในระหว่าง&quot; ปี 2027 (เป็น exit rate ไม่ใช่ระดับทั้งปี; Street FY27 ~59.5-59.8%), opex ที่ ~23% ของรายได้ใน 1H27 และต่ำกว่า 23% ใน 2H27, อัตราภาษี 17.5%, ขาดทุน JV ~$80M และ capex ที่ ~5% ของรายได้ (เทียบกับ ~2% ในปี 2026) มันรองรับ EPS ~$18 ของ Street และอ่านเหมือนพื้น แต่ความเข้มข้นของ opex 1H27 ที่สูงกว่า 21.4% ของไตรมาส 3 มาก จำกัดการทำ leverage และประมาณการหลังประกาศงบมาบรรจบที่ราว ~$17.50-18.60 แทนที่จะขยับขึ้น ในเดือน ส.ค. และ ก.ย. ฝ่ายบริหารเพียงย้ำเป้าหมาย Investor Day 2027 (~$16B รายได้, ~60% GM) ดังนั้นกรอบที่ชัดเจนคือของใหม่ แต่โดยสาระคือเกณฑ์เดียวกัน</p>
+<p><strong>Auto</strong> รายได้เกิน $2B เป็นครั้งแรกที่ $2.07B, +13% y/y (+17% ไม่รวม MEMS; ไตรมาสก่อน +12%) สูงกว่า Street เล็กน้อย (~$2.06B) ขับเคลื่อนโดย content ในสภาพแวดล้อมการผลิตที่ &quot;ค่อนข้างนิ่ง&quot; SDV วิ่งเหนืออัตรารายปี $1.5B และยังอยู่ในแผนสู่ $2B ในปี 2027 และ electrification กลับมาโตเร็วกว่าอัตราของ Investor Day หลังการย่อยเมื่อปีก่อน (xEV คาดว่าเพิ่มจาก ~47.5% ของการผลิตเป็น 50-55%) หลักฐาน: RV Tech กำหนดมาตรฐานแพลตฟอร์ม zonal บน S32K5 ทั้ง VW และ Rivian, การส่งมอบ S32K5 ครั้งแรกในจีนอาจเร็วสุดไตรมาส 1 ปี 27, S32N central compute เริ่ม ramp ช่วงแรกปลายปี 2027 และทั้งคู่ถึงปริมาณเต็มในปี 2028; ฝ่ายบริหารวางกรอบ design win SDV ใหม่ว่าเป็นกำไรด้าน content ที่ตอนนี้ทบต้นกับกำไรส่วนแบ่ง Auto ไตรมาส 4 ถูกไกด์ +LSD% q/q (~$2.11B) และ +LDD% y/y; ฝ่ายบริหารเรียกว่าสูงกว่าฤดูกาล (นิ่งถึงขึ้นเล็กน้อย) แต่ตรงถึงต่ำกว่า Street เล็กน้อย (~$2.11-2.13B)</p>
+<p><strong>Restocking</strong> ยังไม่มีการเติมสต็อกรถยนต์ในวงกว้าง OEM บางรายพูดถึงการสร้างสต็อกเผื่อเพราะอุปทานตึง แต่ &quot;ยังไม่เกิดขึ้น&quot; และฝ่ายบริหารยืนยันว่าจะเห็นการเติมสต็อกใดๆ ได้จากตำแหน่ง SDV หลักของตน (~40% ของ auto ให้บริการผ่านตัวแทนจำหน่าย; สินค้าคงคลังช่องทางนิ่งที่เป้า 11 สัปดาห์) นั่นทำให้ NXPI ไม่สอดคล้องกับเพื่อนร่วมกลุ่มที่อ้างการเติมสต็อกรถยนต์สองไตรมาสติด (auto ของ TXN โตกลาง 10% y/y ในไตรมาส 3) ฝั่งบูลเห็นคันโยกปี 2027 ที่ยังไม่ถูกใช้ (ในเดือน ส.ค. ฝ่ายบริหารบอกว่า Tier 1 ตะวันตกรายใหญ่ถือสินค้าคงคลัง NXPI เพียง 3-6 สัปดาห์ เทียบกับระดับอุดมคติ 10-12) ฝั่งหมีเห็น mix ที่ผูกกับ drivetrain xEV โดยตรงน้อยกว่าซึ่งพลาดแรงบิดตามวัฏจักร</p>
+<p><strong>อุปสงค์</strong> ทุกตัวชี้วัดดีขึ้นเทียบกับ 90 วันก่อน: book-to-bill สูงกว่า 1 มากในทุกตลาดปลายทางและทุกภูมิภาค, backlog โตเป็นดอลลาร์และยืดไปไกลในปี 2027, ~80% ของ lead time ตอนนี้เกิน 16 สัปดาห์ (เทียบกับ 25% เมื่อปีก่อน) และการ escalation ของลูกค้าเพิ่มขึ้นมากเทียบ q/q นี่เป็นครั้งแรกที่ฝ่ายบริหารวัดปริมาณการยืดของ lead time; ไตรมาสก่อน escalation เพิ่มเป็นสองเท่าและ lead time เกิน 16 สัปดาห์เพียงใน &quot;บางส่วน&quot; ของพอร์ตโฟลิโอ ทุกภูมิภาคโต DD y/y; อเมริกาเพิ่ม ~20% q/q ขณะที่จีน (~17% ของยอดขาย) โต ~2% q/q เพราะการส่งออกชดเชยอุปสงค์ในประเทศที่อ่อน</p>
+<p><strong>การคืนทุน</strong> บอร์ดเพิ่มวงเงิน $5B (รวม $6.3B, ~10% ของ market cap) และฝ่ายบริหารจะเร่งบายแบ็กในไตรมาส 4 และปี 2027 หลังจากการคืนทุนตามหลังนโยบาย 100% ของ FCF ส่วนเกินระหว่างที่ลดหนี้ ปิดดีล และใส่เงินทุน JV (ไตรมาส 3: บายแบ็ก $103M บวกปันผล $256M, ~30% ของ FCF) FCF $1.21B (32% ของรายได้) และ ~$3.5B TTM (25%), net leverage 1.3x และเงินทุน JV จะเสร็จ &gt;75% ภายในสิ้นปี ฝ่ายบริหารวางแผนคืน FCF ส่วนที่เกินปันผล ~$1B ผ่านบายแบ็กและรีไฟแนนซ์แทนที่จะชำระหนี้ ขณะที่ capex เพิ่มเป็น ~5% ของรายได้ในปี 2027 สำหรับกำลังการผลิต back-end และไซต์ประกอบ/ทดสอบใหม่ในมาเลเซีย (พร้อมผลิตปี 2028)</p>
+<p><strong>Industrial</strong> รายได้ I&amp;IoT $802M, +39% y/y (ไตรมาสก่อน +38%) ตรงตามคาดโดยประมาณ (Street ~$0.80B) ส่วน industrial โตเกือบ 50% จาก data center, factory automation และ healthcare และตอนนี้คือ ~70% ของ segment (เทียบกับ ~60% ในข้อความก่อนหน้า) ขณะที่ consumer IoT ยังเป็นตัวฉุด โปรเซสเซอร์ที่เปิดใช้ AI กำลังเดินตามที่ ~15% ของรายได้โปรเซสเซอร์ I&amp;IoT ในปี 2026 (มากกว่าสองเท่าของปี 2025) NPU แบบ discrete ชื่อ Ara ถึงการผลิตปริมาณในปี 2028 และ NXPI ชนะ design แรกของหุ่นยนต์ humanoid บน S32K5 กับ &quot;บริษัทเทคโนโลยีระดับโลกชั้นนำของสหรัฐฯ&quot; ไตรมาส 4 ถูกไกด์ +LSD% q/q และ +ระดับสูง 20% y/y (~$0.82B) ต่ำกว่า Street เล็กน้อย</p>
+<p><strong>Data Center</strong> รายได้ปี 2026 ตอนนี้จะเกินเป้า $500M (~$200M ในปี 2025) และฝ่ายบริหารเห็น ~$1B ในปี 2028 แบ่งกันคร่าวๆ ระหว่าง I&amp;IoT กับ CI&amp;O พอร์ตโฟลิโอเป็น control-plane เท่านั้น: สวิตช์ top-of-rack (ส่วนที่กระจุกตัวกับลูกค้ามากที่สุด), การจัดการบอร์ด, secure element และ MCU ป้องกัน GPU (กำลัง ramp ตอนนี้) โดยโปรเซสเซอร์แอปพลิเคชันจะวางใน 2H27 และผลิตภัณฑ์ป้องกัน GPU เพิ่มเติมจะส่งตัวอย่างกลางปี 2027 ในเดือน ก.ย. ฝ่ายบริหารวางกรอบการเติบโตของ DC ปี 2027 ที่ ~20% และไม่ได้อัปเดต ดังนั้นเป้า $1B สื่อถึง ramp แบบหนักปลาย (~40% CAGR, ถ่วงน้ำหนักไปปี 2028 เมื่อ Layerscape เจเนอเรชัน 5nm ramp) ซึ่งขึ้นกับการ ramp ผลิตภัณฑ์ใหม่ design win และซอฟต์แวร์ของลูกค้า แม้ที่ $1B DC จะเป็นเพียง ~6% ของยอดขาย เทียบกับ 10-20% ที่เพื่อนร่วมกลุ่มซึ่งรายได้ DC เกือบเท่าตัว และการที่ IR เรียกคำถามเรื่องการเปิดรับ DC ว่า &quot;คำถามที่ลบมาก&quot; แสดงว่าประเด็นนี้อ่อนไหวเพียงใด</p>
+<p><strong>มาร์จิ้น</strong> GM 58.6% (+160bps y/y) และ OM 37.1% (+330bps) ชนะเล็กน้อยทั้งคู่ (Street ~58.5%/~36.7%) จาก utilization และ fallthrough โดย opex $810M (21.4% ของรายได้) ต่ำกว่า Street ไกด์ GM ไตรมาส 4 59.0% สื่อถึง incremental ราว ~85% q/q; utilization คงที่ระดับกลาง 80% ในไตรมาส 4 และควรถึงระดับสูง 80% ในปี 2027 ฝ่ายบริหารเน้นว่าผลที่ได้เป็นเชิงโครงสร้างและ &quot;ไม่เกี่ยวข้องเลย&quot; กับการขึ้นราคา และ GM ควรขยับเกิน 60% ในปี 2028 เมื่อ VSMC JV ramp (~200bps เมื่อ ramp เต็ม) VSMC เปิดก่อนกำหนด: NXPI กำลัง qual เทคโนโลยีแรก โดยเวเฟอร์เริ่มใน 1H27 ผลผลิตแรกใน 2H27 และปริมาณเร่งในปี 2028</p>
+<p><strong>ราคา</strong> ราคาเพิ่มราว ~1 จุดในไตรมาส 3 และควรเพิ่มราว ~1 จุดในไตรมาส 4 ทำให้ปี 2026 เป็นกลางเทียบกับการลดลง LSD% ที่วางแผนไว้ก่อนเข้าปี; ในปี 2027 NXPI จะส่งผ่านต้นทุนปัจจัยนำเข้าที่สูงขึ้นต่อไป ขณะที่ mix ของ SDV (content 2-3 เท่า) ยก ASP ฝ่ายบริหารบรรยาย &quot;การเปลี่ยนแปลงเชิงโครงสร้าง&quot; ที่การกัดเซาะราคารายปีในอดีตลดลง และเปิดประตูไว้สำหรับการตั้งราคาที่ขับเคลื่อนด้วยอุปทาน: กำลังการผลิต back-end &quot;ตึงมากๆ&quot; และคาดว่ากำลังการผลิต front-end จะตึง &quot;บางช่วงในปีหน้า&quot; ตอนนี้ราคาเป็นกลางต่อ GM ต่างจากเพื่อนร่วมกลุ่มด้านอนาล็อกกำลังไฟที่ได้ประโยชน์เกินสัดส่วน; ในเดือน ก.ค. ฝ่ายบริหารเพียงบอกว่าราคาจะ &quot;ดีกว่าเล็กน้อย&quot; จากการลดลง LSD%</p>
+<p><strong>Mobile/Comms</strong> Mobile ($411M, -4% y/y เทียบกับ +6% ในไตรมาสก่อน, +17% q/q) คละกันเมื่อเทียบ Street (~$0.41-0.43B) และถูกไกด์ลดกลาง 10% y/y ในไตรมาส 4 (~$415M ต่ำกว่า Street เล็กน้อย); ฝ่ายบริหารไม่ได้พูดถึงตัวขับในการประชุมสาย แต่เมื่อเดือน ก.ย. ได้ชี้ว่าการขาดแคลน memory กระทบอุปสงค์ mobile บางส่วน CI&amp;O เป็นดาวเด่นที่ $503M, +54% y/y (ไตรมาสก่อน +41%) สูงกว่า Street (~$0.47-0.49B) จาก DC และ secure card และถูกไกด์ขึ้น &gt;50% y/y ในไตรมาส 4 Digital networking ควรเกิน 30% ของ CI&amp;O เมื่อสิ้นปี 2026 (25% ในปี 2025) เมื่อ RF Power ลดต่ำกว่า 20% จากการออกจาก RF Power รุ่นถัดไป และมีการแยกตลาดปลายทางใหม่เริ่มกับงบไตรมาส 4</p>
+<h3>⚖️ บูล vs แบร์: NXPI</h3>
+<p><strong>ฝั่งบูล</strong> มอง NXPI เป็นวิธีที่ถูกที่สุดในการถือวัฏจักร content หลายปีใน auto และ industrial edge พร้อมคันโยกด้านมาร์จิ้นและการคืนทุนที่ส่วนใหญ่เป็นการพึ่งตนเอง ตัวขับหลักคือการเปลี่ยนจากสถาปัตยกรรมยานยนต์แบบ domain-based ไปเป็น zonal และ central-compute ซึ่งฝ่ายบริหารบอกว่ามี semi content ต่อคัน 2-3 เท่าของวันนี้ ตระกูล S32 ของ NXPI (S32K5 แบบ zonal, S32N แบบ central compute 5nm) ร่วมกับเรดาร์ การจัดการแบตเตอรี่ electrification และเครือข่ายในรถ ช่วยให้ขายระบบแทนที่จะขายชิป และการตัดสินใจแพลตฟอร์ม SDV มีอายุยืนเพราะ OEM แทบไม่ qual ผู้ขายรายที่สองเร็วในช่วงต้นของแพลตฟอร์ม นอกเหนือจาก auto ฝั่งบูลชี้ไปที่ industrial edge (MCU และโปรเซสเซอร์ที่เปิดใช้ AI, NPU แบบ discrete Ara และ funnel design win ของ physical AI ที่ฝ่ายบริหารประเมินขนาดราว ~$1.5B เมื่อช่วงฤดูร้อน) และแฟรนไชส์ DC แบบ control-plane ที่ควรเพิ่มเป็นสองเท่าเป็น ~$1B ภายในปี 2028 เชิงโครงสร้าง ราคาเปลี่ยนจากการกัดเซาะรายปีระดับ LSD% ในอดีตเป็นเป็นกลางหรือดีกว่า โมเดลการผลิตแบบ hybrid (JV 300mm ของ VSMC/ESMC ที่ขยับไปทางเวเฟอร์ outsource/ภายใน ~80/20) ลดต้นทุนต่อหน่วย และธุรกิจแปลง ~25% ของรายได้เป็น FCF</p>
+<p>ไตรมาสนี้เพิ่มหลักฐานให้มุมมองนั้น: ทุกตัวชี้วัดอุปสงค์ดีขึ้น (book-to-bill สูงกว่า 1 มากทุกที่, backlog ขยายเข้าปี 2027, 80% ของ lead time เกิน 16 สัปดาห์), SDV ผ่าน run-rate $1.5B, ธุรกิจ industrial โตราว ~50%, มุมมอง DC เพิ่มเป็นสองเท่า และฝ่ายบริหารผูกมัดล่วงหน้ากับการเติบโต DD และ GM 60% ในปี 2027 ก่อน Investor Day ฝั่งบูลชี้ว่ามีคันโยกอัพไซด์หลายตัวที่อยู่นอกตัวเลข: (1) การเติมสต็อกรถยนต์ยังไม่เริ่มแม้ Tier 1 จะถือสต็อกบางและ OEM พูดถึงสต็อกเผื่อ; (2) การตั้งราคาที่ขับเคลื่อนด้วยอุปทาน หากกำลังการผลิต front-end ตึงในปี 2027 ตามที่ฝ่ายบริหารคาด โดยกำลังการผลิตของ NXPI เอง (VSMC ก่อนกำหนด, การเพิ่ม back-end ใน 1H27) ช่วยให้แย่งส่วนแบ่งได้; (3) GM ราว ~200bps ของ VSMC ในปี 2028 ซ้อนบน utilization ระดับสูง 80% (กฎคร่าวๆ ของฝ่ายบริหารคือ ~100bps ของ GM ต่อรายได้ส่วนเพิ่มทุก $1B); และ (4) วงเงิน $6.3B ที่อาจซื้อหุ้นคืนได้ ~4-5% ของจำนวนหุ้นต่อปี ที่ราว ~12.8 เท่าของ EPS Street CY27 และ ~11 เท่า CY28 ซึ่งเป็นมัลติเพิลต่ำสุดในหมู่ analog (มัธยฐาน ~22 เท่า NTM ก่อนประกาศงบ) และต่ำกว่าค่าเฉลี่ย 5 และ 10 ปีของตัวเองที่ 14.5-15.5 เท่า ฝั่งบูลเห็นงบที่ตรงตามคาดซึ่งขจัดความเสี่ยง โดยมี Investor Day ที่น่าเชื่อถือและการเปิดเผย segment ใหม่เป็นตัวเร่งให้หุ้น re-rate ไปสู่บรรทัดฐานในอดีต</p>
+<p><strong>ฝั่งแบร์</strong> มอง NXPI เป็นหุ้นอนาล็อกปลายวัฏจักรที่พึ่ง auto หนักและไม่มีแรงบิดจาก AI ที่ขับอัพไซด์ของเพื่อนร่วมกลุ่ม ซึ่งทำให้มัลติเพิลต่ำเป็นกับดักมูลค่ามากกว่าโอกาส auto ยังเป็น ~55% ของรายได้ และการเติบโตทั้งหมดมาจาก content ในสภาพแวดล้อมการผลิตที่นิ่งถึงลดลง (SAAR ลดเล็กน้อยในปี 2026 และน่าจะนิ่งๆ ในปี 2027 พร้อมการสิ้นสุดเงินอุดหนุน EV ของจีนและอุปสงค์ภายในจีนที่อ่อน) ทำให้ NXPI เปราะบางเมื่อวัฏจักร auto พลิก เรื่องราวเชิงโครงสร้างเป็นของจริงแต่ช้า: การ ramp เต็มปริมาณของ S32K5/S32N และการผลิตปริมาณของ Ara เป็นเหตุการณ์ปี 2028 และ DC (control plane เท่านั้น, ~3.5% ของยอดขายปี 2026) ถึงเพียง ~6% ของรายได้ภายในปี 2028 ขณะที่เพื่อนร่วมกลุ่มขายเข้า power delivery และ content DC อื่นที่โตเร็วกว่ามาก การแข่งขันกำลังก่อตัวใน central compute (QCOM) และจากการผลักดันให้จีนทำ IVI, ADAS และ MCU ในประเทศ mobile กำลังหดตัว และส่วน consumer IoT ของ I&amp;IoT ล้าหลัง</p>
+<p>ไตรมาสนี้ให้กระสุนฝั่งหมี ในวัฏจักรขาขึ้นที่เพื่อนร่วมกลุ่มชนะและปรับขึ้น NXPI ไกด์ไตรมาส 4 เพียงตรงตามคาด (+2% q/q เทียบกับที่ buyside หวัง +MSD%), ไกด์ Auto ตรงถึงต่ำกว่า Street, ยังเห็นว่าไม่มีการเติมสต็อก และความเห็นเรื่องฤดูกาลของบริษัทเองบ่งชี้การลดในไตรมาส 1 ปี 27 กรอบปี 2027 คือพื้นของฝั่งบูลแต่ก็จำกัดการปรับประมาณการ: &quot;หลักสองหลัก&quot; น่าจะหมายถึง ~10-12% ซึ่ง Street อยู่ตรงนั้นแล้ว; GM 60% เป็น exit rate ไม่ใช่ระดับทั้งปี; opex ที่ ~23% ของรายได้ 1H27 (เทียบกับ 21.4% ในไตรมาส 3) ดูดซับ leverage; และ capex ที่เพิ่มเป็น ~5% บวกขาดทุน JV ~$80M ทำให้การแปลงเป็นเงินสดเจือจาง ราคายังคงเป็นการส่งผ่านล้วนๆ ดังนั้น NXPI ไม่ได้รับอัพไซด์ที่ขับเคลื่อนด้วยอุปทานแบบที่เพื่อนบางรายได้ และเป้า DC ต้องพึ่งการ ramp ผลิตภัณฑ์ปี 2028 เมื่อ EPS NTM ของ Street สูงกว่าจุดสูงสุดของวัฏจักรก่อนหน้าแล้วราว ~20% ฝั่งหมีเถียงว่ามัลติเพิลจะหดมากกว่าขยายจากตรงนี้ เหมือนที่มักเกิดปลายวัฏจักรอนาล็อก และทั้งเป้า DC $1B และบายแบ็กไม่เปลี่ยนเรื่องเล่าก่อน Investor Day</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ไม่ใช่ beat-and-raise แบบที่ฝั่งบูลอยากได้หลังหุ้นวิ่งเข้างบ</p><ul class="rn-sum-list"><li>มัลติเพิล ~12.8 เท่า CY27 ต่ำสุดในกลุ่ม analog</li><li>ฝั่งหมีชี้ว่าพึ่ง auto ~55% และการ ramp โครงสร้างเป็นเรื่องปี 2028</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$3.79B</div><div class="rn-stat-c">รายได้ไตรมาส 3 (+19% y/y)</div></div><div class="rn-stat"><div class="rn-stat-v">$6.3B</div><div class="rn-stat-c">วงเงินบายแบ็กรวม (~10% ของ market cap)</div></div><div class="rn-stat"><div class="rn-stat-v">~$1B</div><div class="rn-stat-c">เป้ารายได้ DC ปี 2028</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span>VRT +16%: ชนะรายได้ ~15% เหนือ Street</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>รายได้ไตรมาส 3 $4.31B เทียบกับ Street $3.76B (organic +55%)</li><li>อเมริกา $2.99B เทียบกับ Street ~$2.51B (+66% organic)</li><li>ไกด์ organic ทั้งปีเป็น 37-39% จาก 30-32%; EPS $7.10-7.20</li><li>ข้อติ: มาร์จิ้นอเมริกา +10bps y/y และการปรับไกด์ส่วนใหญ่คือส่วนที่ชนะไตรมาส 3</li></ul></div>
+<p><strong>VRT +16%: รายได้ไตรมาส 3 สูงกว่า Street ~15% ($4.31B เทียบกับ $3.76B; organic +55% เทียบกับ ~37% ของ buyside) เป็นการชนะบรรทัดบนที่ใหญ่ที่สุดนับแต่เป็นบริษัทมหาชน และการเติบโต organic ทั้งปีไปที่ ~38% จาก ~31% ไกด์ไตรมาส 4 เพียงตรงตาม bogey แต่ตอบข้อกังวลเรื่องอเมริกา/การดำเนินงานที่ทำให้หุ้นลงมา ~44% จากจุดสูงสุดเดือน พ.ค.</strong></p>
+<p>เตือนความจำ: VRT ถูก de-rate หนักก่อนงบนี้จากข้อกังวลเรื่องการดำเนินงาน คุณภาพผลิตภัณฑ์ และส่วนแบ่งหลังไตรมาส 2 พลาด และอยู่ต่ำกว่าระดับต้นเดือน ต.ค. ~18% ดังนั้นนี่ดีกว่ามาก หุ้นไฟฟ้าอื่นขึ้นตามก่อนตลาดเปิด (NVT +8%, ETN/PWR +4%)</p>
+<p>รายได้ไตรมาส 3 $4.31B (+61% y/y, +55% organic เทียบกับไกด์ 34–36%) เทียบกับ Street $3.76B และ bogey ราว ~$3.75–3.85B อเมริกา ซึ่งเป็นความกังวลหลังไตรมาส 2 ทำได้ $2.99B เทียบกับ Street ~$2.51B (+66% organic); APAC +48%, EMEA +19% adj. op margin 25.2% (+290bps y/y) สูงกว่า Street ราว ~60bps และสูงกว่าไกด์ราว ~70bps EPS $2.21 เทียบกับ Street $1.82 และ bogey ราว ~$1.80–1.90</p>
+<p>ออเดอร์ organic เพิ่มมากกว่าเท่าตัว y/y และรายได้รอรับรู้ (เงินมัดจำลูกค้า) เพิ่มอีก $490M q/q เป็น $4.1B</p>
+<p>การเติบโต organic ทั้งปีตอนนี้ 37–39% (จาก 30–32%) โดย EPS $7.10–7.20 เทียบกับ Street ~$6.67 และรายได้ $14.65B ที่ค่ากลางเทียบกับ $14.02B</p>
+<p>ไกด์ไตรมาส 4: $4.31–4.51B (ค่ากลาง $4.41B, ~50% organic) เทียบกับ Street $4.31B และ buyside ~$4.3–4.5B EPS $2.22–2.28 เทียบกับ Street $2.20 และ bogey ราว ~$2.20–2.30 ที่ส่วนบนของสิ่งที่คนส่วนใหญ่เอนเอียงไปทาง op margin 25.8% ที่ค่ากลางต่ำกว่า Street ราว ~20bps</p>
+<p>ข้อติสองเรื่อง มาร์จิ้นอเมริกา 29.4% เพิ่มเพียง +10bps y/y บนยอดขาย +75% (mix); มาร์จิ้นที่ชนะมาจาก APAC (+380bps เป็น 17.0%) และ EMEA (+920bps เป็น 28.0%) และการปรับขึ้นไกด์ทั้งปีมากกว่าส่วนที่ชนะในไตรมาส 3 เพียงเล็กน้อย: จากการปรับรายได้ขึ้น $650M นั้น $563M เป็นอัพไซด์ไตรมาส 3 เทียบกับไกด์ ดังนั้นไตรมาส 4 ขยับขึ้น ~$90M เทียบกับที่ไกด์ FY เดิมสื่อ (~$4.33B → $4.41B) และ $0.41 จากการปรับ EPS $0.45 คือไตรมาส 3 ขอบล่างของช่วงไตรมาส 4 นิ่งเมื่อเทียบ q/q และค่ากลาง (+53% y/y) คือการชะลอ ~8 จุดบนฐานเปรียบเทียบที่ง่ายขึ้น ~6 จุด</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ตอบข้อกังวลเรื่องอเมริกา/การดำเนินงานที่ทำให้หุ้นลงมา ~44% จากจุดสูงสุดเดือน พ.ค.</p><ul class="rn-sum-list"><li>ไกด์ไตรมาส 4 ตรง bogey ที่ $4.31-4.51B</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$4.31B</div><div class="rn-stat-c">รายได้ไตรมาส 3 (+61% y/y)</div></div><div class="rn-stat"><div class="rn-stat-v">$2.21</div><div class="rn-stat-c">EPS เทียบกับ Street $1.82</div></div><div class="rn-stat"><div class="rn-stat-v">$4.1B</div><div class="rn-stat-c">รายได้รอรับรู้ (เงินมัดจำลูกค้า)</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span>GEV +5%: EBITDA และ FCF นำหน้ามาก ยกไกด์อีกครั้ง</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>EBITDA $1.94B เทียบกับ Street ~$1.69B; Wind พลิกเป็น EBITDA บวก ($72M)</li><li>ออเดอร์ $29.3B ดัน backlog เป็น $197B (+$20B q/q)</li><li>สัญญาแก๊สใหม่ 11GW เทียบกับ ~20GW ในแต่ละไตรมาส 1 และ 2</li><li>ดีล Trench $9.0B (~13 เท่า EBITDA 2028E); บายแบ็กเพิ่มเป็น $20B</li></ul></div>
+<p><strong>GEV +5%: EBITDA ($1.94B เทียบกับ Street ~$1.69B) และ FCF ($5.4B) นำหน้ามาก ไกด์ FY ปรับขึ้นอีก backlog ทะลุ $200B ในไตรมาส 4 บายแบ็กเพิ่มเป็นสองเท่าที่ $20B และดีล Trench $9B ข้อติคือความเร็วของ slot แก๊ส: สัญญาแก๊สใหม่ 11GW เทียบกับ ~20GW ในแต่ละไตรมาส 1 และ 2</strong></p>
+<p>ดูแข็งแรงเมื่อเทียบกับความคาดหวังที่ต่ำ แม้สัญญาแก๊สใหม่จะเบาไปเล็กน้อยกว่าที่ buyside ต้องการ</p>
+<p>รายได้ไตรมาส 3 $12.6B (+18% organic) เทียบกับ Street $12.0B adj. EBITDA $1.94B เทียบกับ Street ~$1.69B; มาร์จิ้น 15.4% สูงกว่า Street ราว ~130bps นำโดย Power ที่ 21.4% (+830bps y/y) และ Wind พลิกเป็น EBITDA บวก ($72M) ออเดอร์ $29.3B (+96% organic) ดัน backlog เป็น $197B (+$20B q/q) FCF $5.4B เทียบกับ Street ~$0.8B ส่วนใหญ่เป็นเงินทุนหมุนเวียน (เงินมัดจำลูกค้า)</p>
+<p>เรื่องแก๊ส: เซ็นไป 11GW (slot 8GW, ออเดอร์ 3GW), แปลง slot 13GW เป็นออเดอร์ และส่งมอบ 5GW ดังนั้น slot ลดเหลือ 58GW จาก 63GW และยอดรวมภายใต้สัญญาเพิ่มเป็น 122GW จาก 116GW เป้าสิ้นปีใหม่ ≥130GW (จาก ≥125GW) ต้องการสุทธิ ~8GW ในไตรมาส 4 หรือประมาณ 13GW แบบรวม ที่จังหวะการส่งมอบ ~5GW/ไตรมาส ซึ่งสูงกว่า 11GW ของไตรมาส 3 แต่ต่ำกว่า run-rate ของ 1H มาก ออเดอร์ Electrification -9% organic บนฐานเปรียบเทียบที่ยาก (ออเดอร์ synchronous condenser ก้อนใหญ่เมื่อปีก่อน) โดย book-to-bill ~1.4 และรายได้ต่ำกว่า Street ราว ~$120M</p>
+<p>ไกด์: รายได้ FY $46.5–47.5B (จาก $45.5–46.5B) เทียบกับ Street $46.3B; มาร์จิ้น adj. EBITDA 13.5–14.5% (จาก 12–14%) หรือ ~$6.3–6.9B เทียบกับ Street ~$6.4B ที่ค่ากลาง ส่วนที่ชนะ Street ทั้งปีมีขนาดพอๆ กับส่วนที่ชนะในไตรมาส 3: EBITDA ไตรมาส 4 โดยนัย ~$2.5B (มาร์จิ้น ~18%) ต่ำกว่า ~$2.55B ที่ Street มีอยู่เล็กน้อย FCF ไปที่ $16–17B (จาก $11.5–12.5B) แต่หลังจาก $15.3B YTD นั่นสื่อเพียง $0.7–1.7B ในไตรมาส 4</p>
+<p>ในการประชุมสายบอกว่า: &quot;ในปี 2027 เราคาดว่ากิกะวัตต์ภายใต้สัญญารวมและ backlog อุปกรณ์ไฟฟ้าแก๊สของเราจะเติบโตต่อไป&quot;</p>
+<p>Trench: $9.0B สำหรับธุรกิจส่วนประกอบแรงดันสูง (bushing, instrument transformer, coil) ~13 เท่าของ EBITDA 2028E ก่อน synergy (~18 เท่าของ 2026E) ชำระ ~50/50 เงินสด/หนี้ ปิดดีลปลายปี 2027 Trench ทำรายได้ ~$1.4B ที่มาร์จิ้น EBITDA ~33% ในปีนี้ ไปที่ ~$1.9B ที่ ~36% ในปี 2028 พร้อม backlog และ framework ราว ~$5B และยังเป็นการรวมแนวดิ่งกับซัพพลายเออร์เดิมด้วย</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ดูแข็งแรงเทียบกับความคาดหวังที่ต่ำ แม้ความเร็วของ slot แก๊สจะเบากว่าที่ buyside ต้องการ</p><ul class="rn-sum-list"><li>เป้าสิ้นปี ≥130GW ต้องการสุทธิ ~8GW ในไตรมาส 4</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$197B</div><div class="rn-stat-c">backlog (+$20B q/q)</div></div><div class="rn-stat"><div class="rn-stat-v">122GW</div><div class="rn-stat-c">รวมภายใต้สัญญา (จาก 116GW)</div></div><div class="rn-stat"><div class="rn-stat-v">$16-17B</div><div class="rn-stat-c">ไกด์ FCF ทั้งปี (จาก $11.5-12.5B)</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span>ETSY +9%: ชนะเกณฑ์ buyside ทุกบรรทัดไตรมาส 3</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>GMS $2.65B (+8.8% y/y) เทียบกับ whisper 7-8%</li><li>ผู้ซื้อ active +1% y/y เป็น ~88M — การเติบโตครั้งแรกในสองปี</li><li>ไกด์ GMS ไตรมาส 4 +5-7% เทียบกับ Street +3.9%</li><li>Take rate 26.2% (+50bps y/y) จาก Etsy Ads</li></ul></div>
+<p><strong>ETSY +9%: ผ่านเกณฑ์ buyside ทุกบรรทัดไตรมาส 3 (GMS +8.8% เทียบกับ whisper 7–8%, EBITDA $210M เทียบกับ ~$200–205M) และไกด์ GMS ไตรมาส 4 +5–7% สูงกว่าทั้ง Street (+3.9%) และ bogey ~4–5% ผู้ซื้อที่ active โตเป็นครั้งแรกในสองปี</strong></p>
+<p>ความคาดหวังสูงขึ้นเล็กน้อยก่อนประกาศจากข้อมูลบุคคลที่สามที่ดีกว่า แต่การวางตำแหน่งยังเบา ดังนั้นนี่ดีกว่ามาก และฝั่งบูลจะชอบการเติบโตของผู้ซื้อ active</p>
+<p>GMS ไตรมาส 3 $2.65B (+8.8% y/y, +9.1% cc) เทียบกับ Street $2.57B, bogey ~$2.60B และไกด์ $2.53–2.58B นั่นคือการเร่งขึ้นแบบ ex-FX ~190bps จากไตรมาส 2 และเป็นไตรมาสที่ 6 ติดต่อกันที่ดีขึ้น รายได้ $692M (+10.9%) เทียบกับ Street $667M และ bogey ~$675–680M โดย take rate เพิ่ม 50bps y/y เป็น 26.2% จาก Etsy Ads adj. EBITDA $210M เทียบกับ Street $196M และ bogey ~$200–205M; มาร์จิ้น 30.4% สูงกว่า Street ราว ~110bps</p>
+<p>คุณภาพก็ดีกว่าด้วย ผู้ซื้อ active +1% y/y เป็น ~88M (การเติบโต y/y ครั้งแรกในสองปี), ผู้ซื้อใหม่รวม +6% และ GMS ต่อผู้ซื้อ +3.9% ความถี่ในการซื้อยังลดลงเล็กน้อย ดังนั้น AOV ทำงานมากกว่า GMS ของแอป +10.4% เทียบกับที่ไม่ใช่แอป +7.5% ฝ่ายบริหารให้เครดิต personalization เพียงอย่างเดียวกับการเติบโต GMS ราว ~2 จุด</p>
+<p>ไกด์ไตรมาส 4: GMS $3.46–3.52B (+5–7%) เทียบกับ Street $3.42B (+3.9%) และ bogey ~$3.42–3.46B ที่ค่ากลางนั่นคือการชะลอ ~3 จุดจากไตรมาส 3 บนฐานเปรียบเทียบที่ยากขึ้น ~2 จุด ดังนั้นสแตก 2 ปีคงที่คร่าวๆ ที่ ~6% โดยมีแรงต้านจาก FX อยู่ในตัว take rate ~25.6% และมาร์จิ้น ~30% สื่อถึงรายได้ ~$893M และ EBITDA ~$268M เทียบกับ Street $879M / $264M GMS FY ไปที่ ~7% เทียบกับไกด์ MSD และ bogey ~6%</p>
+<hr>
+<h1>📡 TECH RESEARCH/NEWS</h1>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">คุณภาพดีขึ้นด้วย: ผู้ซื้อเพิ่ม แต่ความถี่การซื้อยังลดเล็กน้อย</p><ul class="rn-sum-list"><li>ไกด์ไตรมาส 4 สื่อการชะลอ ~3 จุดจากไตรมาส 3</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$2.65B</div><div class="rn-stat-c">GMS ไตรมาส 3 (+8.8% y/y)</div></div><div class="rn-stat"><div class="rn-stat-v">$210M</div><div class="rn-stat-c">adj. EBITDA (มาร์จิ้น 30.4%)</div></div><div class="rn-stat"><div class="rn-stat-v">~88M</div><div class="rn-stat-c">ผู้ซื้อ active (+1% y/y)</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span>OpenAI / GOOGL / NVDA: OpenAI วางแผนซื้อชิป AI ของ Google – Bloomberg</span></h2>
+
+<p>OpenAI วางแผนซื้อชิป AI ของ Google ตามรายงานของ Bloomberg ขยายแหล่งฮาร์ดแวร์ให้นอกเหนือจาก Nvidia ขนาดการซื้อ ราคา และกำหนดการส่งมอบไม่ได้เปิดเผย และทั้งสองบริษัทปฏิเสธให้ความเห็น รายงานนี้มาพร้อมกับแผนที่ Oracle ประกาศแยกต่างหากว่าจะเสนอ TPU ของ Google บนคลาวด์ของตนตั้งแต่ปี 2027</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">08</span><span>AVGO: Barclays ขึ้นเป็นบูลมากขึ้น เมื่อดีล Anthropic สื่อถึงเศรษฐศาสตร์แร็ก TPU ~$35B/GW</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>SPV Anthropic $63B ต่อ ~1.7GW สื่อมูลค่าแร็ก TPU ~$35B/GW</li><li>รายได้ AI ของ AVGO ราว ~$205B ใน CY27 เทียบกับ Street ~$138B</li></ul></div>
+<p>Barclays บอกว่า SPV ของ Anthropic มูลค่า $63B สำหรับ ~1.7GW สื่อถึงมูลค่ารวมของแร็ก TPU ~$35B/GW ต่ำกว่า NVDA Vera Rubin ที่ ~$40B/GW เพียง ~13% การแก้โจทย์ย้อนจากมาร์จิ้นคลาวด์ ~35% ของ Google ชี้ว่า AVGO ได้ชิป/เครือข่ายราว ~$18.2B/GW ซึ่งสื่อถึงรายได้ AI ราว ~$205B ใน CY27 เทียบกับ Street ~$138B บน 11.3GW และ ~$410B ใน CY28 เทียบกับ Street ~$256B บน 22.6GW AVGO เคยพูดถึงการติดตั้งของ AI lab 6.3GW/&gt;15GW ใน CY27/28 ปัจจุบันมี SPV ไม่กี่ราย แต่อาจมีตามมาอีก และการสนับสนุนมูลค่าคงเหลือดีขึ้นแล้วจาก ~85% เป็น 72.5% ทำให้ Barclays เป็นบวกต่อเศรษฐศาสตร์และขนาดของ TPU มากขึ้นอย่างมีนัยสำคัญ</p>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Barclays เป็นบวกต่อเศรษฐศาสตร์และขนาดของ TPU มากขึ้นอย่างมีนัยสำคัญ</p><ul class="rn-sum-list"><li>การสนับสนุนมูลค่าคงเหลือดีขึ้นจาก ~85% เป็น 72.5%</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">~$35B/GW</div><div class="rn-stat-c">มูลค่ารวมแร็ก TPU</div></div><div class="rn-stat"><div class="rn-stat-v">~$410B</div><div class="rn-stat-c">รายได้ AI CY28 (Street ~$256B)</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s9" role="tabpanel" aria-labelledby="rn-t-s9" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">09</span><span>APP: DB ลด PT เป็น $450 เมื่อ Consumer ramp ช้าลงและการเติบโต FY27 ลดลง</span></h2>
+
+<p>DB คง Buy แต่ลด PT เป็น $450 จาก $580 โดยลดการเติบโตของรายได้ FY27 เป็น ~25% จาก 32% และ EBITDA เป็น ~$8.5B เมื่อ Gaming/Consumer ปรับเข้าสู่ภาวะปกติจากฐานที่ใหญ่ขึ้น การอัปเกรด AXON เดือน ก.ค. ช่วยให้ประสิทธิภาพ IAP ดีขึ้น และการใช้จ่าย Consumer อาจแซง Gaming ในไตรมาส 4 แต่การขยาย Consumer ต้องใช้ผู้ลงโฆษณา ข้อมูลธุรกรรม และเวลามากขึ้น ขณะที่โมเดลที่ใหญ่ขึ้นก็แปลว่าค่าใช้จ่าย inference/training มากขึ้นและมาร์จิ้นผันผวน DB โมเดลรายได้ไตรมาส 3 +47.7% y/y ใกล้ปลายบนของไกด์ แต่ลดการเติบโตไตรมาส 4 เป็น ~36% จาก 44%</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s10" role="tabpanel" aria-labelledby="rn-t-s10" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">10</span><span>APP/U: ได้ยินว่า Clev คละกันกับ APP โดยบอกว่าการเปลี่ยนโมเดลทำให้ ROI คละกันและการใช้จ่ายไตรมาส 3 ต่ำกว่าคาด; เป็นบวกกับส่วนแบ่งที่เพิ่มขึ้น/ROI ที่ดีขึ้นของ U</span></h2>
+
+
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s11" role="tabpanel" aria-labelledby="rn-t-s11" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">11</span><span>CBRS: MS เห็นความร่วมมือกับ Oracle ช่วยกำลังการผลิต มาร์จิ้น และความหลากหลายของลูกค้า</span></h2>
+
+<p>MS มอง Oracle OCI เป็นชัยชนะด้านการกระจายสินค้า/เศรษฐศาสตร์ที่มีนัยสำคัญ โดยการขายระบบเริ่มปลายไตรมาส 1/ไตรมาส 2 ปี 27 บน CS3 ก่อน CS4 การขายฮาร์ดแวร์ขยายกำลัง inference โดยไม่ต้องให้ Cerebras ออกเงินสร้าง data center ทำให้ GM สูงขึ้น/ความเข้มข้นของเงินทุนต่ำกว่าคลาวด์ ขณะที่เพิ่มช่องทางหลักอีกช่องข้าง AWS และขยายการเปิดรับลูกค้า/inference แบบหลากหลาย สิ่งสำคัญที่ต้องดูคือลูกค้ารายใหญ่ที่สุดจะรับกำลังการผลิตก้อนถัดไปในรูปฮาร์ดแวร์หรือคลาวด์ รวมถึงขนาด/จังหวะของชัยชนะกับ OCI และผู้ให้บริการคลาวด์รายต่อๆ ไป OW/$279</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s12" role="tabpanel" aria-labelledby="rn-t-s12" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">12</span><span>CXMT / Memory: การผลิต HBM3E ใกล้เข้ามาแม้ยีลด์ต่ำ – Reuters</span></h2>
+
+<p>CXMT วางแผนผลิต HBM3E แบบจำกัดภายในสองเดือน ตามรายงานของ Reuters แหล่งข่าวระบุยีลด์ที่ใช้ได้ที่ 20–30% เทียบกับราว 70% ที่ SK Hynix ทำให้ชิปของ CXMT แพงกว่าในการผลิต ตัวอย่างถึงมือลูกค้าแล้ว แต่รายงานว่าการทดสอบแสดงประสิทธิภาพใกล้เคียงผลิตภัณฑ์ HBM3 รุ่นเก่าของ SK Hynix มากกว่า CXMT ไม่ให้ความเห็น</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s13" role="tabpanel" aria-labelledby="rn-t-s13" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">13</span><span>CLS: BNP เป็นบวกมากขึ้นหลัง Investor Day เห็นการเติบโต ~40% + EPS สูงขึ้นถึง CY30</span></h2>
+
+<p>BNP เห็น ramp CY27/28 ที่แข็งแรงกว่า โดยการเติบโต ~90% y/y ใน CY27, Compute &amp; Storage มากกว่าเท่าตัว, 1.6T แซง 800G และทัศนวิสัยขยายเข้าสู่ CY29 ทุก 1GW ของกำลังการผลิต ASIC Jalapeño อาจหมายถึงโอกาสระดับแร็ก ~$2.3B ขณะที่โปรแกรมสวิตช์ 1.6T 10 โปรแกรมถูกจองแล้ว; FCF ติดลบ CY27 สะท้อนเงินทุนหมุนเวียนและควรกลับเป็นบวกใน CY28 BNP ปรับ EPS CY28 ขึ้นเป็น $30.30 จาก $26.95 และเห็นยอดขายโตปีละ ~40% บวกการขยายมาร์จิ้นถึง CY30 OP/$500</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s14" role="tabpanel" aria-labelledby="rn-t-s14" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">14</span><span>TSLA: Wolfe เห็น Robotaxi + การควบรวม SPCX ที่เป็นไปได้ขับเรื่องเล่าปี 2027 แม้ค่าใช้จ่าย AI/Optimus สูงขึ้น</span></h2>
+
+<p>Wolfe ลด EPS ปี 2026 เป็น $1.63 จาก $1.76 แต่ปรับ EPS ปี 2027/28 ขึ้นเป็น $2.00/$2.64 จาก $1.86/$1.97 เมื่อ Robotaxi ขยายเร็วขึ้นและ Energy พลิกตัวจากอุปสงค์ datacenter ระยะทางแบบไร้คนขับเติบโต ~17–20% w/w, Austin &gt;25% หนุนรายได้ Robotaxi ~$2.5B/$7.2B ในปี 2027/28; Energy ถึง ~$16.8B ในปี 2027, +42%, ที่ GM ~29–30% ส่วนที่หักล้างคือ capex ~$27B/$28B ในปี 2027/28 แต่ Wolfe บอกว่าการควบรวม TSLA-SPCX ที่เป็นไปได้หนุนอย่างน้อย ~$510–520/หุ้น เป็นการรองรับขาลง</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s15" role="tabpanel" aria-labelledby="rn-t-s15" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">15</span><span>DASH/CART: BNP เห็นความน่าจะเป็นของดีล ~50% synergy มีนัยสำคัญแต่การจัดหาเงินทุนไม่แน่นอน</span></h2>
+
+<p>BNP ประเมินว่าตลาดตีราคาโอกาสของดีล DASH-CART ที่มีรายงาน ~$17B เพียง ~50% โดย EV ปัจจุบันของ CART ที่ ~$13–14B สะท้อนความไม่แน่นอน การขายพ่วง ความถี่การสั่งที่สูงขึ้น ปฏิบัติการที่ทับซ้อน mix มาร์จิ้นสูงกว่าของ CART และการประหยัดต้นทุน อาจทำให้ดีลเพิ่มมาร์จิ้น การจัดหาเงินทุนน่าจะต้องใช้เงินสด + หนี้ และอาจรวมทุน; BNP จะไม่แปลกใจถ้าราคาต่ำกว่านี้ ขณะที่ $17B สื่อถึงราว $71/หุ้นสำหรับ CART</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s16" role="tabpanel" aria-labelledby="rn-t-s16" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">16</span><span>META: Needham บอกว่าภาระผูกพันนอกงบดุล $857B ทำให้มูลค่าแพงกว่าที่ EV พาดหัวบอกอย่างมีนัยสำคัญ</span></h2>
+
+<p>Needham คำนวณว่า META มีภาระผูกพันนอกงบดุลราว ~$857B เทียบกับหนี้ระยะยาว ~$81B รวมสัญญาเช่า ~$356B ที่ยังไม่เริ่ม และภาระผูกพันยกเลิกไม่ได้อื่นๆ ~$455B การปฏิบัติต่อภาระเหล่านี้เหมือนหนี้ยก EV/รายได้ปี 2027 จาก ~5.2 เท่าเป็น 8.0 เท่า และ EV/OIBDA จาก ~11 เท่าเป็น ~17 เท่า, +54% เทียบกับเพียง ~19–23% สำหรับ AMZN/GOOGL Needham ยังคง Hold โดยเถียงว่า strategy diffusion/ความเข้มข้นของเงินทุนคือความเสี่ยงหลัก และคาดว่า META จะยังเป็นผู้ใช้เงินทุนสุทธิถึง FY28 แม้ Muse, Wonder และ Connectors จะเป็นอัพไซด์</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s17" role="tabpanel" aria-labelledby="rn-t-s17" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">17</span><span>PANW: DB บอกว่าการเปลี่ยนแปลง proxy หนุน M&amp;A ต่อเนื่องพร้อมรักษาความรับผิดชอบต่อการเติบโตแบบ organic</span></h2>
+
+<p>DB บอกว่า PANW เปลี่ยนวิธีการให้แรงจูงใจ NGS ARR ให้รวมการเข้าซื้อที่มีมูลค่า ≤4% ของ market cap ซึ่งหมายความว่า Chronosphere นับรวมขณะที่ CYBR ยังถูกตัดออก ส่วนเป้ารายได้ตอนนี้วัดการเติบโตแบบ organic อย่างชัดเจน DB เห็นว่าการเปลี่ยนแปลงนี้สมเหตุสมผลไม่ใช่หลักฐานว่าการเติบโตหลักชะลอ โดยเถียงว่า M&amp;A ที่เชิงรุกจำเป็นในวงการ cyber ที่เปลี่ยนเร็ว ขณะที่ตัวชี้วัดรายได้ organic ทำให้ฝ่ายบริหารต้องรับผิดชอบ</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec" id="rn-p-s18" role="tabpanel" aria-labelledby="rn-t-s18" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🧠 SKHY ปิดช่องโหว่เรื่องจุดสูงสุดของวัฏจักรได้ส่วนหนึ่ง</strong> — รายได้ KRW104.6T และ OP KRW83.3T ชนะทั้ง Street และ bogey ด้วยราคา และไกด์ bit DRAM ไตรมาส 4 +ระดับกลาง 20% ดัน 4Q สูงกว่า Street ~10-20%; LTA ครอบคลุม &gt;50% ของกำลังการผลิตปี &#x27;27/&#x27;28 ใน 14 ลูกค้า คืนทุน FY26 ราว ~KRW100T (~10% ของ market cap) แต่ฝั่งหมียังชี้ราคาที่เริ่มชะลอและไม่มีกรอบคืนทุนหลัง FY26</li>
+<li><strong>💾 STX: ชนะ Street แต่ไม่ถึงเกณฑ์ buyside</strong> — ยอด $4.23B และ EPS $7.68 ชนะ Street แต่ EB +1% q/q พลาด ~15 EB; ราว +16% q/q ของรายได้ต่อ TB (~$19.2) ส่วนหนึ่งคือการส่งผ่านต้นทุน ต้นทุน/TB ลดเพียง ~6% y/y และไกด์ ธ.ค. $4.8B / $9.20 ต่ำกว่า bogey $4.9–5.05B / $10–10.50 ขณะที่ capex คงที่ 4–6% สนับสนุนกรณีดูโอโพลีที่มีเหตุผล</li>
+<li><strong>🚗 NXPI ไม่ใช่ beat-and-raise ที่ฝั่งบูลอยากได้</strong> — ไตรมาส 3 ($3.79B/$4.20) ชนะเล็กน้อย แต่ไกด์ไตรมาส 4 ($3.85B/$4.36) ตรง Street และต่ำกว่า bogey; กรอบปี 2027 (DD, GM 60% เป็น exit rate, opex ~23% ของรายได้ 1H27) เป็นพื้นแต่จำกัดการปรับประมาณการ แม้วงเงินบายแบ็กรวม $6.3B และมัลติเพิล ~12.8 เท่า CY27 จะต่ำสุดในกลุ่ม</li>
+<li><strong>⚡ VRT และ GEV ตอบข้อกังวลเรื่องการดำเนินงาน</strong> — VRT รายได้ $4.31B สูงกว่า Street ~15% และปรับการเติบโต organic ทั้งปีเป็น 37–39%; GEV มี EBITDA $1.94B, FCF $5.4B, backlog $197B และบายแบ็ก $20B แต่ slot แก๊สใหม่ 11GW ต่ำกว่า ~20GW ของไตรมาส 1 และ 2</li>
+<li><strong>🛍 ETSY ผ่านเกณฑ์ buyside ทุกบรรทัดและผู้ซื้อ active โตเป็นครั้งแรกในสองปี</strong> — GMS +8.8% และไกด์ไตรมาส 4 +5–7% สูงกว่า Street (+3.9%) แต่ไกด์ชี้การชะลอ ~3 จุดจากไตรมาส 3</li>
+<li><strong>🔭 ตัวชี้วัดร่วมของวัน</strong> — ทั้ง SKHY และ STX ชี้ว่าเรื่องเล่า AI-infrastructure ยังขับราคา (ไม่ใช่แค่ปริมาณ) แต่ฝั่งหมีย้ำทั้งสองหุ้นว่าสัญญาและการจัดสรรปกป้องปริมาณได้มากกว่าราคา และอุปทานใหม่ (Yongin, Toshiba, CXMT) กำลังตามมา</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>TMT Breakout, &quot;TMTB Morning Wrap&quot; (Substack, 28 ต.ค. 2026) — <code>2026-10-28_-_TMTB_Morning_Wrap_-_id2359.pdf</code></li>
+</ul>
+<hr>
+<p><strong>Disclaimer:</strong></p>
+<p>จดหมายข่าวฉบับนี้เผยแพร่เพื่อวัตถุประสงค์ด้านข้อมูลและการศึกษาเท่านั้น ไม่มีส่วนใดในนี้เป็นคำแนะนำการลงทุนเฉพาะบุคคล คำแนะนำที่ปรับให้เข้ากับสถานการณ์ของบุคคลใด คำเสนอ หรือการชักชวนให้ซื้อหรือขายหลักทรัพย์หรือตราสารทางการเงินใดๆ จดหมายข่าวนี้ไม่ใช่บริการที่ปรึกษาการลงทุน และไม่มีความสัมพันธ์แบบที่ปรึกษาหรือผู้ดูแลผลประโยชน์เกิดขึ้นระหว่างผมกับผู้อ่านคนใด</p>
+<p>ผมซื้อขายหลักทรัพย์ที่กล่าวถึงที่นี่อย่างจริงจัง มักเป็นระยะสั้น จุดยืนของผมอาจไม่สอดคล้องกับมุมมองที่แสดงไว้ และผมอาจซื้อหรือขาย — รวมถึงทันทีก่อนหรือหลังเผยแพร่ — โดยไม่แจ้งหรืออัปเดต ราคาเป้าหมาย สถานการณ์อัพไซด์/ดาวน์ไซด์ และกรอบเวลา เป็นความเห็นเพื่อประกอบภาพ ไม่ใช่คำมั่นที่จะถือครอง</p>
+<p>สิ่งพิมพ์นี้ใช้ส่วนตัวสำหรับสมาชิกเท่านั้น ห้ามเผยแพร่ซ้ำ เผยแพร่ใหม่ ส่งต่อ หรืออ้างอิงโดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรล่วงหน้า</p>
+<p>Copyright © 2026 TMT Breakout. All rights reserved.</p>
+<p>เปิดเผยข้อมูลฉบับเต็มที่นี่ (Full disclosures here)</p></div>
+</section>
+<footer class="rn-foot">
+TMT Breakout<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+</body></html>

@@ -1,0 +1,779 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>TMTB: ไฮไลต์งาน OCP — Lisa Su ของ AMD, NVIDIA เรื่อง Rubin Ultra, Meta เรื่องคลัสเตอร์ AI 5GW, Broadcom เรื่อง Ethernet, Credo เรื่องออปติก, Astera Labs เรื่อง AI ระดับแร็ก และอื่น ๆ</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">TMT Breakout</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+<div class="rn-lang" id="rn-lang" role="group" aria-label="Language"><div class="rn-sheen" aria-hidden="true"></div><div class="rn-lpill" aria-hidden="true"></div><button class="rn-lopt" type="button" data-lang-opt="th" aria-pressed="true">ไทย</button><button class="rn-lopt" type="button" data-lang-opt="en" aria-pressed="false">EN</button></div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMD?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMD</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NVDA?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NVDA</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/META?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$META</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AVGO?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AVGO</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CRDO?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CRDO</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ALAB?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ALAB</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GOOGL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GOOGL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MSFT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MSFT</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ARM?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ARM</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NOK?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NOK</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MRVL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MRVL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ORCL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ORCL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CLS?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CLS</span>
+<span class="rn-deck">มีเซสชันดี ๆ จากงาน OCP หลายเซสชันเลยครับ</span>
+</div>
+<h1>📰 TMTB: ไฮไลต์งาน OCP — Lisa Su ของ AMD, NVIDIA เรื่อง Rubin Ultra, Meta เรื่องคลัสเตอร์ AI 5GW, Broadcom เรื่อง Ethernet, Credo เรื่องออปติก, Astera Labs เรื่อง AI ระดับแร็ก และอื่น ๆ</h1>
+<div class="rn-byline"><b>TMT Breakout</b><span class="rn-sep">·</span>2026-10-13<span class="rn-sep">·</span><span class="rn-th">อ่าน 10 นาที</span><span class="rn-en">10 min read</span></div>
+</div>
+<p class="rn-notice rn-en">Headings, summaries, figure captions and key numbers are shown in English. Body paragraphs remain in Thai.</p>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🧠 AMD ยกตลาด CPU เป็นธีมใหม่ — TAM ของ CPU ถูกปรับขึ้นสามครั้งในเก้าเดือนเป็นเกิน $200B ภายในปี 2030 (CAGR ราว 50%) เทียบกับตัวเร่ง AI ที่ราว $1.5T; เป็นการคาดการณ์ของ AMD เอง ไม่ใช่ของวอลล์สตรีท</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="สารบัญเซสชัน" data-en="สารบัญเซสชัน" data-th-full="สารบัญเซสชัน" data-en-full="สารบัญเซสชัน" title="สารบัญเซสชัน">สารบัญเซสชัน</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="1. AMD Keynote" data-en="1. AMD Keynote" data-th-full="1. AMD Keynote" data-en-full="1. AMD Keynote: A much larger CPU opportunity, Helios entering production and a separate rack for agents" title="1. AMD Keynote">1. AMD Keynote</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="2. NVIDIA Keynote" data-en="2. NVIDIA Keynote" data-th-full="2. NVIDIA Keynote" data-en-full="2. NVIDIA Keynote: Shipping infrastructure today, a larger optical NVLink domain next, and CPUs as a separate product" title="2. NVIDIA Keynote">2. NVIDIA Keynote</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="3. Meta Networking" data-en="3. Meta Networking" data-th-full="3. Meta Networking" data-en-full="3. Meta Networking: Ethernet scale-up is already deployed, and merchant silicon extends across the network" title="3. Meta Networking">3. Meta Networking</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span>สารบัญเซสชัน</span></h2>
+
+<p>ผมไล่ดูทุกเซสชันที่น่าสนใจจากงาน OCP แล้วสรุปไว้ตามนี้:</p>
+<ul>
+<li><strong>AMD Keynote:</strong> TAM ของ CPU, การส่งมอบ Helios และแร็กเอเจนต์ตัวใหม่ — Lisa Su (ประธานและซีอีโอ, AMD)</li>
+<li><strong>NVIDIA Keynote:</strong> การติดตั้ง Rubin, แร็ก CPU โดยเฉพาะ และ NVLink แบบออปติก — Ian Buck (รองประธาน Hyperscale &amp; High-Performance Computing, NVIDIA)</li>
+<li><strong>Meta Networking:</strong> Ethernet แบบ scale-up, สวิตช์ merchant และการเทรนข้ามหลายอาคาร — Omar Baldonado (ผู้อำนวยการฝ่ายวิศวกรรม, Meta)</li>
+<li><strong>Credo:</strong> โรดแมปออปติกที่ไปไกลกว่าสายไฟฟ้าแบบ active — Bill Brennan (ประธานและซีอีโอ, Credo)</li>
+<li><strong>Compute Meets Optics:</strong> สถาปัตยกรรมของ OpenAI และเส้นทางสู่ scale-up — Binbin Guan (Member of Technical Staff, OpenAI); Manish Mehta (รองประธานฝ่ายการตลาดและปฏิบัติการ, Broadcom); Tareq Bustami (รองประธานฝ่าย Market Technology, Celestica)</li>
+<li><strong>Astera Labs:</strong> Orion, การเชื่อมต่อระดับแร็ก และชั้น KVcache โดยเฉพาะ — Chris Petersen (รองประธานและ Technologist, Astera Labs); Dimitris Ziakas (CTO และรองประธานฝ่ายสถาปัตยกรรม, Hyve Solutions)</li>
+<li><strong>Google:</strong> ไฟ 800V, แบตเตอรี่, ระบายความร้อนด้วยของเหลว และการเข้าถึงกริดอย่างยืดหยุ่น — Tom Garvens (รองประธานฝ่ายวิศวกรรมแพลตฟอร์มฮาร์ดแวร์, Google Cloud); Amber Huffman (Technologist ด้าน AI และโครงสร้างพื้นฐาน, Google)</li>
+<li><strong>Microsoft:</strong> ดึงพลังประมวลผลเพิ่มจากไฟฟ้าที่มีอยู่แล้ว — Brijesh Warrier (รองประธานฝ่ายวิศวกรรมซอฟต์แวร์, Microsoft); Nithish Mahalingam (Partner Director of Engineering, Microsoft)</li>
+<li><strong>Meta Keynote:</strong> การสร้างและดำเนินการคลัสเตอร์เทรนระดับกิกะวัตต์ — Santosh Janardhan (หัวหน้าฝ่ายโครงสร้างพื้นฐาน, Meta)</li>
+<li><strong>Broadcom Keynote:</strong> การแพร่หลายของ Ethernet และเหตุผลที่ทองแดงจะอยู่ได้นานกว่า — Asad Khamisy (SVP และ GM, Core Switching Group, Broadcom)</li>
+<li><strong>Arm Keynote:</strong> ตลาด CPU สามแบบภายในดาตาเซ็นเตอร์ AI — Mohamed Awad (EVP และ GM, Cloud AI Business Unit, Arm)</li>
+<li><strong>AMD Helios Technical:</strong> หน่วยความจำ เครือข่ายแบบรวม และการออกแบบร่วมระดับแร็ก — Andrew Dieckmann (Corporate VP และ GM, AMD); Steve Scott (Corporate Fellow, AMD); Alan Smith (Corporate Fellow, AMD)</li>
+<li><strong>Nokia:</strong> เครือข่าย AI ที่ไปไกลกว่าดาตาเซ็นเตอร์ — Clayton Wagar (Principal Consulting Engineer, Nokia)</li>
+<li><strong>Marvell / Microsoft / Oracle:</strong> ย้ายความปลอดภัยของฮาร์ดแวร์เข้าไปในทุกโหนดประมวลผล — Cary Ussery (SVP และ GM, Multimarket Business Group, Marvell); Mohan Kumar (Architecture &amp; Ecosystems, Oracle Cloud Infrastructure); Jayant Gandhi (Security Architect, Microsoft Azure)</li>
+</ul>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span><span class="rn-th">1. AMD Keynote: โอกาสของ CPU ที่ใหญ่ขึ้นมาก, Helios เข้าสู่การผลิต และแร็กแยกสำหรับเอเจนต์</span><span class="rn-en">1. AMD Keynote: A much larger CPU opportunity, Helios entering production and a separate rack for agents</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>TAM ของ CPU ถูกปรับขึ้นสามครั้งในเก้าเดือน ตอนนี้เกิน $200B ภายในปี 2030 (CAGR ราว 50%)</li><li>Helios เริ่มส่งมอบเชิงการผลิตเดือนกันยายน ระบบชุดแรกรันที่ OpenAI, Meta, Microsoft และ Oracle</li><li>Helion รองรับสูงสุด 32,768 CPU core; Verano ผลิตปี 2027 เน้นพลังงานต่ำและหน่วยความจำ</li></ul></div>
+<p><strong>ผู้พูด:</strong> Lisa Su ประธานและซีอีโอ AMD</p>
+<p><strong>สรุป:</strong> ข้ออ้างที่มีนัยสำคัญที่สุดของ AMD คือ ประมาณการ TAM ของ CPU ถูกปรับขึ้นถึงสามครั้งในเก้าเดือน และตอนนี้เกิน $200B ภายในปี 2030 อีกข้อคือ Helios เริ่มส่งมอบเชิงการผลิตตั้งแต่เดือนกันยายน แร็ก Helion ตัวใหม่เปลี่ยนแนวคิด CPU สำหรับเอเจนต์ให้กลายเป็นผลิตภัณฑ์จริง ส่วน Verano ขยายโรดแมป CPU ไปสู่คอนฟิกที่ใช้พลังงานต่ำลงและเน้นหน่วยความจำมากขึ้น</p>
+<p><strong>1. ตลาด CPU กำลังถูกนิยามใหม่ด้วยการประมวลผลของเอเจนต์ ไม่ใช่แค่การเป็นโฮสต์ให้ GPU</strong></p>
+<p>Su ประเมินโอกาสของตัวเร่ง AI ในดาตาเซ็นเตอร์ไว้ที่ราว $1.5T ภายในปี 2030 แต่การเปลี่ยนแปลงที่คมกว่าอยู่ที่ CPU: ตอนนี้ AMD มองว่าตลาดเกิน $200B ภายในปี 2030 โต CAGR ราว 50% ตลอดหลายปีข้างหน้า ตัวเลขเหล่านี้เป็นการคาดการณ์ตลาดของ AMD เอง ไม่ใช่ประมาณการของวอลล์สตรีท</p>
+<p>ตรรกะเบื้องหลังคือ เอเจนต์สร้างงานจำนวนมากนอกเหนือจากการอนุมานของโมเดล ไม่ว่าจะเป็นการรันโค้ด การเรียกใช้แอปพลิเคชัน การจัดการบริบท และการประสานงานเอเจนต์ตัวอื่น ซึ่งเพิ่มภาระงาน CPU ควบคู่ไปกับโปรเซสเซอร์ที่ทำหน้าที่รองรับ GPU อยู่แล้ว ส่วนการระบุขนาดตลาดแบบเก่าราว ~$20B ในคีย์โน้ตไม่ควรใช้เป็นจุดเริ่มต้นที่เทียบกับ CAGR ใหม่ได้โดยตรง</p>
+<p><strong>2. Helios เดินจากการเปิดตัวสู่การติดตั้งให้ลูกค้ารายแรก</strong></p>
+<p>Su บอกว่าการส่งมอบเชิงการผลิตเริ่มในเดือนกันยายน และการเร่งกำลังผลิตจะต่อเนื่องตลอด Q4 และครึ่งแรกของปี 2027 AMD ระบุว่าระบบชุดแรกติดตั้งและทำงานอยู่แล้วที่ OpenAI, Meta, Microsoft และ Oracle โดยการส่งมอบ การติดตั้ง และการตรวจสอบ workload กำลังดำเนินอยู่</p>
+<p>นี่เป็นหมุดหมายด้านการลงมือทำที่มีความหมาย แต่การติดตั้งชุดแรกยังไม่เท่ากับการทำตามพันธะหลายกิกะวัตต์ที่ประกาศไว้ก่อนหน้านี้ให้ครบ คำถามต่อไปคือจังหวะที่การติดตั้งเหล่านี้จะแปรเป็นการ deploy ขนาดใหญ่ที่ทำซ้ำได้</p>
+<p><strong>3. Helion เล็งไปที่ workload ที่ต่างจาก Helios</strong></p>
+<p>Helion ออกแบบรอบการประมวลผลของเอเจนต์ มีคอนฟิกที่เน้น CPU สำหรับไฮเปอร์สเกลเลอร์ และคอนฟิก CPU/GPU แบบรวมสำหรับองค์กร สเปกที่ AMD เผยแพร่รองรับ CPU core สูงสุด 32,768 core ขณะที่ตัวกำหนดเส้นทางโมเดลในตัวจะส่งคำขอไปยังโมเดลและทรัพยากรประมวลผลที่เหมาะสม</p>
+<p>ความแตกต่างนี้ตั้งใจทำ: ไฮเปอร์สเกลเลอร์อาจแยกแร็กอนุมานกับแร็กประมวลผลเอเจนต์ ส่วนองค์กรที่รันโมเดลขนาดเล็กในสถานที่ของตัวเองอาจอยากได้สองหน้าที่ในที่เดียวกัน คอนฟิกสำหรับพันธมิตรวางแผนไว้เดือนพฤศจิกายน 2026 นี่คือสถาปัตยกรรมการ deploy แบบที่สอง ไม่ใช่แค่ Helios ตัวเล็กลง</p>
+<p><strong>4. Verano ทำให้หน่วยความจำและพลังงานของระบบกลายเป็นส่วนหนึ่งของการถกเรื่อง CPU</strong></p>
+<p>AMD โชว์ Verano ซึ่งเป็น EPYC ตระกูล Venice ที่ปรับให้ใช้พลังงานระบบต่ำลง ใช้แนวทางหน่วยความจำแบบ LPDDR และอัปเดตการเชื่อมต่อ CPU-ไป-GPU วางแผนผลิตในปี 2027</p>
+<p>ประเด็นสำคัญคือ AMD ไม่ได้มอง workload CPU ที่เกี่ยวกับเอเจนต์ทุกอย่างเป็นการแข่งขันเรื่องจำนวน core สูงสุด โปรเซสเซอร์โฮสต์ การประมวลผลเอเจนต์แบบหนาแน่น และเอเจนต์ที่ต้องการเทคนิคสูง ต้องการสมดุลที่ต่างกันระหว่างแบนด์วิดท์หน่วยความจำ การเชื่อมต่อ ประสิทธิภาพต่อ core และพลังงาน</p>
+<p><strong>5. เศรษฐศาสตร์ของแร็กขึ้นอยู่กับระบบรอบข้าง</strong></p>
+<p>AMD อ้างว่า Helios ได้เปรียบ 30% ด้าน token ต่อดอลลาร์ แต่คีย์โน้ตไม่ได้ให้รายละเอียดการเปรียบเทียบมากพอที่จะขยายความได้เปรียบนี้ไปยัง workload อื่น ข้อโต้แย้งเชิงวิศวกรรมที่กว้างกว่าของ AMD ทนทานกว่า คือ พลังประมวลผล ความจุหน่วยความจำ แบนด์วิดท์หน่วยความจำ เครือข่าย และซอฟต์แวร์ ต้องพัฒนาไปพร้อมกัน</p>
+<p>นัยเชิงการลงทุนมีสองชั้น: AMD กำลังเข้าหาโอกาส CPU ที่ใหญ่ขึ้น พร้อมกับขยับข้อเสนอด้าน GPU ไปสู่ระบบสมบูรณ์ที่ deploy ได้ แต่ทั้งการคาดการณ์ TAM และเบนช์มาร์กของผู้ขายก็ยังไม่ได้ยืนยันส่วนแบ่งรายได้หรือส่วนร่วมของมาร์จิ้นในที่สุด</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">AMD ผลักธีม CPU สำหรับเอเจนต์ให้เป็นผลิตภัณฑ์จริง ควบคู่กับ GPU ระดับแร็ก</p><ul class="rn-sum-list"><li>ตัวเลข TAM เป็นการคาดการณ์ของ AMD เอง</li><li>การติดตั้งชุดแรกยังไม่เท่ากับการทำพันธะหลายกิกะวัตต์ให้ครบ</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">&gt;$200B</div><div class="rn-stat-c">ตลาด CPU ภายในปี 2030 ตามที่ AMD ประเมิน</div></div><div class="rn-stat"><div class="rn-stat-v">32,768</div><div class="rn-stat-c">จำนวน CPU core สูงสุดของ Helion</div></div><div class="rn-stat"><div class="rn-stat-v">30%</div><div class="rn-stat-c">ข้ออ้างของ AMD ด้าน token ต่อดอลลาร์ของ Helios</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span><span class="rn-th">2. NVIDIA Keynote: โครงสร้างพื้นฐานที่ส่งมอบวันนี้ โดเมน NVLink ออปติกที่ใหญ่ขึ้นต่อไป และ CPU เป็นผลิตภัณฑ์แยก</span><span class="rn-en">2. NVIDIA Keynote: Shipping infrastructure today, a larger optical NVLink domain next, and CPUs as a separate product</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Vera Rubin ผลิตแล้ว ส่วน Rubin Ultra 576 GPU กับ co-packaged optics เป็นตัวอย่างล่วงหน้า</li><li>แร็กเฉพาะ Vera CPU 256 ตัวสำหรับประมวลผลเอเจนต์</li><li>MaxLPS ใช้ช่องว่างระหว่างพลังงานตามป้ายกับการใช้จริง; ถาดไร้สายประกอบ ~1 นาที เทียบ ~90 นาที</li></ul></div>
+<p><strong>ผู้พูด:</strong> Ian Buck รองประธาน Hyperscale &amp; High-Performance Computing, NVIDIA</p>
+<p><strong>สรุป:</strong> NVIDIA รวมการ deploy Vera Rubin ปัจจุบันเข้ากับตัวอย่างล่วงหน้าของโดเมน NVLink แบบ Rubin Ultra ขนาด 576 GPU ที่ใช้ co-packaged optics สิ่งที่สำคัญไม่แพ้กันคือแร็ก Vera CPU โดยเฉพาะสำหรับประมวลผลเอเจนต์ ควบคู่กับงานซอฟต์แวร์และการจัดการพลังงานที่มุ่งเพิ่มพลังประมวลผลที่ใช้ได้จริงภายในสิ่งปลูกสร้างที่มีข้อจำกัด</p>
+<p><strong>1. แยกการ deploy Vera Rubin ออกจากตัวอย่างล่วงหน้าของ Rubin Ultra</strong></p>
+<p>Buck อธิบายว่า Vera Rubin อยู่ในการผลิตและเข้าถึงดาตาเซ็นเตอร์ของลูกค้าแล้ว ส่วนตัวอย่างล่วงหน้าของ Rubin Ultra เป็นหมุดหมายคนละเรื่อง: ระบบเชื่อมต่อ NVLink 576 GPU ที่วางแผนไว้ ครอบคลุมหลายแร็ก ใช้ถาดสวิตช์ co-packaged optics รุ่นถัดไป</p>
+<p>ข้อสรุปคือ NVIDIA ตั้งใจขยายโดเมนตัวเร่งที่เชื่อมแน่นให้เกินแร็กที่ใช้ทองแดงในปัจจุบัน ตัวอย่างล่วงหน้านี้สนับสนุนโอกาสด้านเนื้อหาออปติกในอนาคต แต่ไม่ควรนับเป็นคอนฟิก 576 GPU ที่กำลังส่งมอบอยู่</p>
+<p><strong>2. แร็ก Vera CPU ไม่ใช่แค่อุปกรณ์เสริมของ GPU</strong></p>
+<p>Buck อธิบายแร็กเฉพาะที่มี Vera CPU 256 ตัวสำหรับประมวลผลเอเจนต์และงานที่เกี่ยวข้อง สถาปัตยกรรมของ NVIDIA แยกบทบาทนี้ออกจากระบบเทรน/อนุมาน Vera Rubin NVL72: แร็ก CPU รองรับการเรียกใช้เครื่องมือ การประสานงาน และการรันแบบ sandbox</p>
+<p>แนวทางสถาปัตยกรรมเน้นประสิทธิภาพต่อ core ที่คงที่และแข็งแรง การเข้าถึงหน่วยความจำ และ throughput ที่คาดเดาได้ แทนที่จะปรับเพื่อต้นทุนต่อ core ต่ำสุดเพียงอย่างเดียว ซึ่งเปิดอีกเส้นทางให้ NVIDIA เข้าถึงการใช้จ่ายของดาตาเซ็นเตอร์ รวมถึงงานที่ไม่ได้รันบน GPU ของตัวเองโดยตรง</p>
+<p><strong>3. Co-packaged optics เริ่มที่ scale-out ก่อน แล้วจึงโดเมน scale-up ที่ใหญ่ขึ้น</strong></p>
+<p>Spectrum-X Photonics ถูกนำเสนอเป็นผลิตภัณฑ์ scale-out ที่ส่งมอบในปีนี้ ส่วน NVLink แบบออปติกผูกกับโรดแมป scale-up รุ่นถัดไป ทั้งสองเป็นตลาดและกำหนดการนำไปใช้ที่ต่างกัน</p>
+<p>Buck ยังเน้นเครือข่ายหลายระนาบ (multiplane) และการตรวจจับความล้มเหลวระดับฮาร์ดแวร์อย่างรวดเร็ว เป้าหมายทางเศรษฐกิจไม่ใช่แค่แบนด์วิดท์ที่สูงขึ้น แต่คือการหลีกเลี่ยงสถานการณ์ที่ลิงก์เสียตัวเดียวทำให้ตัวเร่งราคาแพงจำนวนมากช้าลงหรือหยุดชะงัก ส่วนการปรับปรุงด้านประสิทธิภาพพลังงานและจำนวนสวิตช์ที่เขาพูดถึงเป็นข้ออ้างของผู้ขาย ผูกกับการเปรียบเทียบสถาปัตยกรรมเฉพาะแบบ</p>
+<p><strong>4. การจัดการพลังงานปลดล็อกกำลังประมวลผลได้โดยไม่ต้องต่อไฟจากสาธารณูปโภคใหม่</strong></p>
+<p>การพูดถึง MaxLPS ของ NVIDIA เน้นที่ช่องว่างระหว่างพลังงานตามป้ายกับการใช้จริงของ workload ถ้าซอฟต์แวร์เฝ้าดูความต้องการอย่างต่อเนื่องและบังคับขีดจำกัดทางไฟฟ้า ผู้ดำเนินการก็อาจติดตั้งหรือใช้พลังประมวลผลได้มากขึ้นภายใต้กรอบพลังงานที่จัดสรรไว้เท่าเดิม</p>
+<p>นี่คือโอกาสด้านการใช้ประโยชน์ ไม่ใช่การสร้างไฟฟ้าเพิ่ม ปริมาณที่เรียกคืนได้ขึ้นกับความหลากหลายของ workload ความระมัดระวังของการจัดสรรเดิม และความไวของระบบควบคุม ตัวอย่างในทรานสคริปต์มีตัวเลขที่ไม่สอดคล้องกัน ดังนั้นกลไกน่าเชื่อถือกว่าตัวเลขการเพิ่มระดับทั้งฟลีตที่แม่นยำ</p>
+<p><strong>5. การผลิตและการ deploy กำลังกลายเป็นส่วนหนึ่งของความแตกต่างของแพลตฟอร์ม</strong></p>
+<p>Buck เทียบการประกอบถาดประมวลผลรุ่นก่อนที่ใช้ราว 90 นาที กับถาดดีไซน์ไร้สายเคเบิลรุ่นใหม่ที่ใช้ประมาณหนึ่งนาที การเปรียบเทียบนี้เป็นของถาดประมวลผล ไม่ใช่แร็กที่สร้างเสร็จทั้งหมดหรือคลัสเตอร์ที่เปิดใช้งานแล้ว</p>
+<p>ผลงานด้าน MGX ที่กว้างกว่านั้นทำให้อินเทอร์เฟซของแร็ก ระบายความร้อน พลังงาน และการซ่อมบำรุงเป็นมาตรฐาน NVIDIA พยายามทำให้การผลิต การติดตั้ง และการซ่อมบำรุงทำซ้ำได้ข้ามพันธมิตร ขณะที่ยังรักษาความได้เปรียบของการออกแบบร่วมระดับระบบ การพูดถึง 800V ขยายความพยายามนี้เข้าไปถึงสิ่งอำนวยความสะดวก แทนที่จะสมมติว่าดาตาเซ็นเตอร์เดิมทุกแห่งรับแร็กรุ่นถัดไปได้โดยไม่ต้องแก้ไข</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">NVIDIA แยกสิ่งที่ส่งมอบวันนี้ออกจากพรีวิว และเปิดเส้นทางรายได้จาก CPU</p><ul class="rn-sum-list"><li>Spectrum-X Photonics คือ scale-out ปีนี้ ส่วน NVLink ออปติกคือ scale-up รุ่นถัดไป</li><li>ข้ออ้างด้านประสิทธิภาพเป็นของผู้ขาย</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">576</div><div class="rn-stat-c">จำนวน GPU ในโดเมน NVLink แบบ Rubin Ultra ที่วางแผนไว้</div></div><div class="rn-stat"><div class="rn-stat-v">256</div><div class="rn-stat-c">จำนวน Vera CPU ในแร็ก CPU</div></div><div class="rn-stat"><div class="rn-stat-v">90 นาที → 1 นาที</div><div class="rn-stat-c">เวลาประกอบถาดประมวลผลรุ่นก่อนเทียบรุ่นไร้สายเคเบิล</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span><span class="rn-th">3. Meta Networking: Ethernet แบบ scale-up ถูก deploy แล้ว และซิลิคอน merchant ขยายไปทั่วเครือข่าย</span><span class="rn-en">3. Meta Networking: Ethernet scale-up is already deployed, and merchant silicon extends across the network</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>MTIA 300 ของ Meta ใช้ Ethernet scale-up บน Broadcom Tomahawk 5 แล้ว</li><li>โรดแมปมี Tomahawk 6 และซิลิคอนรุ่นถัดไปที่เป็นไปตาม ESUN</li><li>fabric แบนลง ระบบเครือข่าย 102.4T และชั้นแบ็กโบนใหม่</li></ul></div>
+<p><strong>ผู้พูด:</strong> Omar Baldonado ผู้อำนวยการฝ่ายวิศวกรรม Meta ดูแลเครือข่ายดาตาเซ็นเตอร์และเครือข่าย AI</p>
+<p><strong>สรุป:</strong> การเปิดเผยจากผู้ปฏิบัติการที่หนักแน่นที่สุดคือ MTIA 300 ของ Meta ใช้ Ethernet แบบ scale-up ที่ตั้งบน Broadcom Tomahawk 5 อยู่แล้ว โดยมีดีไซน์ Tomahawk 6 และซิลิคอนรุ่นถัดไปที่เป็นไปตาม ESUN อยู่ในโรดแมป Meta ยังอธิบายถึงโครงข่าย scale-out ที่แบนลง ระบบเครือข่าย 102.4T และชั้นแบ็กโบนใหม่ที่สร้างจากองค์ประกอบดาตาเซ็นเตอร์ที่คุ้นเคย</p>
+<blockquote>🔒 เนื้อหาที่เหลือของโพสต์นี้เปิดให้เฉพาะสมาชิก TMTB Pro (ต้นฉบับแสดงแค่ตัวอย่างล่วงหน้า): ถ้าต้องการข้อมูลเพิ่มหรืออยากทดลองใช้ ให้ติดต่อ sales@tmtbreakout.com</blockquote>
+<p><strong>สิ่งที่สมาชิกได้รับตามที่ต้นฉบับระบุ:</strong> เข้าถึง TMTB Slack · อีเมลวันละสองฉบับ (ก่อนตลาดเปิดสรุปงานวิจัย ข่าว และข้อมูลที่ทำให้หุ้นขยับ และหลังตลาดปิดสรุปข่าว/งานวิจัย/ข้อมูลที่ขับเคลื่อนการเคลื่อนไหวใหญ่ที่สุดของวัน) · TMTB Podcast Intel ที่คัดเฉพาะพอดแคสต์ที่มีสัญญาณสูงสุด ส่งหลายครั้งต่อสัปดาห์ · TMTB Weeklys, ความเห็นด้านการเทรด, บทเขียนเรื่อง positioning/sentiment, พรีวิวผลประกอบการ และอื่น ๆ มีราคาพิเศษสำหรับกองทุนเกิดใหม่/นักลงทุนรายย่อย</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">การเปิดเผยจากผู้ปฏิบัติการที่หนักแน่นที่สุดของงานคือ Ethernet scale-up ใช้งานจริงแล้วที่ Meta</p><ul class="rn-sum-list"><li>ต้นฉบับถูก paywall ตัดหลังส่วนสรุป</li></ul></div>
+
+</div>
+
+</section>
+<section class="rn-sec" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🧠 AMD ยกตลาด CPU เป็นธีมใหม่</strong> — TAM ของ CPU ถูกปรับขึ้นสามครั้งในเก้าเดือนเป็นเกิน $200B ภายในปี 2030 (CAGR ราว 50%) เทียบกับตัวเร่ง AI ที่ราว $1.5T; เป็นการคาดการณ์ของ AMD เอง ไม่ใช่ของวอลล์สตรีท</li>
+<li><strong>🚚 Helios เริ่มส่งมอบเชิงการผลิตแล้ว</strong> — ตั้งแต่เดือนกันยายน เร่งต่อเนื่องถึง Q4 และ 1H27; ระบบชุดแรกรันอยู่ที่ OpenAI, Meta, Microsoft, Oracle แต่การติดตั้งชุดแรกยังไม่เท่ากับการทำพันธะหลายกิกะวัตต์ให้ครบ</li>
+<li><strong>🤖 Helion และ Verano แยกสถาปัตยกรรมเอเจนต์ออกมา</strong> — Helion รองรับสูงสุด 32,768 CPU core (คอนฟิกพันธมิตรเดือนพ.ย. 2026); Verano (Venice, LPDDR) ผลิตปี 2027 เน้นพลังงานต่ำและหน่วยความจำ</li>
+<li><strong>🔭 NVIDIA ขยาย NVLink ด้วยออปติก</strong> — Vera Rubin ผลิตแล้ว ส่วน Rubin Ultra 576 GPU กับ co-packaged optics เป็นแค่ตัวอย่างล่วงหน้า ไม่ใช่สิ่งที่ส่งมอบอยู่ และ Spectrum-X Photonics คือผลิตภัณฑ์ scale-out ของปีนี้</li>
+<li><strong>🖥 แร็ก Vera CPU 256 ตัวคือเส้นทางรายได้ใหม่ของ NVIDIA</strong> — สำหรับเรียกเครื่องมือ ประสานงาน และ sandbox ของเอเจนต์ ชูประสิทธิภาพต่อ core ที่คงที่ ไม่ใช่ต้นทุนต่อ core ต่ำสุด</li>
+<li><strong>⚡ ไฟฟ้าคือคอขวด การจัดการพลังงานคือคันโยก</strong> — MaxLPS ใช้ช่องว่างระหว่างพลังงานตามป้ายกับการใช้จริงเพื่ออัดกำลังประมวลผลเพิ่มภายใต้กรอบไฟเดิม; ตัวเลขในตัวอย่างไม่สอดคล้องกัน จึงเชื่อกลไกได้มากกว่าตัวเลขอัปไซด์</li>
+<li><strong>🌐 Ethernet scale-up เข้าสู่การใช้งานจริงที่ Meta</strong> — MTIA 300 ใช้ Broadcom Tomahawk 5 แล้ว ถัดไปคือ Tomahawk 6 และซิลิคอนที่เป็นไปตาม ESUN; ระบบเครือข่าย 102.4T และ fabric ที่แบนลงเป็นประเด็นต่อไป</li>
+<li><strong>⚠️ แยกข้ออ้างของผู้ขายออกจากหลักฐาน</strong> — 30% token ต่อดอลลาร์ของ Helios, ประสิทธิภาพพลังงานของ NVIDIA และถาดไร้สาย (90 นาทีเทียบหนึ่งนาที) ล้วนเป็นข้ออ้างของผู้ขายที่เปรียบเทียบเฉพาะกรณี ยังไม่ยืนยันส่วนแบ่งรายได้หรือมาร์จิ้นในที่สุด</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>[TMTB: OCP Highlights - AMD&#x27;s Lisa Su, NVIDIA on Rubin Ultra, META on 5GW AI Clusters, Broadcom on Ethernet, Credo on Optics, Astera Labs on Rack-Scale AI &amp; More](2026-10-13_-_TMTB_OCP_Highlights_-_AMDs_Lisa_Su_NVIDIA_on_Rubin_Ultra_META_on_5GW_AI_Clusters_Broadcom_on_Eth_-_id2092.pdf)</li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+TMT Breakout<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+</body></html>
