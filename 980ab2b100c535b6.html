@@ -1,0 +1,820 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>Deep|NVDA: ห่วงโซ่อุปทาน AI ในยุคหลัง Jensen Huang</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">FundaAI</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NVDA?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NVDA</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/TSM?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$TSM</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AVGO?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AVGO</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMD?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMD</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/COHR?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$COHR</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/LITE?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$LITE</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MRVL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MRVL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GLW?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GLW</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMKR?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMKR</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GOOGL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GOOGL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMZN?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMZN</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/META?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$META</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CRWV?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CRWV</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NBIS?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NBIS</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/UBER?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$UBER</span>
+<span class="rn-deck">🚪 การจากไปของ Jensen อาจลดทั้งการสนับสนุนด้านการเงินให้ระบบนิเวศ AI และความกล้าเสี่ยง จนกระทบความได้เปรียบเชิงระบบนิเวศของ Nvidia และอำนาจต่อรองในห่วงโซ่อุปทาน</span>
+</div>
+<h1>🔄 Deep|NVDA: ห่วงโซ่อุปทาน AI ในยุคหลัง Jensen Huang</h1>
+<div class="rn-byline"><b>FundaAI</b><span class="rn-sep">·</span>2026-11-13<span class="rn-sep">·</span><span class="rn-th">อ่าน 16 นาที</span><span class="rn-en">16 min read</span></div>
+</div>
+<div class="rn-lede"><p><strong>NOV 13 (13 พ.ย.)</strong></p>
+<p>เมื่อวันที่ 12 พฤศจิกายน 2026 Nvidia ประกาศว่า Jensen Huang ผู้ก่อตั้งบริษัท ได้ลาออกจากตำแหน่งประธานบริษัท (President) ซีอีโอ และกรรมการบริษัท มีผลทันที โดย Colette Kress ซีเอฟโอ ได้รับแต่งตั้งเป็นซีอีโอรักษาการ ตลาดเริ่มต้นด้วยการจับตาว่าส่วนแบ่งตลาดระหว่าง GPU กับ ASIC จะขยับอย่างไร แต่เราเชื่อว่านัยสำคัญที่แท้จริงอยู่ที่สามเรื่อง ได้แก่ 1) ความกล้าเสี่ยงในการกำกับดูแลกิจการที่อาจลดลง 2) เม็ดเงินสนับสนุนระบบนิเวศ AI ที่อาจหดตัว และ 3) การกระจายมูลค่าตลอดห่วงโซ่อุปทานที่อาจถูกจัดรูปใหม่</p></div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🧠 Huang คือกลไกตัดสินใจที่ทดแทนยาก — ความอดทนต่อการลงทุนข้ามเจเนอเรชัน (CUDA, Grace→Vera, CPO) และการเป็นผู้ชี้ขาดข้ามหน่วยงาน เป็นสิ่งที่ผู้บริหารมืออาชีพรับช่วงได้ยาก</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="Why Jensen Huang Is Difficult to Replace" data-en="Why Jensen Huang Is Difficult to Replace" data-th-full="Why Jensen Huang Is Difficult to Replace" data-en-full="Why Jensen Huang Is Difficult to Replace" title="Why Jensen Huang Is Difficult to Replace">Why Jensen Huang Is Difficult to Replace</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="Deep | What&#x27;s Holding Back Co-Packaged O…" data-en="Deep | Whatʼs Holding Back Co- Packaged…" data-th-full="Deep | What&#x27;s Holding Back Co-Packaged O…" data-en-full="Deep | Whatʼs Holding Back Co- Packaged Optics Mass Production?" title="Deep | What&#x27;s Holding Back Co-Packaged O…">Deep | What&#x27;s Holding Back Co-Packaged O…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="Analyst Independence Statement" data-en="Analyst Independence Statement" data-th-full="Analyst Independence Statement" data-en-full="Analyst Independence Statement" title="Analyst Independence Statement">Analyst Independence Statement</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="ℹ️ About FUNDA: เกี่ยวกับ FUNDA" data-en="ℹ️ About FUNDA: เกี่ยวกับ FUNDA" data-th-full="ℹ️ About FUNDA: เกี่ยวกับ FUNDA" data-en-full="ℹ️ About FUNDA: เกี่ยวกับ FUNDA" title="ℹ️ About FUNDA: เกี่ยวกับ FUNDA">ℹ️ About FUNDA: เกี่ยวกับ FUNDA</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="No Investment Advice and Report Neutrali…" data-en="No Investment Advice and Report Neutrali…" data-th-full="No Investment Advice and Report Neutrali…" data-en-full="No Investment Advice and Report Neutrali…" title="No Investment Advice and Report Neutrali…">No Investment Advice and Report Neutrali…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="Timeliness Statement" data-en="Timeliness Statement" data-th-full="Timeliness Statement" data-en-full="Timeliness Statement" title="Timeliness Statement">Timeliness Statement</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="Intellectual Property" data-en="Intellectual Property" data-th-full="Intellectual Property" data-en-full="Intellectual Property" title="Intellectual Property">Intellectual Property</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s9" data-sec="s9" aria-controls="rn-p-s9" aria-selected="false" data-th="Forward-Looking Statements and Disclaimer" data-en="Forward-Looking Statements and Disclaimer" data-th-full="Forward-Looking Statements and Disclaimer" data-en-full="Forward-Looking Statements and Disclaimer" title="Forward-Looking Statements and Disclaimer">Forward-Looking Statements and Disclaimer</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s10" data-sec="s10" aria-controls="rn-p-s10" aria-selected="false" data-th="Invite your friends and earn rewards" data-en="Invite your friends and earn rewards" data-th-full="Invite your friends and earn rewards" data-en-full="Invite your friends and earn rewards" title="Invite your friends and earn rewards">Invite your friends and earn rewards</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span>Why Jensen Huang Is Difficult to Replace: ผู้ตัดสินใจหลักผู้ปั้นยุค AI — ทำไมถึงหาใครมาแทน Jensen Huang ได้ยาก</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Huang ลาออกจากตำแหน่ง President, CEO และกรรมการ มีผลทันที (12 พ.ย. 2026) โดย Colette Kress ซีเอฟโอเป็นซีอีโอรักษาการ</li><li>FUNDA มองสามนัยสำคัญ: ความกล้าเสี่ยงด้านธรรมาภิบาลที่ลดลง · เม็ดเงินหนุนระบบนิเวศ AI ที่หดตัว · การกระจายมูลค่าในห่วงโซ่อุปทานที่ถูกจัดรูปใหม่</li><li>ระยะใกล้ (≤12 เดือน) ส่วนแบ่งตลาดยังไม่ขยับเร็ว เพราะกำลังการผลิตถูกจองแล้ว แต่ธรรมาภิบาลการเงินเปลี่ยนให้เห็นได้ใน 1-2 ไตรมาส</li><li>ระยะกลาง-ยาว (&gt;12 เดือน) การค้ำประกันและการจ่ายล่วงหน้าที่ลดลงอาจทำให้ Neocloud โตช้าลงและ ASIC ได้เปรียบ TCO มากขึ้น</li><li>โรงงานผลิตเวเฟอร์ล้ำสมัยและผู้ออกแบบ ASIC อยู่ในตำแหน่งที่ดีกว่า ส่วนประกอบระบบและชิ้นส่วนไฟฟ้า-เครื่องกลปลายน้ำเสี่ยงถูกบีบมูลค่า</li></ul></div>
+<p>ตั้งแต่การเปิดตัว CUDA ในปี 2006 การพัฒนา GPU เฉพาะทางสำหรับดาต้าเซ็นเตอร์ ไปจนถึงการที่เขาลงมือส่งมอบระบบ DGX-1 เครื่องแรกให้ OpenAI ด้วยตัวเองในปี 2016 และต่อมาก็หนุนหลัง Neoclouds กับ Neolabs — Huang เป็นผู้ก่อตั้งที่อยู่ศูนย์กลางของจุดเปลี่ยนสำคัญหลายต่อหลายครั้งที่หล่อหลอมอุตสาหกรรม AI ตลอดสองทศวรรษที่ผ่านมา CUDA แทบไม่ทำเงินให้เลยอยู่หลายปีหลังเปิดตัว และถูกวอลล์สตรีทมองด้วยความสงสัย แต่ Huang ก็ยังลงทุนต่อ จนในที่สุดสร้างความได้เปรียบเชิงระบบนิเวศของ Nvidia ในงานประมวลผล AI ขึ้นมาได้</p>
+<p>ธุรกิจ CPU คืออีกตัวอย่างหนึ่ง โปรเจกต์ Grace เจออุปสรรคใหญ่กลางทางระหว่างการพัฒนา และสุดท้ายต้องใช้แกน Neoverse V2 สำเร็จรูปของ Arm ประสิทธิภาพยังตามหลังคู่แข่งฝั่ง x86 และส่วนใหญ่ขายพ่วงมากับ GPU ยอดส่งมอบสะสมอยู่ที่เกือบ 2.5 ล้านชิ้น แต่ Nvidia ก็ยังลงทุนต่อเนื่อง — Vera รุ่นถัดไปใช้แกน Olympus ที่พัฒนาเองภายในบริษัท เข้าสู่การผลิตจำนวนมากในปี 2026 และเป็นครั้งแรกที่เสนอขายภายนอกในรูป CPU แบบสแตนด์อโลน Meta, OCI, CoreWeave และรายอื่น ๆ วางแผนติดตั้งใช้งานแล้ว ขณะที่ Dell, HPE, Lenovo และ Supermicro ก็คาดว่าจะเปิดตัวเซิร์ฟเวอร์สแตนด์อโลนที่ใช้ Vera เราเชื่อว่าตอนนี้ Vera อยู่บนเส้นทางพัฒนาที่มั่นคงกว่าเดิมแล้ว การลงทุนระยะยาวแบบนี้ ที่ข้ามผลิตภัณฑ์หลายเจเนอเรชันและทนต่อความล้มเหลวระหว่างทางได้ มักมีเพียงผู้ก่อตั้งที่มีทั้งความตั้งใจและความสามารถที่จะยืนหยัดต่อไปเท่านั้นที่ประคองไว้ได้</p>
+<h3>🤝 A Major Backer of Neolabs and Neoclouds: ผู้หนุนหลักของ Neolabs และ Neoclouds</h3>
+<p>Nvidia ลงทุนในแทบทุก LLM รายใหญ่และ Neolab โดยมี OpenAI, Anthropic, xAI, Mistral, Thinking Machines, Reflection AI, Poolside และอื่น ๆ อยู่ในรายชื่อบริษัทที่ไปลงทุน ในปี 2025 Nvidia เข้าร่วมดีลเวนเจอร์แคปิตอลราว 67 ดีล เราเชื่อว่า Nvidia น่าจะเป็นหนึ่งในผู้หนุนหลักที่สำคัญที่สุดของระบบนิเวศ Neolabs โดยรวม และบทบาทนี้ยิ่งเด่นชัดกว่าใน Neoclouds — หากไม่มี Huang ระบบนิเวศ Neocloud ในวันนี้ก็คงก่อตัวได้ยาก Nvidia เริ่มลงทุนใน CoreWeave ตั้งแต่ปี 2023 ลงนามข้อตกลงซื้อกำลังการผลิตที่ว่างอยู่คืนมูลค่า $6.3 พันล้านดอลลาร์ในเดือนกันยายน 2025 และอัดฉีดเพิ่มอีก $2 พันล้านดอลลาร์ในเดือนมกราคม 2026 นอกจากนี้ยังลงทุนใน Nebius, Lambda, Crusoe, Nscale และรายอื่น ๆ ในเดือนกรกฎาคม 2026 Nvidia เปิดตัวโครงการมาตรฐานเพื่อเช่า GPU ที่ว่างอยู่กลับคืนในราคาคงที่ แลกกับส่วนแบ่งรายได้จากบริการคลาวด์ เพื่อช่วยให้ Neoclouds หาแหล่งเงินทุนได้ Nvidia คาดว่ากำลังการผลิตติดตั้งของพันธมิตร Neocloud จะเพิ่มจากราว 3 GW ณ สิ้นปี 2025 เป็น 8 GW ภายในสิ้นปี 2026</p>
+<p>การลงทุนและข้อตกลงความร่วมมือเหล่านี้ใช้ทรัพยากรบนงบดุลไปมหาศาล ณ วันที่ 26 กรกฎาคม 2026 เงินลงทุนในตราสารทุนของ Nvidia สูงถึง $99 พันล้านดอลลาร์ และมีภาระผูกพันราว $36 พันล้านดอลลาร์ต่อพันธมิตรผู้ให้บริการคลาวด์ AI บางราย บริษัทยังเคยหารือเรื่องการให้การค้ำประกันสัญญาเช่าดาต้าเซ็นเตอร์ของ OpenAI ในรัฐโอไฮโอ โดยวงเงินที่คุยกันตอนแรกสูงถึงราว $250 พันล้านดอลลาร์ มีรายงานว่า Kress ซีเอฟโอคัดค้านดีลที่ Huang เสนอหลายครั้ง รวมถึงการค้ำประกันให้ OpenAI รายนี้ด้วย ท้ายที่สุด Nvidia แบ่งข้อตกลงค้ำประกันออกเป็นสองระยะในเดือนสิงหาคม โดยระยะแรกจำกัดเพดานไว้ที่ราว $105 พันล้านดอลลาร์ นี่คือเหตุผลสำคัญเบื้องหลังมุมมองของเราว่าเม็ดเงินสนับสนุนทั่วทั้งระบบนิเวศ AI อาจเริ่มหดตัว</p>
+<h3>🎯 The Final Decision-Maker in Cross-Divisional Collaboration: ผู้ชี้ขาดสุดท้ายในการทำงานข้ามหน่วยงาน</h3>
+<p><em>สมัครสมาชิกแล้ว (Subscribed)</em></p>
+<p>Nvidia มีโครงสร้างองค์กรที่แบนราบเป็นพิเศษ Huang กำกับดูแลผู้บริหารระดับสูงโดยตรงมากกว่า 60 คน และแทบไม่นัดประชุมแบบตัวต่อตัว เขามักเป็นผู้ตัดสินขั้นสุดท้ายเมื่อเกิดข้อพิพาทเรื่องการจัดสรรทรัพยากรข้ามหน่วยงานและแผนที่นำทางเทคโนโลยี ในฐานะผู้ก่อตั้ง เขายังยินดีรับผิดชอบต่อความล้มเหลวที่อาจเกิดจากการตัดสินใจเชิงรุก ซึ่งผู้บริหารมืออาชีพอาจทำตามได้ยาก</p>
+<p>ความตึงเครียดระหว่างกลุ่มที่เชิงรุกกว่ากับกลุ่มที่อนุรักษ์นิยมกว่ามีอยู่ใน Nvidia มานานแล้ว ปัญหาห่วงโซ่อุปทานของบริษัทในช่วงไม่กี่ปีที่ผ่านมาหลายเรื่องเกี่ยวข้องกับความเร็วในการก้าวหน้าของเทคโนโลยีใหม่ ระบบ Blackwell หนึ่งระบบต้องออกแบบชิปขึ้นใหม่ตั้งแต่ศูนย์ถึงเจ็ดตัวและนำเข้าสู่การผลิตจำนวนมาก ในเดือนสิงหาคม 2024 มีรายงานข้อบกพร่องด้านการออกแบบและยีลด์ต่ำ นำไปสู่การแก้ไขโฟโตมาสก์ของ GPU และทำให้การส่งมอบสินค้าล่าช้าไปราวสามเดือน ต่อมา Huang ยอมรับต่อสาธารณะว่าเป็น &quot;ความผิดของ Nvidia 100%&quot; นอกจากนี้ GB200 NVL72 ในช่วงแรกของการติดตั้งยังเจอปัญหาความร้อนสูงเกินและปัญหาการเชื่อมต่อ ทำให้ต้องแก้ไขดีไซน์แร็กหลายรอบ</p>
+<p>CPO (Co-Packaged Optics) เป็นอีกโปรเจกต์ที่ Huang ผลักดันด้วยตัวเอง การถกเถียงเรื่องแผนที่นำทางเทคโนโลยีระหว่าง CPO, NPO และทรานซีฟเวอร์ออปติกแบบ pluggable ยังดำเนินอยู่ สวิตช์ Spectrum-6 รุ่นล่าสุดยังคงมีทั้งรุ่น pluggable และรุ่น CPO แม้ Spectrum-X Photonics จะเข้าสู่การผลิตจำนวนมากในปี 2026 แล้ว แต่ยีลด์ของออปติคัลเอนจินแบบ CPO ก็ยังค่อนข้างต่ำ เราเชื่อว่า Huang อยู่ในตำแหน่งที่เหมาะอย่างยิ่งที่จะประสานความร่วมมืออันกว้างขวางนี้ระหว่างอดีตทีมเครือข่ายของ Mellanox ฝ่ายชิป และฝ่ายระบบ หลังการเปลี่ยนผ่านผู้บริหาร จังหวะของแผนที่นำทางเทคโนโลยีเสี่ยงสูงอย่าง CPO อาจชะลอลง ดังที่เราระบุไว้ในรายงาน CPO ที่เผยแพร่ก่อนหน้านี้ &quot;Deep|Optics: Hybrid Bonding and Testing Remain Key Bottlenecks to CPO Mass Production&quot; ความคืบหน้าสู่การผลิต CPO จำนวนมากยังคงช้า</p>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">การจากไปของ Huang อาจปิดยุคที่การลงทุนเสี่ยงสูงทั่วห่วงโซ่อุปทาน AI ถูกขับเคลื่อนโดยผู้ก่อตั้ง</p><ul class="rn-sum-list"><li>โฟกัสของอุตสาหกรรมอาจเปลี่ยนจากไล่ประสิทธิภาพสูงสุดโดยไม่คำนึงต้นทุน ไปสู่สเปกมาตรฐานและการปรับ TCO</li><li>อัตรากำไรขั้นต้นและมูลค่ากิจการของห่วงโซ่อุปทานฮาร์ดแวร์หลายส่วนอาจเผชิญแรงกดดันขาลงระยะยาว</li></ul></div>
+<aside class="rn-further"><div class="rn-label"><span class="rn-th">อ่านเพิ่ม</span><span class="rn-en">Further reading</span></div>รายงาน CPO ก่อนหน้าของ FUNDA: Deep|Optics: Hybrid Bonding and Testing Remain Key Bottlenecks to CPO Mass Production</aside>
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$99 พันล้านดอลลาร์</div><div class="rn-stat-c">เงินลงทุนในตราสารทุนของ Nvidia ณ 26 ก.ค. 2026</div></div><div class="rn-stat"><div class="rn-stat-v">$279 พันล้านดอลลาร์</div><div class="rn-stat-c">ข้อผูกพันด้านอุปทานและกำลังการผลิต เพิ่มจาก $119 พันล้านดอลลาร์ในไตรมาสก่อน</div></div><div class="rn-stat"><div class="rn-stat-v">72%–75%</div><div class="rn-stat-c">อัตรากำไรขั้นต้นของ Nvidia ที่ลูกค้ายอมรับ</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span><span class="rn-th">Deep | What&#x27;s Holding Back Co-Packaged Optics Mass Production? — อะไรที่ฉุดการผลิต Co-Packaged Optics จำนวนมากไว้?</span><span class="rn-en">Deep | Whatʼs Holding Back Co- Packaged Optics Mass Production?</span></span></h2>
+
+<p>FUNDA · 8:16 AM</p>
+<div class="figure"><img src="data:image/jpeg;base64,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" alt="figure 1"><div class="figure-caption">รูปที่ 1: การ์ดโปรโมตแบบฝัง (Substack embed) ของรายงาน FUNDA ฉบับก่อนหน้าด้านออปติกส์ พื้นหลังเทาอ่อน มีโลโก้ข้อความตัวใหญ่ด้านบนและภาพปริซึมแตกแสงเป็นสายรุ้งบนพื้นดำ ป้ายในภาพ: FUNDA REPORT = รายงาน FUNDA · The full-stack research platform = แพลตฟอร์มวิจัยแบบฟูลสแตก · OPTICS = ออปติกส์</div></div>
+<p>ทำไมบันทึกฉบับนี้จึงสำคัญ (Why this note matters) · อ่านเรื่องเต็ม (Read full story)</p>
+<h3>🚗 Betting on the Next Billion-Dollar Markets Yet to Take Shape: เดิมพันกับตลาดระดับพันล้านดอลลาร์ที่ยังไม่ก่อตัว</h3>
+<p>รถยนต์ไร้คนขับและหุ่นยนต์เป็นการลงทุนระยะยาวที่โดดเด่นที่สุดของ Nvidia Huang เคยเรียกสองสาขานี้ ซึ่งยังไปไม่ถึงระดับขนาดใหญ่แต่อาจเติบโตเป็นตลาดระดับพันล้านดอลลาร์ในที่สุด ว่าเป็น &quot;ตลาดศูนย์พันล้านดอลลาร์&quot; (zero-billion-dollar markets) แพลตฟอร์มของ Nvidia ครอบคลุม DRIVE Thor, แพลตฟอร์ม DRIVE Hyperion Robotaxi และโมเดลขับขี่อัตโนมัติ Alpamayo ตลอดจนแพลตฟอร์มหุ่นยนต์ฮิวมานอยด์ Isaac GR00T, โมเดลโลก Cosmos และแพลตฟอร์มจำลอง Omniverse เราประเมินว่า Nvidia ลงทุนในด้านเหล่านี้ปีละหลายพันล้านดอลลาร์ ขณะที่สัดส่วนรายได้ในปัจจุบันยังจำกัด อย่างไรก็ตาม ผู้ผลิตรถยนต์และผู้ให้บริการ Robotaxi อย่าง Uber, Mercedes-Benz และ Toyota รวมถึงบริษัทหุ่นยนต์จำนวนมาก ได้วางแผนผลิตภัณฑ์โดยอิงแพลตฟอร์มฟูลสแตกนี้แล้ว หากผู้นำคนถัดไปเผชิญแรงกดดันให้ปกป้องอัตรากำไร การลงทุนเหล่านี้ — ซึ่งไม่น่าจะสร้างผลตอบแทนที่มีนัยสำคัญในระยะใกล้ — อาจเป็นหนึ่งในสิ่งแรก ๆ ที่ถูกตัดงบ</p>
+<p>ลูกค้าที่พึ่งพาแพลตฟอร์มของ Nvidia ก็อาจเผชิญความไม่แน่นอนเรื่องแผนที่นำทางผลิตภัณฑ์มากขึ้นเช่นกัน</p>
+<h3>🪙 A Leading Advocate for Token Demand: ผู้ผลักดันอันดับต้น ๆ ของอุปสงค์ Token</h3>
+<p>Huang เป็นหนึ่งในผู้ทรงอิทธิพลที่สุดในการผลักดันให้ใช้ token เพิ่มขึ้น และ Nvidia ก็ทำให้ดูเป็นตัวอย่างภายในองค์กรเอง ในงาน GTC เดือนมีนาคม 2026 เขาเสนอว่าวิศวกรควรได้รับงบ token เทียบเท่าราวครึ่งหนึ่งของเงินเดือนพื้นฐาน เพิ่มเติมจากค่าตอบแทน เขาบอกว่าจะ &quot;กังวลอย่างยิ่ง&quot; หากวิศวกรที่ได้รับเงินเดือน $500,000 ต่อปี ใช้ token น้อยกว่ามูลค่า $250,000 ต่อปี และเมื่อถูกถามว่า Nvidia ใช้เงินราว $2 พันล้านดอลลาร์ต่อปีซื้อ token ให้ทีมวิศวกรหรือไม่ เขาตอบว่า &quot;เรากำลังมุ่งไปที่ตรงนั้น&quot; ในมุมมองของเรา นอกจาก OpenAI และ Anthropic เองแล้ว Nvidia อาจมีงบ token ระดับองค์กรใหญ่ที่สุดแห่งหนึ่งของโลก และอาจใหญ่ที่สุดด้วยซ้ำ หากทีมบริหารชุดใหม่ให้ความสำคัญกับการควบคุมค่าใช้จ่าย งบ token ภายในและความพยายามภายนอกในการส่งเสริมเศรษฐกิจ token อาจสูญเสียแรงส่งทั้งคู่ ซึ่งเท่ากับเสียแบบอย่างสำคัญของอุปสงค์ด้าน inference ในภาคองค์กรไป</p>
+<h3>🔗 The Supply Chain Integrator: ผู้ผสานห่วงโซ่อุปทาน</h3>
+<p>การสนับสนุนห่วงโซ่อุปทานของ Huang ไปไกลเกินความสัมพันธ์ลูกค้า-ซัพพลายเออร์แบบทั่วไป เขามักเจรจาเงื่อนไขสำคัญกับซัพพลายเออร์หลักด้วยตัวเอง สะท้อนสไตล์ &quot;founder mode&quot; แบบคลาสสิก Nvidia ทำงานร่วมกับ TSMC มานานกว่า 30 ปี ตั้งแต่การนำ CoWoS และ HBM มาใช้ใน GPU ดาต้าเซ็นเตอร์ในวงกว้างตั้งแต่ช่วงแรกในปี 2016 จนถึงการเปลี่ยนไปใช้ CoWoS-L สำหรับ Blackwell และ Rubin ความต้องการของ Nvidia เป็นตัวขับเคลื่อนหลักของการขยายกำลังการผลิตแพ็กเกจจิงขั้นสูง ในปี 2026 Huang ยังผูกการรับประกันกำลังการผลิตเข้ากับการลงทุนในตราสารทุน — ในเดือนมีนาคม Nvidia ลงทุนใน Coherent และ Lumentum รายละ $2 พันล้านดอลลาร์ พร้อมข้อผูกพันซื้อหลายหมื่นล้านดอลลาร์และการรับประกันกำลังการผลิตในอนาคต ต่อมาในเดือนเดียวกันก็ลงทุนใน Marvell อีก $2 พันล้านดอลลาร์ และในเดือนพฤษภาคมลงทุนใน Corning ผ่านวอร์แรนต์ ในเดือนกรกฎาคมและตุลาคม Nvidia ลงนามข้อตกลงแพ็กเกจจิงกับ Amkor มูลค่า $1.5 พันล้านดอลลาร์และ $1.3 พันล้านดอลลาร์ ตามลำดับ และจ่ายล่วงหน้าราว $1.1 พันล้านดอลลาร์ให้ KYEC เพื่อสำรองกำลังการทดสอบในสหรัฐฯ ในเดือนตุลาคมยังลงนามข้อตกลงขยายกำลังการผลิตกับ SPIL, Unimicron, Ibiden และ Samsung Electro-Mechanics ครอบคลุมซับสเตรตแพ็กเกจ แพ็กเกจจิงขั้นสูง และออปติคัลเอนจิน</p>
+<p>ณ วันที่ 26 กรกฎาคม 2026 ข้อผูกพันด้านอุปทานและกำลังการผลิตของ Nvidia เพิ่มขึ้นเป็น $279 พันล้านดอลลาร์ จาก $119 พันล้านดอลลาร์ในไตรมาสก่อน โดยหลักเพื่อล็อกกำลังการผลิตหน่วยความจำและการผลิต การพบปะประจำปีของ Huang กับผู้บริหารระดับสูงของห่วงโซ่อุปทานไต้หวันในช่วง Computex ก็เป็นมาตรวัดสำคัญของความเชื่อมั่นของอุตสาหกรรมต่อการขยายกำลังการผลิตเช่นกัน เมื่อเทียบกันแล้ว ผู้ให้บริการคลาวด์ที่พัฒนา ASIC เองยังตามหลัง Nvidia ในการประสานงานกับห่วงโซ่อุปทาน: ระหว่างซีอีโอของพวกเขากับหัวหน้าทีม ASIC มักมีชั้นการบริหารคั่นอยู่สองถึงสามชั้น จนกระทั่งปลายปี 2025 Google และ Amazon จึงย้ายหัวหน้าด้านโครงสร้างพื้นฐาน AI และซิลิคอนเฉพาะทางให้รายงานตรงต่อซีอีโอ เราเชื่อว่าตลอดสามปีที่ผ่านมา ความน่าเชื่อถือแบบผู้ก่อตั้งและพันธสัญญาระยะยาวของ Nvidia ทำให้บริษัทในห่วงโซ่อุปทานไต้หวันมั่นใจพอจะขยายกำลังการผลิตล่วงหน้าก่อนที่อุปสงค์จะมาถึง และรับวัสดุกับสถาปัตยกรรมใหม่ ๆ มาใช้ นี่ก็เป็นหนึ่งในส่วนที่ผู้บริหารมืออาชีพรับช่วงต่อได้ยากที่สุดเช่นกัน</p>
+<h3>⏱ Near-Term Impact (Within 12 Months): ผลกระทบระยะใกล้ (ภายใน 12 เดือน)</h3>
+<p>ในระยะใกล้ ส่วนแบ่งตลาดด้านประมวลผลไม่น่าจะขยับเร็วหลังการเปลี่ยนผ่านผู้บริหาร เพราะกำลังการผลิตสำคัญถูกจองไว้แล้ว แต่การจัดสรรเงินทุนและการควบคุมค่าใช้จ่ายอาจเข้มงวดขึ้นก่อน ตลาดกำลังจับตา AMD, Broadcom และผู้ให้บริการออกแบบ AI ASIC ในไต้หวันอย่างใกล้ชิด ในมุมห่วงโซ่อุปทาน กำลังการผลิต HBM แพ็กเกจจิงขั้นสูง และซับสเตรตแพ็กเกจ ABF ระดับไฮเอนด์ใกล้เต็มอัตราการใช้งานอยู่แล้ว และกำลังการผลิตส่วนเพิ่มจำนวนมากก็มีลูกค้าจองไว้แล้ว เมื่อรวมกับการเร่งผลิตภัณฑ์ยุค Rubin ในปี 2027 และข้อตกลงด้านการเงินสำหรับกำลังประมวลผลของ OpenAI และ Neoclouds ที่ผูกพันแน่นกับ Nvidia อยู่แล้ว การเปลี่ยนแปลงส่วนแบ่งตลาดอย่างมีนัยสำคัญอาจใช้เวลาอย่างน้อย 12 เดือนกว่าจะปรากฏ ในทางตรงกันข้าม การเปลี่ยนแปลงด้านธรรมาภิบาลการเงินอาจเห็นได้เร็วกว่า เมื่อซีเอฟโอก้าวมาเป็นซีอีโอรักษาการทันที การลงทุนในตราสารทุนใหม่ใน Neolabs และ Neoclouds การค้ำประกันสินเชื่อสัญญาเช่า โครงการ R&amp;D เสี่ยงสูง และงบ token ภายใน มีแนวโน้มจะอนุรักษ์นิยมมากขึ้นในหนึ่งถึงสองไตรมาสข้างหน้า</p>
+<h3>🔭 Medium- to Long-Term Impact (Beyond 12 Months): ผลกระทบระยะกลางถึงยาว (เกิน 12 เดือน) — การสนับสนุนด้านการเงินของระบบนิเวศ AI อาจหดตัว</h3>
+<p>Nvidia สร้างกระแสเงินสดอิสระหลายหมื่นล้านดอลลาร์ในแต่ละไตรมาส ที่ผ่านมาบริษัทหนุนการขยายตัวของระบบนิเวศผ่านการลงทุนก้อนใหญ่ใน Neoclouds และการสั่งซื้อล่วงหน้าเพื่อจองกำลังการผลิตต้นน้ำ หากผู้บริหารมืออาชีพรีบเข้มงวดการค้ำประกันสินเชื่อใหม่และการจ่ายล่วงหน้าระยะยาวก่อน ประโยชน์จากการสนับสนุนด้านการเงินและเงินอุดหนุนกำลังการผลิตที่มีอยู่ก็อาจค่อย ๆ จางลงในปีถัดมา ซึ่งอาจกดดันการขยายตัวของ Neocloud ปลายน้ำ ทำให้การเติบโตช้าลง และเร่งให้วัฏจักรรายจ่ายฝั่งทุน (capex) ด้าน AI โดยรวมเย็นลงเร็วขึ้น</p>
+<h3>⚙️ Accelerating ASIC Substitution: การทดแทนด้วย ASIC เร่งตัว</h3>
+<p>เหตุผลหนึ่งที่ลูกค้ายอมรับอัตรากำไรขั้นต้นของ Nvidia ที่สูงถึง 72%–75% ได้ ก็เพราะกลยุทธ์ผลิตภัณฑ์เชิงรุกของ Huang ผลักดันประสิทธิภาพการประมวลผลให้ดีขึ้นต่อเนื่อง หากผู้บริหารมืออาชีพเข้ามาควบคุมและจังหวะการพัฒนาเทคโนโลยีอนุรักษ์นิยมขึ้น ความได้เปรียบด้านต้นทุนการเป็นเจ้าของรวม (TCO) ของ AI ASIC อาจยิ่งกว้างขึ้น กำลังการผลิตกระบวนการล้ำสมัยและแพ็กเกจจิงขั้นสูงของ TSMC ก็อาจค่อย ๆ เคลื่อนไปทาง Google และ Broadcom</p>
+<h3>💸 Slower Hardware Specification Upgrades and Greater Supply Chain Pricing Pressure: ข้อกำหนดฮาร์ดแวร์อัปเกรดช้าลง และแรงกดดันด้านราคาในห่วงโซ่อุปทานมากขึ้น</h3>
+<p>การปรับมูลค่าขึ้น (re-rating) ของห่วงโซ่อุปทานไต้หวันตลอดสามปีที่ผ่านมา สะท้อนความยินดีของ Huang ที่จะรับความเสี่ยงจากการส่งมอบล่าช้าและการวนรอบเทคโนโลยี พร้อมนำวัสดุและสถาปัตยกรรมใหม่เข้ามาในทุกเจเนอเรชันของผลิตภัณฑ์ ภายใต้รูปแบบการบริหารที่นำโดยผู้บริหารมืออาชีพ การวนรอบผลิตภัณฑ์อาจช้าลง สเปกอาจเป็นมาตรฐานมากขึ้น และการเทียบราคาและเจรจาต่อรองระหว่างซัพพลายเออร์หลายรายอาจเกิดบ่อยขึ้น เมื่อ ASIC เฉพาะที่ CSP พัฒนาเองมีเป้าหมายหลักเพื่อลดต้นทุนรวม เราเชื่อว่าแม้โรงงานผลิตเวเฟอร์และผู้ให้บริการออกแบบ ASIC อาจยังยืดหยุ่นได้ แต่ธุรกิจประกอบระบบและชิ้นส่วนไฟฟ้า-เครื่องกลปลายน้ำจำนวนมากอาจเผชิญแหล่งมูลค่าที่แคบลงและแรงกดดันต่อมูลค่ากิจการ</p>
+<h3>🏁 Conclusion: บทสรุป</h3>
+<p>โดยรวมแล้ว การจากไปของ Huang อาจเป็นจุดสิ้นสุดของช่วงที่การลงทุนเสี่ยงสูงทั่วห่วงโซ่อุปทาน AI ถูกขับเคลื่อนโดยผู้ก่อตั้ง แม้อุปสงค์ด้านประมวลผลรวมจะยังเติบโตต่อและ ASIC ค่อย ๆ เพิ่มสัดส่วนในยอดส่งมอบ แต่จุดโฟกัสของอุตสาหกรรมอาจเปลี่ยนจากการไล่ตามประสิทธิภาพประมวลผลสูงสุดโดยไม่คำนึงถึงต้นทุน ไปสู่สเปกที่เป็นมาตรฐานและการปรับ TCO ให้เหมาะสม ผลคืออัตรากำไรขั้นต้นและมูลค่ากิจการของห่วงโซ่อุปทานฮาร์ดแวร์หลายส่วนอาจเผชิญแรงกดดันขาลงในระยะยาว ในสภาพแวดล้อมใหม่นี้ เราเชื่อว่าโรงงานผลิตเวเฟอร์ที่มีความได้เปรียบด้านกระบวนการล้ำสมัย และผู้ให้บริการออกแบบ ASIC ที่ได้ประโยชน์จากเทรนด์ ASIC ที่พัฒนาเองภายในบริษัท อยู่ในตำแหน่งที่ดีกว่าที่จะรักษาความสามารถในการแข่งขันระยะยาวไว้ได้</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🧠 Huang คือกลไกตัดสินใจที่ทดแทนยาก</strong> — ความอดทนต่อการลงทุนข้ามเจเนอเรชัน (CUDA, Grace→Vera, CPO) และการเป็นผู้ชี้ขาดข้ามหน่วยงาน เป็นสิ่งที่ผู้บริหารมืออาชีพรับช่วงได้ยาก</li>
+<li><strong>💰 เม็ดเงินหนุนระบบนิเวศมีแนวโน้มตึงตัวก่อน</strong> — เงินลงทุนตราสารทุน $99 พันล้านดอลลาร์ ภาระผูกพัน $36 พันล้านดอลลาร์ และการค้ำประกัน OpenAI ที่ถูกแบ่งเฟสเหลือเพดานราว $105 พันล้านดอลลาร์ ชี้ว่าซีเอฟโอรักษาการอาจเข้มงวดกว่าเดิมใน 1-2 ไตรมาส</li>
+<li><strong>⏱ ระยะใกล้ (≤12 เดือน) ส่วนแบ่งตลาดยังไม่ขยับเร็ว</strong> — กำลังการผลิต HBM แพ็กเกจจิง และซับสเตรต ABF ถูกจองเต็ม ประกอบกับ Rubin ปี 2027 แต่ธรรมาภิบาลการเงินเปลี่ยนให้เห็นได้เร็วกว่า</li>
+<li><strong>📉 ระยะกลาง-ยาว (&gt;12 เดือน) เสี่ยง capex AI เย็นลงเร็วกว่าคาด</strong> — หากการค้ำประกันและการจ่ายล่วงหน้าถูกลดลง Neocloud จะโตช้าลง และ ASIC ได้เปรียบ TCO มากขึ้น (TSMC อาจเทกำลังการผลิตไปทาง Google และ Broadcom)</li>
+<li><strong>🔧 ห่วงโซ่อุปทานไต้หวันเสี่ยงถูกบีบมูลค่า</strong> — การวนรอบสเปกช้าลงและการเทียบราคาหลายซัพพลายเออร์ทำให้ส่วนประกอบระบบและชิ้นส่วนไฟฟ้า-เครื่องกลปลายน้ำเสี่ยงที่สุด ขณะที่โรงงานผลิตเวเฟอร์และผู้ออกแบบ ASIC ยืดหยุ่นกว่า</li>
+<li><strong>🔬 โครงการเสี่ยงสูงอย่าง CPO และการลงทุนในขับขี่อัตโนมัติ/หุ่นยนต์ เป็นกลุ่มแรก ๆ ที่อาจถูกชะลอหรือตัดงบ</strong> — ติดตามต่อผ่านรายงาน CPO ก่อนหน้าของ FUNDA</li>
+</ol>
+<hr>
+<p><strong>Sources:</strong></p>
+<ul>
+<li>[Deep|NVDA: The AI Supply Chain in the Post Jensen Huang Era — FUNDA (fundaai@substack.com), 13 Nov 2026](inputs/sources/FundaAI/2026-11-13_-_DeepNVDA_The_AI_Supply_Chain_in_the_Post_Jensen_Huang_Era_-_id2670.pdf)</li>
+</ul>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span>Analyst Independence Statement: คำแถลงความเป็นอิสระของนักวิเคราะห์</span></h2>
+
+<p>ความเห็นที่แสดงในรายงานฉบับนี้สะท้อนมุมมองส่วนตัวและเป็นอิสระของนักวิเคราะห์ที่มีต่อหลักทรัพย์และผู้ออกหลักทรัพย์ที่กล่าวถึงในที่นี้อย่างถูกต้อง ค่าตอบแทนของนักวิเคราะห์ไม่ว่าส่วนใดไม่เคย ไม่ได้ และจะไม่เกี่ยวข้องโดยตรงหรือโดยอ้อมกับคำแนะนำหรือมุมมองเฉพาะที่แสดงในรายงานนี้ บริษัทยึดถือขั้นตอนการปฏิบัติตามกฎระเบียบอย่างเข้มงวดเพื่อรับรองความถูกต้อง ความมั่นคงปลอดภัย และความชอบด้วยกฎหมายของแหล่งข้อมูลและสารสนเทศที่ใช้</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span>ℹ️ About FUNDA: เกี่ยวกับ FUNDA</span></h2>
+
+<p>Consensus AI Technology Pte. Ltd. (&quot;บริษัท&quot; หรือ &quot;FUNDA&quot;) เป็นบริษัทวิจัยอิสระที่จดทะเบียนในสิงคโปร์ บริษัทไม่มีความเกี่ยวข้องกับผู้ค้าหลักทรัพย์ วาณิชธนกิจ หรือบริษัทจัดการสินทรัพย์ใด ๆ และไม่ได้จดทะเบียนเป็นที่ปรึกษาการลงทุนหรือโบรกเกอร์-ดีลเลอร์ในเขตอำนาจใด ๆ บริษัทไม่มีความสัมพันธ์ด้านวาณิชธนกิจหรือการรับประกันการจำหน่ายหลักทรัพย์กับบริษัทที่ครอบคลุมในรายงานนี้ และไม่รับเงินสนับสนุนหรือทุนจากบริษัทจดทะเบียน</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span>No Investment Advice and Report Neutrality: ไม่ใช่คำแนะนำการลงทุนและความเป็นกลางของรายงาน</span></h2>
+
+<p>เนื้อหาของรายงานฉบับนี้และข้อมูลที่ปรากฏในนี้มีไว้เพื่อให้ข้อมูลเท่านั้น และไม่ถือเป็นคำแนะนำการลงทุนหรือเป็นฐานของการตัดสินใจทางธุรกิจ ความเห็นที่แสดงในที่นี้เป็นเพียงความเห็นส่วนตัวของผู้เขียนแต่ละท่าน ณ เวลาใดเวลาหนึ่ง และไม่ได้สะท้อนจุดยืนของ FUNDA ในฐานะแพลตฟอร์มที่ดำเนินงานอย่างอิสระ FUNDA คงสถานะเป็นบุคคลที่สามที่เป็นกลาง และไม่ให้การรับรองใด ๆ ไม่ว่าโดยชัดแจ้งหรือโดยนัย เกี่ยวกับความถูกต้อง ความครบถ้วน หรือความเหมาะสมในการใช้ของความเห็นดังกล่าว</p>
+<p><strong>ไม่ใช่การเสนอขายหรือการชักชวน (No Offer or Solicitation):</strong> รายงานฉบับนี้ไม่ถือเป็นการเสนอ ชักชวน แนะนำ หรือให้คำปรึกษาให้ซื้อ ขาย หรือถือหลักทรัพย์หรือเครื่องมือทางการเงินใด ๆ และไม่ให้คำปรึกษาด้านกฎหมาย ภาษี หรือบัญชี</p>
+<p><strong>ข้อมูลจากบุคคลที่สาม (Third-Party Data):</strong> ข้อมูลจากบุคคลที่สามทั้งหมดที่อ้างอิงในรายงานฉบับนี้มาจากแหล่งสาธารณะหรือแหล่งที่ได้รับอนุญาต บริษัทไม่ให้การรับรองหรือรับประกันใด ๆ ไม่ว่าโดยชัดแจ้งหรือโดยนัย เกี่ยวกับความถูกต้องหรือความครบถ้วนของข้อมูลดังกล่าว</p>
+<p><strong>ไม่มีส่วนร่วมในการตัดสินใจ (Non-Participation in Decision-Making):</strong> บริษัทไม่มีส่วนร่วมไม่ว่าโดยตรงหรือโดยอ้อมในกระบวนการตัดสินใจลงทุนของลูกค้าหรือผู้อ่าน ผู้อ่านควรตัดสินใจลงทุนอย่างอิสระตามวัตถุประสงค์การลงทุนและสถานะทางการเงินของตนเอง และปรึกษาที่ปรึกษาทางการเงินหรือกฎหมายมืออาชีพก่อนทำธุรกรรมใด ๆ</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span>Timeliness Statement: คำแถลงเรื่องความทันต่อเวลา</span></h2>
+
+<p>เนื่องจากสภาพแวดล้อมตลาดและแนวโน้มเทคโนโลยีเปลี่ยนแปลงอย่างรวดเร็ว รายงานฉบับนี้สะท้อนสภาวะตลาด ณ วันก่อนวันที่เผยแพร่ ข้อมูลที่เกี่ยวข้องอาจล้าสมัยไปตามกาลเวลา FUNDA ไม่มีหน้าที่ต้องปรับปรุงเนื้อหาของรายงานนี้แบบเรียลไทม์</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">08</span><span>Intellectual Property, Confidentiality, and Restrictions on Commercial Use: ทรัพย์สินทางปัญญา การรักษาความลับ และข้อจำกัดการใช้เชิงพาณิชย์</span></h2>
+
+<p>รายงาน ข้อมูล แบบจำลอง และเนื้อหาทั้งหมดที่บริษัทจัดทำให้ เป็นทรัพย์สินทางปัญญากรรมสิทธิ์เฉพาะของบริษัท และได้รับความคุ้มครองตามกฎหมายลิขสิทธิ์และทรัพย์สินทางปัญญา</p>
+<p><strong>ความเป็นเจ้าของสิทธิ (Ownership of Rights):</strong> เว้นแต่จะระบุไว้เป็นอย่างอื่นโดยชัดแจ้งในข้อตกลงเป็นลายลักษณ์อักษร สิทธิในทรัพย์สินทางปัญญาทั้งหมด (รวมถึงลิขสิทธิ์) ที่เกิดจากหรือเกี่ยวข้องกับรายงานฉบับนี้ เป็นของบริษัทแต่เพียงผู้เดียว</p>
+<p><strong>การใช้ที่ได้รับอนุญาต (Authorized Use):</strong> ลูกค้าสถาบันอาจใช้รายงานฉบับนี้ภายในองค์กรในขอบเขตที่นโยบายการกำกับดูแลภายในของตนอนุญาต อย่างไรก็ตาม ห้ามเปิดเผยหรือแบ่งปันแก่บุคคลที่สามโดยเด็ดขาด</p>
+<p><strong>การห้ามใช้เชิงพาณิชย์ (Prohibition on Commercial Use):</strong> หากไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรอย่างชัดแจ้งจากบริษัทล่วงหน้า ห้ามบุคคลหรือนิติบุคคลใดทำซ้ำ เผยแพร่ซ้ำ แจกจ่าย ขายต่อ บรรจุใหม่ หรือใช้รายงานฉบับนี้หรือส่วนใดส่วนหนึ่งเพื่อวัตถุประสงค์เชิงพาณิชย์หรือแสวงหากำไรไม่ว่ารูปแบบใด</p>
+<p><strong>การดำเนินการทางกฎหมาย (Legal Recourse):</strong> บริษัทขอสงวนสิทธิ์ในการดำเนินการและเรียกร้องทางกฎหมายทั้งหมดที่มีต่อการใช้เชิงพาณิชย์ การแจกจ่ายซ้ำ หรือการละเมิดสิทธิในทรัพย์สินทางปัญญาโดยไม่ได้รับอนุญาต</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s9" role="tabpanel" aria-labelledby="rn-t-s9" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">09</span><span>Forward-Looking Statements and Disclaimer: ข้อความเชิงคาดการณ์อนาคตและข้อสงวนสิทธิ์</span></h2>
+
+<p>รายงานฉบับนี้อาจมีข้อความเชิงคาดการณ์อนาคต รวมถึงการพยากรณ์ การประมาณการ และการวิเคราะห์แนวโน้มอุตสาหกรรม ข้อความเหล่านี้อยู่ภายใต้ความเสี่ยงและความไม่แน่นอนซึ่งอาจทำให้ผลลัพธ์จริงแตกต่างอย่างมีนัยสำคัญจากที่คาดไว้ บริษัทไม่รับผิดชอบต่อความสูญเสียทางตรง ทางอ้อม หรือที่เป็นผลสืบเนื่องใด ๆ ที่เกิดจากการใช้หรือการพึ่งพาเนื้อหาของรายงานฉบับนี้</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s10" role="tabpanel" aria-labelledby="rn-t-s10" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">10</span><span>Invite your friends and earn rewards: ชวนเพื่อนและรับรางวัล</span></h2>
+
+<p>หากคุณชอบ FUNDA ลองแชร์ให้เพื่อน ๆ และรับรางวัลเมื่อพวกเขาสมัครสมาชิก</p>
+<p><strong>ชวนเพื่อน (Invite Friends)</strong></p>
+<p>ถูกใจ (LIKE) · คอมเมนต์ (COMMENT) · รีสแตก (RESTACK)</p>
+
+
+</div>
+
+</section>
+<footer class="rn-foot">
+FundaAI<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+
+
+</body></html>

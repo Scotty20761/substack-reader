@@ -1,0 +1,1220 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>Preview|PANW FY27Q1: การอ่านเชิงปริมาณช่วงต้นของผู้ชนะแห่งยุค Platformization</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">FundaAI</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/PANW?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$PANW</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CRWD?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CRWD</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ZS?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ZS</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/FTNT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$FTNT</span>
+<span class="rn-deck">การสำรวจช่องทางจำหน่าย (channel checks) ชี้ว่าการใช้จ่ายของลูกค้าในไตรมาส FY27Q1 เติบโตแข็งแกร่ง และ platformization แรงขึ้นกว่าเดิม — 14 พ.ย.</span>
+</div>
+<h1>🛡️ Preview|PANW FY27Q1: การอ่านเชิงปริมาณช่วงต้นของผู้ชนะแห่งยุค Platformization</h1>
+<div class="rn-byline"><b>FundaAI</b><span class="rn-sep">·</span>2026-11-13<span class="rn-sep">·</span><span class="rn-th">อ่าน 51 นาที</span><span class="rn-en">51 min read</span></div>
+</div>
+<div class="rn-lede"><p>ก่อนประกาศงบ เราคุยกับผู้ให้ข้อมูลในช่องทางจำหน่ายของ PANW หกราย และรวบรวมความเคลื่อนไหวล่าสุดใน 5 หัวข้อต่อไปนี้:</p>
+<ol>
+<li>การเติบโตและแนวโน้มการใช้จ่ายของลูกค้า</li>
+<li>งบประมาณความปลอดภัยของลูกค้าและ platformization</li>
+<li>พัฒนาการของผลิตภัณฑ์หลัก</li>
+<li>ความคืบหน้าของผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา</li>
+<li>วิธีที่องค์กรใช้โมเดล AI ในงานปฏิบัติการด้านความปลอดภัย (security operations)</li>
+</ol></div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>📈 การใช้จ่ายของลูกค้า PANW เร่งตัวต่อเนื่อง — ช่องทางอเมริกาเหนือ A ปรับ FY27Q1 เป็น 34%–35% (สูงกว่าช่วงเดิม 32%–34%) และคาด FY27Q2 ที่ 36%–38% ส่วนช่องทางยุโรปและออสเตรเลียก็ทรงตัวหรือขยับขึ้นเล็กน้อย</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="ภาพรวมการใช้จ่ายของลูกค้า" data-en="Preview|PANW FY27Q1" data-th-full="ภาพรวมการใช้จ่ายของลูกค้า" data-en-full="Preview|PANW FY27Q1: An Early Quantitative Read on a Platformization Winner" title="ภาพรวมการใช้จ่ายของลูกค้า">ภาพรวมการใช้จ่ายของลูกค้า</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="งบประมาณความปลอดภัยของลูกค้าและ Platform…" data-en="งบประมาณความปลอดภัยของลูกค้าและ Platform…" data-th-full="งบประมาณความปลอดภัยของลูกค้าและ Platform…" data-en-full="งบประมาณความปลอดภัยของลูกค้าและ Platform…" title="งบประมาณความปลอดภัยของลูกค้าและ Platform…">งบประมาณความปลอดภัยของลูกค้าและ Platform…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="III. ผลงานรายผลิตภัณฑ์" data-en="III. ผลงานรายผลิตภัณฑ์" data-th-full="III. ผลงานรายผลิตภัณฑ์" data-en-full="III. ผลงานรายผลิตภัณฑ์" title="III. ผลงานรายผลิตภัณฑ์">III. ผลงานรายผลิตภัณฑ์</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="ผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา" data-en="ผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา" data-th-full="ผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา" data-en-full="ผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา" title="ผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา">ผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="ติดตามผล" data-en="ติดตามผล" data-th-full="ติดตามผล" data-en-full="ติดตามผล" title="ติดตามผล">ติดตามผล</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="แนวโน้มรายไตรมาส" data-en="แนวโน้มรายไตรมาส" data-th-full="แนวโน้มรายไตรมาส" data-en-full="แนวโน้มรายไตรมาส" title="แนวโน้มรายไตรมาส">แนวโน้มรายไตรมาส</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="อัปเดตตัวชี้วัดหลัก" data-en="อัปเดตตัวชี้วัดหลัก" data-th-full="อัปเดตตัวชี้วัดหลัก" data-en-full="อัปเดตตัวชี้วัดหลัก" title="อัปเดตตัวชี้วัดหลัก">อัปเดตตัวชี้วัดหลัก</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span><span class="rn-th">ภาพรวมการใช้จ่ายของลูกค้า</span><span class="rn-en">Preview|PANW FY27Q1: An Early Quantitative Read on a Platformization Winner</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ช่องทางอเมริกาเหนือ A ปรับประมาณการ FY27Q1 ขึ้นเป็น 34%–35% (เดิม 32%–34%) และคาด FY27Q2 ที่ 36%–38%</li><li>ช่องทางอเมริกาเหนือ B เห็นการเติบโตราว 15.7% ใน FY27Q1 และคาดว่าจะขยับเป็นราว 16.25% ในเดือนมกราคม</li><li>ช่องทางยุโรป A (ฐานลูกค้าชุดใหม่) เร่งจากราว 23% เป็นราว 25% และคาด FY27Q2 ที่ราว 27%</li><li>เมื่อตัด CyberArk และ Chronosphere ออก การเติบโตยังคงขยับขึ้นเล็กน้อย</li></ul></div>
+<p>ผู้ให้ข้อมูลสี่รายเคยร่วมสัมภาษณ์ในรอบก่อน และอีกสองรายเป็นรายใหม่ ช่องทางอเมริกาเหนือ C (North American Channel C) ซึ่งเป็นรายใหม่ให้ตัวเลขการเติบโตบางตัวที่ไม่สอดคล้องกัน เราจึงใช้เฉพาะข้อสังเกตเชิงคุณภาพของรายนี้ในผลิตภัณฑ์บางตัวเท่านั้น</p>
+<p><strong>ตารางที่ 1: การเติบโตของการใช้จ่ายของลูกค้า (YoY) รายช่องทางและรายไตรมาส</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>วันที่สัมภาษณ์</th><th>FY26Q3</th><th>FY26Q4</th><th>FY27Q1</th><th>FY27Q2E</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A</td><td class="rn-numcell">2026.08</td><td>29%–30%</td><td>34%–35%</td><td>32%–34% E</td><td>36%–38%</td></tr><tr><td></td><td class="rn-numcell">2026.11</td><td>—</td><td>—</td><td>34%–35%</td><td>36%–38%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td class="rn-numcell">2026.11</td><td>14.5%–14.7%</td><td>~15.1%</td><td>~15.7%</td><td>~16.25% (ม.ค.)</td></tr><tr><td>ช่องทางยุโรป A</td><td class="rn-numcell">2026.11</td><td>19%–20%</td><td>~23%</td><td>~25%</td><td>~27%</td></tr><tr><td>ช่องทางยุโรป B</td><td class="rn-numcell">2026.08</td><td>~14%</td><td>~15%</td><td>18%–20% E</td><td>18%–20%</td></tr><tr><td></td><td class="rn-numcell">2026.11</td><td>—</td><td>—</td><td>18%–20%</td><td>18%–20%</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td class="rn-numcell">2026.08</td><td>~20%</td><td>19%–22%</td><td>—</td><td>—</td></tr><tr><td></td><td class="rn-numcell">2026.11</td><td>~20%</td><td>19%–22%</td><td>20%–22%</td><td>21%–23%</td></tr></tbody></table>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p><strong>1. ช่องทางอเมริกาเหนือ A (North American Channel A)</strong></p>
+<ul>
+<li>a. ในเดือนสิงหาคม ช่องทางนี้รายงานว่าการใช้จ่ายของลูกค้าใน FY26Q4 โต 34%–35% YoY และคาดว่า FY27Q1 จะโต 32%–34%</li>
+<li>b. ตอนนี้ช่องทางประเมิน FY27Q1 ที่ 34%–35% ซึ่งเท่ากับหรือสูงกว่าช่วงบนของประมาณการเดิมเล็กน้อย และแทบไม่เปลี่ยนจากไตรมาสก่อน ผู้ให้ข้อมูลบอกว่ามีดีลใหญ่ปิดได้ในไตรมาสนี้ โดยมีดีมานด์แข็งแรงจากลูกค้ากลุ่มค้าปลีก ผู้จัดจำหน่าย และบริการทางการเงิน</li>
+<li>c. ช่องทางยังคาดว่า FY27Q2 จะโต 36%–38% ผู้ให้ข้อมูลคาดว่าไตรมาสหน้าจะมีการต่ออายุสัญญา (renewal) มากขึ้น และเห็นลูกค้าใช้งบที่เหลืออยู่ในช่วงปลายปีปฏิทิน</li>
+</ul>
+<p><strong>2. ช่องทางอเมริกาเหนือ B (North American Channel B)</strong></p>
+<ul>
+<li>a. ผู้ให้ข้อมูลรายใหม่นี้ดูแลธุรกิจ system integration ระดับโลกของ PANW ขนาดราว $460 ล้าน การเติบโตของการใช้จ่ายของลูกค้าขยับจาก 14.5%–14.7% ใน FY26Q3 เป็นราว 15.1% ใน FY26Q4</li>
+<li>b. การเติบโตเพิ่มเป็นราว 15.7% ใน FY27Q1 ซึ่งอยู่ในช่วง 14.5%–16.5% ที่ผู้ให้ข้อมูลเคยประเมินไว้</li>
+<li>c. ผู้ให้ข้อมูลคาดว่าการเติบโตจะขยับขึ้นเป็นราว 16.25% ในเดือนมกราคม และใกล้ 16.6% ในช่วงมีนาคม–เมษายน</li>
+<li>d. เมื่อตัด CyberArk และ Chronosphere ออก การเติบโตของการใช้จ่ายของลูกค้ายังคงค่อยๆ ขยับขึ้น ช่องทางประเมินว่าการซื้อกิจการสองรายนี้เพิ่มอัตราการเติบโตรายไตรมาสราว 0.8–1 จุดเปอร์เซ็นต์</li>
+</ul>
+<p><strong>3. ช่องทางยุโรป A (European Channel A)</strong></p>
+<ul>
+<li>a. ผู้ให้ข้อมูลย้ายนายจ้างระหว่างการสัมภาษณ์สองรอบ และตอนนี้ดูแลฐานลูกค้าคนละชุด เรายังคงป้าย European Channel A ไว้ และขอให้อัปเดตการเติบโตของการใช้จ่ายรายไตรมาสพร้อมแนวโน้มไตรมาสหน้า โดยอิงจากลูกค้าที่ผู้ให้ข้อมูลดูแลอยู่ในปัจจุบัน</li>
+<li>b. สำหรับฐานลูกค้าปัจจุบัน การเติบโตเพิ่มจาก 19%–20% ใน FY26Q3 เป็นราว 23% ใน FY26Q4 และราว 25% ใน FY27Q1 ผู้ให้ข้อมูลประเมินคร่าวๆ ว่าลูกค้าเดิมสร้างการเติบโตมากกว่า 90%</li>
+<li>c. ช่องทางคาดว่า FY27Q2 จะโตราว 27% โดยส่วนหนึ่งได้แรงหนุนจากลูกค้าที่ใช้งบที่เหลือในช่วงปลายปีปฏิทิน</li>
+</ul>
+<blockquote>“แล้วก็ยังมีดีลแพลตฟอร์มหลายปีขนาดใหญ่ที่เราคาดว่าจะปิดได้ ความเสี่ยงหลักซึ่งเป็นเรื่องปกติของดีลใหญ่ทุกดีลก็คือ มันอาจเลื่อนข้ามไปปีหน้า”</blockquote>
+<ul>
+<li>ผู้ให้ข้อมูลมองบวกต่อ PANW มากขึ้นหลังเปลี่ยนบทบาท เขาเห็นลูกค้าชุดใหม่ และยังพบว่าลูกค้าชอบรวมการใช้จ่ายด้านความปลอดภัยไว้บนแพลตฟอร์มให้น้อยรายลง ซึ่งสอดคล้องกับมุมมองเดิมเรื่อง platformization</li>
+</ul>
+<blockquote>“ผมต้องบอกว่าผมมองในแง่ดีขึ้น … ผมยังได้ทำงานกับพาร์ตเนอร์กลุ่มเดิมอย่าง Palo Alto แต่ได้เห็นพวกเขาในฐานลูกค้าที่ต่างออกไป ซึ่งช่วยยืนยันมุมมองของผมหลายอย่าง … ลูกค้าปลายทางชอบรวมศูนย์ไว้บนแพลตฟอร์มให้น้อยลง … แนวโน้มของผมต่อ Palo Alto Networks ดีขึ้น และก่อนหน้านี้ก็ค่อนข้างบวกอยู่แล้ว”</blockquote>
+<ul>
+<li>ช่องทางคาดว่า FY27Q2 จะมีการเติบโตแบบออร์แกนิกราว 23% เมื่อตัด CyberArk และ Chronosphere ออก</li>
+</ul>
+<p><strong>4. ช่องทางยุโรป B (European Channel B)</strong></p>
+<ul>
+<li>a. ในเดือนสิงหาคม ช่องทางรายงานว่าการใช้จ่ายโตราว 15% ใน FY26Q4 โดยมาจากผลิตภัณฑ์และบริการเดิมของ PANW เป็นหลัก ตอนนั้นช่องทางคาดว่าทั้ง FY27Q1 และ FY27Q2 จะโต 18%–20%</li>
+<li>b. FY27Q1 เป็นไปตามประมาณการเดิม</li>
+<li>c. ประมาณการ FY27Q2 ยังอยู่ที่ 18%–20% ช่องทางคาดว่าบางโครงการจะปิดได้ในไตรมาสแรกของปีปฏิทิน เมื่องบประมาณใหม่ถูกปล่อยออกมา</li>
+<li>d. เมื่อตัด CyberArk และ Chronosphere ออก การเติบโตของการใช้จ่ายของลูกค้า YoY เพิ่มจากราว 15% ใน FY26Q4 เป็นราว 18% ใน FY27Q1</li>
+</ul>
+<p><strong>5. ช่องทางออสเตรเลีย (Australian Channel)</strong></p>
+<ul>
+<li>a. ในเดือนสิงหาคม ช่องทางรายงานว่าการใช้จ่ายโต 19%–22% ใน FY26Q4 และคาดว่าทั้งปี FY27 จะโต 22%–25%</li>
+<li>b. ตอนนี้ช่องทางประเมิน FY27Q1 ที่ 20%–22% ซึ่งใกล้เคียงกับไตรมาสก่อน การขยายตัวในกลุ่มลูกค้าเดิมเป็นแรงขับเคลื่อนการเติบโตส่วนใหญ่ ส่วนวงจรการขายที่ยาวขึ้นทำให้การเร่งตัวใน FY27Q1 จำกัด</li>
+</ul>
+<blockquote>“ไตรมาส 4 มักได้อานิสงส์จากการซื้อช่วงสิ้นปี ขณะที่ไตรมาส 1 เรามีการรีเซ็ตงบประมาณและต้องรออนุมัติจัดซื้อ”</blockquote>
+<ul>
+<li>ช่องทางคาดว่าการเติบโตจะขยับขึ้นเป็น 21%–23% ใน FY27Q2 และยังคงประมาณการทั้งปี FY27 ที่ 22%–25%</li>
+<li>ช่องทางประเมินว่าการเติบโตแบบออร์แกนิกไตรมาสนี้อยู่ที่ราว 18% ใกล้เคียงกับประมาณการไตรมาสก่อนที่ 17%–18% และคาดว่าไตรมาสหน้าจะโตแบบออร์แกนิก 18%–20%</li>
+</ul>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ช่องทางส่วนใหญ่รายงานว่าการใช้จ่ายของลูกค้าคงที่หรือสูงกว่าไตรมาสก่อนเล็กน้อย</p><ul class="rn-sum-list"><li>อเมริกาเหนือ A มีดีลใหญ่ปิดได้ในกลุ่มค้าปลีก ผู้จัดจำหน่าย และบริการทางการเงิน</li><li>ความเสี่ยงหลักคือดีลแพลตฟอร์มหลายปีอาจเลื่อนข้ามไปปีหน้า</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">34%–35%</div><div class="rn-stat-c">ช่องทางอเมริกาเหนือ A — การเติบโตของการใช้จ่ายใน FY27Q1</div></div><div class="rn-stat"><div class="rn-stat-v">~15.7%</div><div class="rn-stat-c">ช่องทางอเมริกาเหนือ B — FY27Q1</div></div><div class="rn-stat"><div class="rn-stat-v">~25%</div><div class="rn-stat-c">ช่องทางยุโรป A — FY27Q1</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span>งบประมาณความปลอดภัยของลูกค้าและ Platformization</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ส่วนแบ่งของ PANW ในงบความปลอดภัยองค์กรใหญ่ (อเมริกาเหนือ A) เพิ่มจาก 26%–30% ใน CY25 เป็น 30%–35% ใน CY26 และอาจถึง 40%–42% ใน CY27</li><li>ธนาคารที่ช่องทางหนึ่งดูแลเห็นสัดส่วนความปลอดภัยในงบ IT เพิ่มจากราว 12% เป็นราว 20% และคาดงบความปลอดภัยโตราว 100% ภายในสิ้นปี 2027</li><li>สัดส่วนการใช้จ่ายกับ PANW ที่ผูกกับปริมาณการใช้งานเพิ่มจากราว 5%–8% เป็น 10%–15%</li><li>ลูกค้ายังพึ่งผู้ขาย best-of-breed บางราย และมักรอให้สัญญาเดิมครบกำหนดก่อนย้าย</li></ul></div>
+<p>สมัครรับแล้ว (Subscribed)</p>
+<p>เรายังถามช่องทางบางรายถึงแผนเบื้องต้นของลูกค้าสำหรับ CY27 ว่างบประมาณความปลอดภัยไซเบอร์อาจโตได้เท่าไร และ PANW อาจได้ส่วนแบ่งงบนั้นเท่าไร</p>
+<p><strong>ตารางที่ 2: การเติบโตของงบประมาณความปลอดภัย (YoY) รายช่องทาง</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>CY25 งบความปลอดภัยโต YoY</th><th>CY26 งบความปลอดภัยโต YoY</th><th>CY27E งบความปลอดภัยโต YoY</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A (องค์กรขนาดใหญ่)</td><td>8%–12%*</td><td>~12%</td><td>12%–17%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td class="rn-numcell">9.9%</td><td>~11.5%</td><td>11.5%–14.25%</td></tr><tr><td>ช่องทางยุโรป A</td><td>7%–8%</td><td>10%–11%</td><td>11%–13%</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td>6%–8%</td><td>8%–12%</td><td>10%–15%</td></tr></tbody></table>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p><strong>ตารางที่ 3: ส่วนแบ่งงบประมาณของ PANW รายช่องทาง</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>ส่วนแบ่งงบของ PANW ปี CY25</th><th>ส่วนแบ่งงบของ PANW ปี CY26</th><th>ส่วนแบ่งงบของ PANW ปี CY27E</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A (องค์กรขนาดใหญ่)</td><td>26%–30%*</td><td>30%–35%</td><td>35%–42%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td>10%–14%</td><td>12%–18%</td><td>17%–26%</td></tr><tr><td>ช่องทางยุโรป A</td><td>14%–15%</td><td>17%–18%</td><td>19%–20%</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td>12%–15%</td><td>15%–20%</td><td>17%–22%</td></tr></tbody></table>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p>เราใช้ค่ากลางของช่วงการเติบโตของงบความปลอดภัยและช่วงส่วนแบ่งงบของ PANW เพื่อประมาณการเติบโตของการใช้จ่ายแบบออร์แกนิกใน CY26 และ CY27 สำหรับช่องทางส่วนใหญ่ เราหักการเติบโตของ CY26 ออกเป็นตัวเลขหลักเดียวของจุดเปอร์เซ็นต์ เพื่อสะท้อนผลจากการซื้อกิจการ ส่วนช่องทางยุโรป A ระบุว่า CyberArk เป็นปัจจัยที่ช่วยเพิ่มส่วนแบ่งของ PANW ในปีนั้นมากที่สุด เราจึงปรับส่วนแบ่งงบของ PANW ใน CY26 ของช่องทางนี้ก่อนคำนวณการเติบโต</p>
+<p><strong>ตารางที่ 4: การเติบโตของการใช้จ่ายแบบออร์แกนิกโดยนัย (Implied Organic Spending Growth)</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>CY26 การเติบโตแบบออร์แกนิกโดยนัย</th><th>CY27E การเติบโตแบบออร์แกนิกโดยนัย</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A (องค์กรขนาดใหญ่)</td><td class="rn-numcell">25.0%</td><td class="rn-numcell">35.6%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td class="rn-numcell">34.4%</td><td class="rn-numcell">61.8%</td></tr><tr><td>ช่องทางยุโรป A</td><td class="rn-numcell">23.8%</td><td class="rn-numcell">24.8%</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td class="rn-numcell">37.6%</td><td class="rn-numcell">25.4%</td></tr></tbody></table>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA และประมาณการของ FUNDA</em></p>
+<p><strong>1. ช่องทางอเมริกาเหนือ A</strong></p>
+<ul>
+<li>a. ช่องทางประเมินว่างบประมาณความปลอดภัยไซเบอร์ของลูกค้าโต 8%–12% YoY ใน CY25 ส่วนใน CY26 งบโตราว 12% ในองค์กรขนาดใหญ่ และราว 5% ในธุรกิจขนาดเล็กและขนาดกลาง (SMB) ช่องทางคาดว่างบขององค์กรขนาดใหญ่ใน CY27 จะโต 12%–17% เร็วกว่า CY26 ราว 2–3 จุดเปอร์เซ็นต์ โดยกลุ่มบริษัทขนาดกลางแทบไม่เร่งตัว เมื่อเวิร์กโหลด AI เข้าสู่การใช้งานจริงมากขึ้น ลูกค้าต้องใช้จ่ายเพิ่มกับ privileged access และการจัดการ machine identity</li>
+</ul>
+<p>เงินส่วนหนึ่งมาจากงบที่มีอยู่เดิมสำหรับ AI และโครงการเชิงกลยุทธ์</p>
+<ul>
+<li>b. การรวมผู้ขาย (vendor consolidation) ของลูกค้ารายใหญ่เป็นตัวขับหลักของการเพิ่มส่วนแบ่งของ PANW ผู้ให้ข้อมูลประเมินว่าส่วนแบ่งของ PANW ในงบความปลอดภัยขององค์กรขนาดใหญ่เพิ่มจากราว 26%–30% ใน CY25 เป็น 30%–35% ใน CY26 ในช่วงนั้นงบความปลอดภัยขององค์กรขนาดใหญ่โตราว 12% และการใช้จ่ายกับ PANW โตราว 30%–35% ผู้ให้ข้อมูลเดิมประเมินว่า CY27 จะเพิ่มอีกราว 5–7 จุดเปอร์เซ็นต์ และบอกว่าส่วนแบ่งของ PANW อาจเข้าใกล้ 40%–42% ช่องทางเห็นลูกค้ารวมศูนย์ปฏิบัติการด้านเครือข่ายและด้านความปลอดภัยที่เคยแยกกัน และรวมศูนย์การเฝ้าระวังไว้ที่เดียว</li>
+</ul>
+<blockquote>“ความกังวลทั้งหมดในองค์กร ถ้าให้พูดคร่าวๆ ก็คือ 60% มาจากการที่ AI เข้าสู่การใช้งานจริงมากขึ้นและข้อกังวลเรื่อง AI ที่เพิ่มขึ้นเรื่อยๆ ส่วนอีก 40% คือ ‘เฮ้ย ฉันมีผู้ขายและผลิตภัณฑ์ในระบบเยอะเกินไป มันไม่ได้ช่วยอะไรเลย ฉันจ่ายค่าไลเซนส์และค่าคนเพิ่มขึ้น’ การรวมมาอยู่กับ Palo Alto ซึ่งมีความสามารถทั้งหมดนี้อยู่ใต้ร่มเดียว ทำให้เกิดประสิทธิภาพในการปฏิบัติงาน แม้การรวมศูนย์จะเป็นดีลใหญ่เมื่อวัดเป็นเงิน แต่การติดตั้งและการย้ายระบบก็ใช้เวลา ต่อให้ระดับผู้บริหารตกลงกันแล้ว ทีมที่ลงมือทำจริงอาจต้องใช้เวลานานกว่าจะเปลี่ยนผลิตภัณฑ์เก่า และจัดสรรงบไลเซนส์ให้ Palo Alto”</blockquote>
+<ul>
+<li>ลูกค้าบางรายใช้จ่ายกับ AI มากกว่าที่คาด และยังมีที่ว่างในงบสำหรับการต่ออายุสัญญาช่วงสิ้นปี ช่องทางบอกว่าลูกค้ากันเงินไว้สำหรับการต่ออายุ พร้อมทั้งเจรจาสัญญาบริการ IT อื่นๆ ใหม่</li>
+</ul>
+<blockquote>“เมื่อพวกเขาเซ็นต่ออายุหลายปีและขยับไปสู่ platformization และอะไรทำนองนั้น ไม่ใช่ว่าพวกเขาจะจ่ายทั้งหมดในไตรมาส 4 … ลูกค้าบางรายใช้จ่ายมากกว่าเดิม งบ AI ของพวกเขาทำให้ตกใจกับราคาหรือเจอเรื่องที่คาดไม่ถึง … ในมุมของผม ลูกค้าจัดสรรงบไว้แล้วสำหรับการต่ออายุผลิตภัณฑ์องค์กรส่วนใหญ่ที่จะมาถึง … ไตรมาส 4 ของปีปฏิทินคือช่วงที่ผู้ขายส่วนใหญ่เปิดรับการปิดดีลด้วย … ลูกค้าจำนวนมากเริ่มเปิดประมูลบริการ IT แบบ managed service เชิงรุก … พวกเขาอาจมีสัญญา managed service สามปีหรือห้าปี … พวกเขากดดันให้ผู้ขายลดงบ โดยบอกว่า คุณใช้ความสามารถของ AI ทำได้มากขึ้นด้วยต้นทุนที่ต่ำลง … แม้การใช้จ่ายจะสูงขึ้น ลูกค้าก็ประหยัดได้ในบางด้านเช่นกัน”</blockquote>
+<ul>
+<li>สัดส่วนการใช้จ่ายของลูกค้ากับ PANW ที่ผูกกับปริมาณการใช้งาน (usage) เพิ่มจากราว 5%–8% เมื่อปีที่แล้วเป็น 10%–15% ในตอนนี้ ผู้ให้ข้อมูลยกตัวอย่างการนำเข้าข้อมูลของ XSIAM และการใช้งานผลิตภัณฑ์ไฟร์วอลล์กับผลิตภัณฑ์ความปลอดภัยสำหรับ AI บางตัว</li>
+</ul>
+<p><strong>2. ช่องทางอเมริกาเหนือ B</strong></p>
+<ul>
+<li>a. การเติบโตของงบประมาณความปลอดภัยไซเบอร์ของลูกค้าเพิ่มจาก 9.9% ใน CY25 เป็นราว 11.5% ใน CY26 ช่องทางคาดว่า CY27 จะโต 11.5%–14.25% โดยมีการใช้จ่ายเพิ่มเติมกับความปลอดภัยด้านตัวตน (identity) ข้อมูล เครือข่าย และ endpoint ส่วนแบ่งของ PANW เพิ่มจาก 10%–14% ใน CY25 เป็น 12%–18% ใน CY26 และคาดว่าจะถึง 17%–26% ใน CY27 โดยหลักแล้วมาจากดีมานด์ SASE และระบบอัตโนมัติ SOC</li>
+<li>b. Platformization ไปไกลที่สุดในด้านระบบอัตโนมัติ SOC ช่องทางเห็นลูกค้าใช้เครื่องมือด้านปฏิบัติการความปลอดภัยที่เคยซื้อแยกกัน มาใช้ร่วมกันเป็นชุดเดียว</li>
+</ul>
+<blockquote>“โดยรวมแล้ว platformization กำลังเร่งตัว และผมค่อนข้างเอนไปทางว่าการเร่งตัวนี้มีนัยสำคัญ แต่ผมจะไม่เริ่มจากสมมติฐานว่าทุกอย่างในความปลอดภัยไซเบอร์จะถูกรวมมาอยู่ใต้ Palo Alto … เราเห็นประโยชน์สูงสุดของ platformization ใน autonomous SOC … มันคือการรวมกันของ XSIAM, XSOAR, exposure management และอื่นๆ … นั่นคือหนึ่งในตัวอย่างที่ดีที่สุดของ platformization ที่เราเห็น อันดับสองคือ Prisma Cloud และอันดับสามในระดับหนึ่งคือ AI security”</blockquote>
+<ul>
+<li>ราว 13%–20% ของการใช้จ่ายของลูกค้ากับ PANW ผูกกับปริมาณการใช้งาน โดยหลักอยู่ในความปลอดภัยบนคลาวด์ ไฟร์วอลล์บนคลาวด์ และปริมาณข้อมูลที่ XSIAM ประมวลผล ผู้ให้ข้อมูลยังประเมินสัดส่วนของงบความปลอดภัยรวมที่ใช้ไปกับ AI token</li>
+</ul>
+<blockquote>“สำหรับองค์กรขนาดใหญ่ทั่วไป ซึ่งหมายถึงบริษัทที่มีรายได้เกิน $3 พันล้านต่อปี ราว 1.2% ถึง 1.8% ของงบไซเบอร์ไปกับ AI token … ถ้าเป็นบริษัทแบบ AI-native หรือ digital-native ที่ลงทุนจริงจังในด้านเหล่านี้ ตัวเลขจะสูงกว่า 4% และอาจสูงได้ถึง 11% แต่นั่นเป็นเพราะพวกเขามองจากมุมธุรกิจ … สำหรับองค์กรขนาดใหญ่ทั่วไป ผมคาดว่าตัวเลขนี้จะเพิ่มเป็น 1.4%–2.2% ในอีกหนึ่งถึงสองไตรมาสข้างหน้า”</blockquote>
+<p><strong>3. ช่องทางยุโรป A</strong></p>
+<ul>
+<li>a. การเติบโตของงบประมาณความปลอดภัยไซเบอร์ของลูกค้าเพิ่มจากราว 7%–8% ใน CY25 เป็น 10%–11% ใน CY26 และคาดว่าจะถึง 11%–13% ใน CY27 งบ IT รวมของลูกค้าโดยทั่วไปโตราว 5%–7% ผู้ให้ข้อมูลบอกว่างบ CY25 ตึงตัว การต่ออายุสัญญาจำนวนมากออกมาเท่าเดิม ลูกค้ายังใช้เงินที่ประหยัดได้จากการรวมผู้ขายไปทุ่มกับโครงการ AI ความต้องการด้านความปลอดภัยที่เกี่ยวข้องกับ AI เริ่มปรากฏในงบชัดเจนขึ้นช่วงต้น CY26 การใช้จ่ายส่วนเพิ่มส่วนใหญ่ไปที่ AI security, identity, การป้องกันการฉ้อโกง และ compliance ส่วนแบ่งของ PANW ในงบความปลอดภัยของลูกค้าเพิ่มจากราว 14%–15% ใน CY25 เป็น 17%–18% ใน CY26 ผู้ให้ข้อมูลมองว่า CyberArk คือผู้มีส่วนมากที่สุดต่อการเพิ่มขึ้นนี้ เพราะการใช้จ่ายด้านความปลอดภัยของ identity ที่เคยนับแยก ตอนนี้ไหลมาที่ PANW เมื่อรวม CyberArk ส่วนแบ่งของ PANW คาดว่าจะเพิ่มราว 1–2 จุดเปอร์เซ็นต์เป็น 19%–20% ใน CY27 แต่เมื่อตัด CyberArk ออก ผู้ให้ข้อมูลก็ยังคาดว่าจะเพิ่มราว 0.5–1 จุดเปอร์เซ็นต์</li>
+<li>b. สัดส่วนของออร์เดอร์ใหญ่ที่ครอบคลุมหลายกลุ่มผลิตภัณฑ์เพิ่มจากราว 20% เมื่อปีที่แล้วเป็นราว 40% ส่วนหนึ่งมาจากการซื้อกิจการ ผู้ให้ข้อมูลยังประเมินว่าราว 40%–50% ของลูกค้าองค์กรขนาดใหญ่ที่ดูแลอยู่จะซื้อข้ามหลายกลุ่มผลิตภัณฑ์ภายในปีหน้า</li>
+</ul>
+<blockquote>“ฝ่ายจัดซื้อมักชอบการรวมศูนย์ที่มากขึ้น เพราะต่อรองเงื่อนไขกับซัพพลายเออร์ได้ดีกว่าและทำให้สภาพแวดล้อม IT เรียบง่ายขึ้น Palo Alto เสนอส่วนลดแบบบันเดิลและแรงจูงใจในการขายข้ามผลิตภัณฑ์ ลูกค้าบางรายยังภักดีต่อผลิตภัณฑ์ best-of-breed เช่น CrowdStrike ด้าน endpoint และ Okta ด้าน identity เรามักเห็นลูกค้ารอจนถึงตอนที่ต้องเจรจากับซัพพลายเออร์เดิมใหม่ก่อน แล้วค่อยพิจารณา Palo Alto ถ้ายังเหลือสัญญา Okta อีกสองปี พวกเขาก็จะไม่ย้ายทุกอย่างตอนนี้ Platformization จะดำเนินต่อไปเมื่อสัญญาเดิมครบกำหนดต่ออายุ ลูกค้าชอบการมีแพลตฟอร์มเดียว แต่ก็ทำให้พวกเขาพึ่งพาผู้ให้บริการรายเดียวมากขึ้นทั้งด้านเทคโนโลยีและราคา และเพิ่มต้นทุนการย้ายค่าย บางบริษัทจะเลือกผู้ให้บริการรายเดียว ขณะที่รายอื่นจะยังใช้หลายแพลตฟอร์ม … การย้ายไปแพลตฟอร์มเดียวก็มีต้นทุนในตัวเอง ต้องใช้คนและเวลา และบางครั้งต้องพึ่งผู้ให้บริการ system integrator ภายนอก”</blockquote>
+<ul>
+<li>ลูกค้ากำลังจัดสรรการใช้จ่าย IT ประจำใหม่ และขอเงินทุนเพิ่มหลังเกิดเหตุความปลอดภัย ช่องทางเห็นงบบางส่วนที่เคยกันไว้เพื่อรักษาโครงสร้างพื้นฐานให้เดินต่อได้ ถูกเบนไปที่ AI และความปลอดภัยไซเบอร์</li>
+</ul>
+<blockquote>“บริษัทกำลังเพิ่มการใช้จ่ายด้านความปลอดภัยไซเบอร์ บางครั้งด้วยการจัดสรรทรัพยากรใหม่ และบางครั้งก็ใช้เหตุการณ์อย่างเหตุ PHP ไปขอทรัพยากรใหม่จาก CFO … จึงเกิดการใช้จ่ายสุทธิที่เพิ่มขึ้น ผมไม่อยากบอกว่าการเปลี่ยนนี้มาจากฮาร์ดแวร์เป็นหลัก แต่ก็เป็นตัวอย่างที่ดี … คุณเอาเงินจากการใช้จ่าย IT แบบ keeping-the-lights-on … แล้วส่งต่อไปที่ AI และความปลอดภัยไซเบอร์”</blockquote>
+<p>ช่องทางยังบอกอีกว่าเหตุความปลอดภัยครั้งล่าสุดในสวีเดนทำให้บริษัทในประเทศใส่ใจความปลอดภัยไซเบอร์มากขึ้นและเพิ่มการใช้จ่ายที่เกี่ยวข้อง แต่ยังไม่เห็นการใช้จ่ายก้าวกระโดดอย่างชัดเจนในไตรมาส 4 ของปีปฏิทิน</p>
+<blockquote>“แค่สัปดาห์นี้เราเพิ่งมีเหตุการณ์ในสวีเดน แฮกเกอร์เจาะเข้าไปในตู้แช่ของห้างค้าปลีกอาหารรายใหญ่หลายแห่ง และสินค้าบางส่วนต้องถูกทิ้ง … มันทำให้ผู้คนตระหนักมากขึ้นว่าต้องเสริมความปลอดภัยไซเบอร์ ผมจะไม่เรียกว่าเป็นการก้าวกระโดดของการใช้จ่ายในไตรมาส 4 แต่มันทำให้การพูดคุยเรื่องนี้เข้มข้นขึ้น และการใช้จ่ายด้านความปลอดภัยไซเบอร์ก็เพิ่มขึ้นตามมา”</blockquote>
+<ul>
+<li>สัดส่วนการใช้จ่ายของลูกค้ากับ PANW ที่ผูกกับปริมาณการใช้งานเพิ่มจากราว 5%–8% เมื่อปีก่อนเป็น 10%–15% ผู้ให้ข้อมูลให้เครดิตส่วนใหญ่ของการเพิ่มขึ้นนี้กับสัดส่วน SecOps และความปลอดภัยบนคลาวด์ในรายการที่ลูกค้าซื้อที่สูงขึ้น</li>
+</ul>
+<p><strong>4. ช่องทางยุโรป B</strong></p>
+<ul>
+<li>a. ช่องทางคาดว่าการใช้จ่ายด้านความปลอดภัยจะเพิ่มจากราว 12% ของงบ IT รวมเป็น 18%–20% ผู้ให้ข้อมูลคาดว่าความปลอดภัยด้าน identity และผลิตภัณฑ์ที่ซื้อกิจการมาจะผลักดันการซื้อ PANW มากขึ้น บางโครงการมีแนวโน้มปิดได้เมื่องบประมาณใหม่เปิดในไตรมาสแรกของปีปฏิทิน</li>
+<li>b. Platformization คืบหน้าตามที่คาด ช่องทางกำลังทบทวนสัญญาระยะยาวและซัพพลายเออร์ปัจจุบันของลูกค้า เพื่อดูว่าผลิตภัณฑ์ใดย้ายมาที่ PANW ได้</li>
+</ul>
+<blockquote>“Palo Alto ยังขาดบางอย่างที่คล้ายกับ Flex Consumption ของ CrowdStrike ลูกค้ามีความยืดหยุ่นน้อยลงในการย้ายมา Palo Alto ในระหว่างที่กำลังเจรจาถอยออกจากสัญญาเดิม … ดีลที่เราทำตอนนี้ราว 80% เป็นการรวมผลิตภัณฑ์เข้าด้วยกัน มันไปไกลกว่าไฟร์วอลล์”</blockquote>
+<p>ช่องทางเห็น SentinelOne, Fortinet และ CrowdStrike ทำได้ดีกว่าในกลุ่มลูกค้าขนาดกลาง ผู้ให้ข้อมูลบอกว่าลูกค้ากลุ่มนี้อ่อนไหวต่อราคามากกว่า และยอดขาย PANW ส่วนใหญ่ในช่องทางนี้ยังคงเป็นองค์กรขนาดใหญ่</p>
+<ul>
+<li>โครงการ AI ทำให้การใช้จ่ายฮาร์ดแวร์ยังสูง ขณะที่ลูกค้าตัดต้นทุนอุปกรณ์อื่น — ในการสนทนารอบก่อน ช่องทางยุโรป B บอกว่าการใช้จ่ายด้าน AI ที่สูงขึ้น รวมถึงราคาฮาร์ดแวร์และซอฟต์แวร์ที่สูงขึ้น บีบงบ IT การใช้จ่ายฮาร์ดแวร์สำหรับโครงการ AI ยังสูงในไตรมาสนี้ ช่องทางเห็นลูกค้าบางรายเริ่มตัดการใช้จ่ายอุปกรณ์ที่ไม่จำเป็น เพื่อปกป้องการลงทุนด้านความปลอดภัยไซเบอร์ โดยเฉพาะ identity security และ compliance</li>
+</ul>
+<blockquote>“พวกเขามาตรฐานสเปกฮาร์ดแวร์ส่วนใหญ่ไว้แล้ว … ความสนใจต่ออะไรอย่าง AI laptop ลดลง ลูกค้าส่วนใหญ่ก็ยังไม่ซื้อ AI laptop … หลายรายลดสเปกแล็ปท็อปลง … พวกเขาทำสัญญาฮาร์ดแวร์ที่ยาวขึ้น แต่ผู้ขายในสภาพแวดล้อมน้อยลง ซึ่งช่วยให้ต้นทุนมีประสิทธิภาพขึ้น โดยรวมแล้วพวกเขายังใช้จ่ายกับฮาร์ดแวร์สูงเพราะโครงการ AI แต่ก็หาวิธีลดต้นทุนและเลี่ยงการใช้จ่ายบางอย่างที่อาจไม่สำคัญ … พวกเขาให้ความสำคัญกับความปลอดภัยไซเบอร์ โดยเฉพาะ identity และ compliance … พวกเขากำลังทำงานด้าน governance และ compliance มากมาย”</blockquote>
+<ul>
+<li>ราว 15%–18% ของการใช้จ่ายของลูกค้ากับ PANW ผูกกับปริมาณการใช้งาน โดยหลักอยู่ในผลิตภัณฑ์ AI และความปลอดภัยที่ส่งผ่านคลาวด์</li>
+</ul>
+<p><strong>5. ช่องทางออสเตรเลีย</strong></p>
+<ul>
+<li>a. การเติบโตของงบประมาณความปลอดภัยไซเบอร์ของลูกค้าเพิ่มจาก 6%–8% ใน CY25 เป็น 8%–12% ใน CY26 และคาดว่าจะถึง 10%–15% ใน CY27 ผู้ให้ข้อมูลเห็นลูกค้าเบนงบ AI เฉพาะบางส่วนไปที่ AI security การปกป้อง identity และ data governance การขยายความปลอดภัยบนคลาวด์ compliance และความปลอดภัยของ AI agent ก็ผลักดันการใช้จ่ายส่วนเพิ่มเช่นกัน ในกลุ่มลูกค้า PANW เดิม ส่วนแบ่งงบของ PANW เพิ่มจาก 12%–15% ใน CY25 เป็น 15%–20% ใน CY26 และคาดว่าจะถึง 17%–22% ใน CY27 โดยหลักผ่านการขายข้ามผลิตภัณฑ์ (cross-selling)</li>
+<li>b. Platformization เร่งตัวเพียงเล็กน้อย เมื่อการขยายตัวของลูกค้าเริ่มสร้างรายได้</li>
+</ul>
+<blockquote>“ผมยังเห็น net revenue retention ในกลุ่มลูกค้าที่ทำ platformization แล้วอยู่ราว 110% ถึง 120% ตัวขับหลักคือลูกค้าเดิมที่รวมความปลอดภัยเครือข่าย SASE ความปลอดภัยบนคลาวด์ และ SecOps ไว้กับผู้ขายเชิงกลยุทธ์ไม่กี่ราย อย่างไรก็ตาม ลูกค้ารายใหญ่มักต้องใช้เวลา 6 ถึง 18 เดือนในการย้ายแพลตฟอร์ม เพราะสัญญาเดิม ความซับซ้อนของการผนวกรวม และรอบการจัดซื้อ ดังนั้นผมคาดว่ากลยุทธ์ platformization จะช่วยการเติบโตอย่างมีนัยสำคัญมากขึ้นใน FY27Q2 และ FY27Q3 เมื่อการขยายตัวของลูกค้าแปลงเป็นรายได้ประจำ”</blockquote>
+<ul>
+<li>เหตุการณ์ด้านความปลอดภัยส่วนใหญ่ช่วยดึงโครงการที่มีอยู่แล้วให้เร็วขึ้น ผู้ให้ข้อมูลแยกระหว่างการตอบสนองทันทีของลูกค้ากับช่วงเวลาที่ผลปรากฏในการใช้จ่าย</li>
+</ul>
+<blockquote>“ในมุมของผม เหตุการณ์เหล่านี้ยกระดับความตระหนักรู้ในระดับคณะกรรมการและสร้างความเร่งด่วน … ลูกค้าส่วนใหญ่มีงบความปลอดภัยรายปีที่อนุมัติแล้ว ดังนั้นการตอบสนองทันทีของพวกเขาคือการประเมินช่องโหว่ใหม่ เร่งโครงการที่มีอยู่ และจัดลำดับความสำคัญของการใช้จ่ายใหม่ไปที่การปกป้อง identity, endpoint detection, ความปลอดภัยบนคลาวด์ และ incident response … ผลทางการเงินมักเห็นชัดขึ้นในช่วงสองถึงสี่ไตรมาส เมื่อลูกค้าประเมินความเสี่ยงและขออนุมัติเสร็จ แล้วเริ่มขยายสัญญาความปลอดภัยที่มีอยู่”</blockquote>
+<ul>
+<li>สัดส่วนการใช้จ่ายของลูกค้ากับ PANW ที่ผูกกับปริมาณการใช้งานเพิ่มเป็น 15%–20% จากราว 12%–15% เมื่อไม่กี่ไตรมาสก่อน ส่วนใหญ่มาจากการนำเข้าข้อมูล Cortex เวิร์กโหลดความปลอดภัยบนคลาวด์ และบริการความปลอดภัยที่ส่งผ่านคลาวด์ ส่วนการใช้จ่ายไฟร์วอลล์ส่วนใหญ่ยังเรียกเก็บผ่านการสมัครสมาชิก (subscription) หรือสัญญา</li>
+</ul>
+<p><strong>6. ข้อมูลจากช่องทางเพิ่มเติม</strong></p>
+<p>เรายังศึกษาการใช้จ่ายด้าน AI ขององค์กรและงบความปลอดภัยอยู่ด้วย ผู้ให้ข้อมูลช่องทางอีกรายที่ดูแลธนาคารขนาดใหญ่บอกว่า Palo Alto อาจได้ส่วนแบ่งการใช้จ่ายด้านความปลอดภัยใหม่มากขึ้น เรารวมความเห็นของผู้ให้ข้อมูลรายนี้ไว้เป็นส่วนเสริมของการสำรวจช่องทางจำหน่ายของ PANW</p>
+<ul>
+<li>a. ช่องทางนี้มองบวกมากต่อการเติบโตของงบความปลอดภัยในกลุ่มลูกค้าธนาคาร เห็นการใช้จ่ายด้านความปลอดภัยเพิ่มจากราว 12% เป็นราว 20% ของงบ IT รวม ก่อนเดือนตุลาคม งบ IT ของธนาคารตึงตัว ธนาคารให้ความสำคัญกับเซิร์ฟเวอร์และสตอเรจ และการซื้อด้านความปลอดภัยส่วนใหญ่เป็นการต่ออายุหนึ่งปี ลูกค้าบางรายเริ่มทบทวนสัญญาและความต้องการซื้อตั้งแต่ต้นเดือนตุลาคม ถึงปลายเดือนตุลาคม ข้อสอบถามและโครงการหลายปีเพิ่มขึ้นอย่างเห็นได้ชัด และบางโครงการขนาดใหญ่เริ่มดำเนินการแล้ว ผู้ให้ข้อมูลคาดว่าจะมีไม่กี่โครงการที่เซ็นสัญญาได้ตั้งแต่ปลายพฤศจิกายนถึงธันวาคม และจะมีอีกหลายโครงการเดินหน้าต้นปี 2027 ประมาณการเบื้องต้นของผู้ให้ข้อมูลคือ การใช้จ่ายรายปีกับผลิตภัณฑ์และบริการด้านความปลอดภัยอาจเกือบเป็นสองเท่าภายในสิ้นปี 2027 ในกลุ่มธนาคารที่ดูแลอยู่ การนำ AI ไปใช้เป็นตัวขับหลักที่ผู้ให้ข้อมูลมองเห็น และธนาคารกำลังทำโครงการความปลอดภัยควบคู่กับการเปลี่ยนแปลงโครงสร้างพื้นฐานด้านข้อมูลและเครือข่าย</li>
+</ul>
+<blockquote>“ก่อนเดือนตุลาคม เราไม่เห็นสัญญาหลายปีมากนัก เพราะงบ IT ตึงตัวในลูกค้าส่วนใหญ่ ธนาคารใช้จ่ายหลักๆ กับเซิร์ฟเวอร์และสตอเรจ … การซื้อด้านความปลอดภัยส่วนใหญ่เป็นการต่ออายุหนึ่งปี … ผมคิดว่าจุดเปลี่ยนจริงๆ คือสองสัปดาห์ที่ผ่านมา ต้นเดือนตุลาคมลูกค้าเริ่มคุยกันแล้วว่าต้องการอะไรและทบทวนสัญญากับการใช้งานเดิม … จากนั้นสองสัปดาห์ก่อนทุกอย่างก็เปลี่ยน … จู่ๆ ก็มีข้อสอบถาม การลงทะเบียนดีล และโอกาสเพิ่มขึ้นมากมาย … ผมคิดว่าบางโครงการจะเซ็นกันตั้งแต่ปลายเดือนพฤศจิกายนถึงธันวาคม แต่ส่วนใหญ่น่าจะเริ่มในเดือนมกราคม เดือนธันวาคมเป็นเดือนทำงานสั้น และการอนุมัติก็ใช้เวลา”</blockquote>
+<blockquote>“ความปลอดภัยเคยคิดเป็นราว 12% ของงบ IT รวม และตอนนี้อยู่ราว 20% … โครงการความปลอดภัยที่เราเห็นเชื่อมโยงกับโครงการอื่นของธนาคารมากมาย รวมถึงข้อมูลและเครือข่าย ในมุมของเรา AI คือตัวขับหลัก ธนาคารอยากเตรียมพร้อม เพราะเหตุการณ์ด้านความปลอดภัยในอดีตทำให้พวกเขาเสียหายหนักมาแล้ว ดังนั้นเราประเมินว่างบความปลอดภัยจะเพิ่มขึ้นราว 100% ภายในสิ้นปี 2027 รวมทั้งผลิตภัณฑ์และบริการ”</blockquote>
+<ul>
+<li>ผู้ให้ข้อมูลคาดว่า PANW จะได้ส่วนแบ่งที่มากขึ้นของงบความปลอดภัยส่วนเพิ่มของธนาคาร และประเมินเบื้องต้นว่าธุรกิจ PANW ของช่องทางนี้จะโตราว 30% หรือมากกว่าใน CY27 แพลตฟอร์มความปลอดภัยที่ธนาคารติดตั้งอยู่แล้วก็อยู่ในตำแหน่งที่ดีกว่าในการรองรับความต้องการด้านความปลอดภัยของ AI ที่เกิดใหม่</li>
+</ul>
+<blockquote>“ผมคิดว่า Palo Alto Networks จะได้ส่วนแบ่งมากขึ้น ผลิตภัณฑ์ความปลอดภัยบนคลาวด์ SASE และไฟร์วอลล์ของเขาเหมาะกับลูกค้ากลุ่มนี้ … ธนาคารไว้ใจ Palo Alto และ CrowdStrike อยู่แล้ว การนำความสามารถด้าน AI ของพวกเขามาใช้บนแพลตฟอร์มที่ใช้อยู่แล้วทำได้ค่อนข้างง่าย”</blockquote>
+<ul>
+<li>ช่องทางมีโอกาสราว 14–15 รายการสำหรับข้อตกลงซอฟต์แวร์องค์กรของ PANW ผู้ให้ข้อมูลประเมินว่าสัญญา PANW สามปีทั่วไปที่ธนาคารขนาดใหญ่ก่อนหน้านี้มีมูลค่ารวมราว $18–20 ล้าน ขณะที่ดีลใหญ่ที่กำลังจะมาอาจถึง $38–40 ล้านโดยรวม ขึ้นอยู่กับลูกค้า ปีนี้ช่องทางเห็นสัญญาบางฉบับขยายเป็นห้าหรือหกปีแล้ว</li>
+</ul>
+<blockquote>“ถ้าลูกค้าตั้งใจจะอยู่กับ Palo Alto ต่อไปอยู่แล้ว การเซ็นห้าหรือหกปีก็ได้ส่วนลดมากกว่า … ปีนี้เราเห็นสัญญาห้าปีและหกปีแล้ว ลูกค้าวางแผนจะอยู่กับ Palo Alto และมูลค่าสัญญาก็เพิ่มขึ้น”</blockquote>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">งบความปลอดภัยไซเบอร์ CY27 มีแนวโน้มโตต่อ และส่วนแบ่งของ PANW มีแนวโน้มเพิ่ม</p><ul class="rn-sum-list"><li>AI เป็นตัวขับหลักของการใช้จ่ายส่วนเพิ่ม โดยเฉพาะ identity, AI security และ compliance</li><li>ดีลธนาคารบางรายการขยายเป็นสัญญาห้าถึงหกปี และมูลค่าสัญญาเพิ่มขึ้น</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">35%–42%</div><div class="rn-stat-c">ส่วนแบ่งงบของ PANW ใน CY27E — ช่องทางอเมริกาเหนือ A (องค์กรขนาดใหญ่)</div></div><div class="rn-stat"><div class="rn-stat-v">12% → 20%</div><div class="rn-stat-c">สัดส่วนความปลอดภัยในงบ IT ของธนาคารที่ช่องทางหนึ่งดูแล</div></div><div class="rn-stat"><div class="rn-stat-v">10%–15%</div><div class="rn-stat-c">สัดส่วนการใช้จ่ายกับ PANW ที่ผูกกับปริมาณการใช้งาน</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span>III. ผลงานรายผลิตภัณฑ์</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ไฟร์วอลล์ฮาร์ดแวร์ได้แรงจากรอบเปลี่ยนอุปกรณ์ โดยช่องทางยุโรป A คาดว่าจะยืดไปอีกสี่ถึงหกไตรมาส</li><li>ไฟร์วอลล์ซอฟต์แวร์ของอเมริกาเหนือ A โตราว 42% และคาดว่ารอบการเติบโตจะอยู่อีกสองถึงสามปี</li><li>SASE ของอเมริกาเหนือ A โต 29%–30% สูงกว่าประมาณการเดิมราวสองจุดเปอร์เซ็นต์</li><li>Cortex Cloud ของอเมริกาเหนือ A เร่งเป็น 35%–36% และ XSIAM ของอเมริกาเหนือ B โต 45%–46%</li></ul></div>
+<h3>🔥 1. ไฟร์วอลล์ฮาร์ดแวร์ (Hardware Firewalls)</h3>
+<p><strong>ตารางที่ 5: การเติบโตของการใช้จ่ายไฟร์วอลล์ฮาร์ดแวร์ (YoY) รายช่องทาง</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>FY26Q3</th><th>FY26Q4</th><th>FY27Q1</th><th>FY27Q2E</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A</td><td>—</td><td>—</td><td class="rn-numcell">30%</td><td>36%–37%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td class="rn-numcell">13.8%</td><td class="rn-numcell">15.8%</td><td>16.1%–16.2%</td><td class="rn-numcell">16.6%</td></tr><tr><td>ช่องทางยุโรป A</td><td>—</td><td class="rn-numcell">8%</td><td class="rn-numcell">10%</td><td>—</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td>—</td><td>12%–15%</td><td>12%–15%</td><td>12%–15%</td></tr></tbody></table>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p><strong>1. ช่องทางอเมริกาเหนือ A</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางระบุว่าการใช้จ่ายส่วนเพิ่มกับไฟร์วอลล์ราว 45%–50% มาจากการเปลี่ยนฮาร์ดแวร์ตามรอบปกติ ราว 20%–25% มาจากเวิร์กโหลด AI ใหม่ และราว 10% มาจากการซื้อล่วงหน้าก่อนขึ้นราคา ช่องทางคิดว่ารอบการเปลี่ยนฮาร์ดแวร์อาจชะลอลงในครึ่งหลังของ FY27 โดยการสร้างศูนย์ข้อมูล AI ยังหนุนดีมานด์ตลอดทั้งปี</li>
+<li>b. การใช้จ่ายไฟร์วอลล์ฮาร์ดแวร์โตราว 30% YoY ในไตรมาสนี้ ช่องทางคาดว่าการเติบโตจะเพิ่มเป็น 36%–37% ในไตรมาสหน้า โดยได้แรงหนุนจากการซื้อช่วงสิ้นปีปฏิทิน</li>
+</ul>
+<blockquote>“Hybrid cloud กำลังเพิ่มขึ้นแน่นอน … โครงการประเภท sovereign cloud โดยเฉพาะ [ในกลุ่ม] ลูกค้าการเงิน การแพทย์ และ life sciences เรายังเห็นดีมานด์ฮาร์ดแวร์แข็งแรงต่อเนื่องที่นั่น … ใน Q2 เทียบกับ Q1 เราคาดว่าจะ … เร่งตัวขึ้นในแง่ฮาร์ดแวร์”</blockquote>
+<ul>
+<li>การเทรน AI และโครงการ hybrid cloud ยังหนุนการเปลี่ยนฮาร์ดแวร์ต่อเนื่อง ช่องทางเห็นความเป็นไปได้ที่จะชะลอช่วงกลางปี ขึ้นอยู่กับความคืบหน้าของโครงการ AI และวิวัฒนาการของภัยคุกคามด้านความปลอดภัย</li>
+</ul>
+<p><strong>2. ช่องทางอเมริกาเหนือ B</strong></p>
+<ul>
+<li>a. การใช้จ่ายโต 16.1%–16.2% ในไตรมาสนี้ เพิ่มจาก 15.8% ในไตรมาสก่อน ช่องทางบอกว่า “ใน Q1 พวกเขาทำได้ดีกว่าที่คาด … [ทั้ง] ฮาร์ดแวร์และซอฟต์แวร์”</li>
+<li>b. นอกจากการเปลี่ยนอุปกรณ์ตามรอบแล้ว ลูกค้ากำลังเข้มงวดการควบคุมขอบเขตเครือข่าย (network perimeter) ขณะนำ AI มาใช้</li>
+</ul>
+<blockquote>“โดยเฉพาะ [ในด้าน] ไฟร์วอลล์ฮาร์ดแวร์ เราเห็นการกลับมาฟื้นตัวเล็กน้อย ไม่ใช่แค่กับ Palo Alto … [เรา] เห็นกับ Fortinet ด้วย … ตอนนี้ลูกค้า [ต้องการ] ควบคุมที่ชั้นขอบมากขึ้นในมุมความปลอดภัยเครือข่าย เพราะการนำ AI มาใช้เหล่านี้ และแน่นอนว่าภัยคุกคามทั้งหมดที่มาจาก … LLM และแพลตฟอร์ม AI … ไฟร์วอลล์ฮาร์ดแวร์ของคุณให้ … ความปลอดภัยในแง่การแบ่งแยกส่วน (segregation) แม้กระทั่งในแง่ microsegmentation”</blockquote>
+<ul>
+<li>ช่องทางคาดว่าการใช้จ่ายจะโตราว 16.6% หรือมากกว่าในไตรมาสหน้า การเปลี่ยนอุปกรณ์และการควบคุมเครือข่ายที่เข้มขึ้นน่าจะหนุนการเติบโตไปจนถึงกลางปี 2027</li>
+</ul>
+<p><strong>3. ช่องทางยุโรป A</strong></p>
+<ul>
+<li>a. ในกลุ่มลูกค้าที่ผู้เชี่ยวชาญดูแลอยู่ตอนนี้ การเติบโตของการใช้จ่ายไฟร์วอลล์ฮาร์ดแวร์เพิ่มจากราว 8% ในไตรมาสก่อนเป็นราว 10% ในไตรมาสนี้ ส่วนใหญ่ขับเคลื่อนจากการเปลี่ยนอุปกรณ์ของลูกค้าเดิม</li>
+<li>b. ช่องทางคาดว่ารอบการเปลี่ยนอุปกรณ์นี้จะยืดต่ออีกสี่ถึงหกไตรมาส</li>
+</ul>
+<blockquote>“สำหรับฮาร์ดแวร์ มันเป็นการเปลี่ยนผ่านระดับรุ่นมากกว่า คือย้ายไปฮาร์ดแวร์ที่ใหม่กว่า และจะยืดไปราวสี่ถึงหกไตรมาส ก็คือหนึ่งถึงหนึ่งปีครึ่งนั่นเอง หลังจากนั้นก็จะเป็นรอบการเปลี่ยนตามปกติที่ยาวกว่านี้”</blockquote>
+<p><strong>4. ช่องทางยุโรป B</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางประเมินการเติบโตของการใช้จ่ายไฟร์วอลล์ใน FY26Q4 ที่ราว 20% และคาดว่ารอบการเปลี่ยนอุปกรณ์จะยืดไปอย่างน้อยอีกหนึ่งไตรมาส</li>
+<li>b. การใช้จ่ายไฟร์วอลล์โดยรวมโตราว 20% อีกครั้งในไตรมาสนี้ ช่องทางคาดว่าไตรมาสหน้าจะใกล้เคียงกัน ลูกค้าบางรายเริ่มรวมการซื้อฮาร์ดแวร์เข้าในสัญญาฉบับใหญ่ เมื่อดูทั้งปี ช่องทางประเมินการเติบโตของการใช้จ่ายไฟร์วอลล์ฮาร์ดแวร์ที่ราว 18%–20% ในปี 2026 และราว 20% ในปี 2027</li>
+<li>c. ตอนนี้ช่องทางคาดว่ารอบการเปลี่ยนอุปกรณ์จะยาวขึ้น นอกจากการอัปเกรดที่ลูกค้าเดิมแล้ว Palo Alto ยังแทนที่ผู้ขายคู่แข่งได้เมื่อลูกค้าเปลี่ยนอุปกรณ์</li>
+</ul>
+<blockquote>“มันจะยืดยาวกว่านี้ ผมคิดว่าเรามีโอกาสมากมายจากการเปลี่ยนไฟร์วอลล์ … ผมคิดว่ามีโอกาสอีกมากสำหรับ Palo Alto โดยรวมที่จะคว้าโอกาสเหล่านั้น โดยเฉพาะจาก Cisco และแม้แต่ Fortinet … ผมคิดว่ามันจะยืดเยื้อ เพราะเราจะเห็นลูกค้าวางสายตาระยะยาวต่อเป้าหมายระยะยาวและการรวมศูนย์ของพวกเขา”</blockquote>
+<p><strong>5. ช่องทางออสเตรเลีย</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางประเมินการเติบโตของ FY26Q4 ที่ 12%–15% ซึ่งขับเคลื่อนหลักจากการเปลี่ยนอุปกรณ์ และคาดว่าดีมานด์จะยืนระดับต่อไปอย่างน้อยอีกหกเดือน</li>
+<li>b. การใช้จ่ายโต 12%–15% อีกครั้งในไตรมาสนี้ ช่องทางคาดว่าไตรมาสหน้าจะโตในช่วงเดียวกัน</li>
+<li>c. เมื่อผ่านมาราวหนึ่งไตรมาส ช่องทางยังคาดว่าไฟร์วอลล์ฮาร์ดแวร์จะโตแข็งแรงต่ออีกสองถึงสามไตรมาส จากนั้นจึงชะลอลงทีละน้อย</li>
+</ul>
+<h3>☁️ 2. ไฟร์วอลล์ซอฟต์แวร์ (Software Firewalls)</h3>
+<p><strong>ตารางที่ 6: การเติบโตของการใช้จ่ายไฟร์วอลล์ซอฟต์แวร์ (YoY) รายช่องทาง</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>FY26Q3</th><th>FY26Q4</th><th>FY27Q1</th><th>FY27Q2E</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A</td><td class="rn-numcell">36%</td><td class="rn-numcell">40%</td><td class="rn-numcell">42%</td><td>—</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td class="rn-numcell">19.3%</td><td class="rn-numcell">20.6%</td><td class="rn-numcell">21.4%</td><td>—</td></tr><tr><td>ช่องทางยุโรป A</td><td>—</td><td class="rn-numcell">20%</td><td class="rn-numcell">25%</td><td>—</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td>—</td><td>20%–25%</td><td>20%–25%</td><td>20%–25%</td></tr></tbody></table>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p><strong>1. ช่องทางอเมริกาเหนือ A</strong></p>
+<ul>
+<li>a. การใช้จ่ายโตราว 42% YoY ในไตรมาสนี้ เพิ่มจากราว 40% ในไตรมาสก่อน ไฟร์วอลล์ซอฟต์แวร์เป็นส่วนที่โตเร็วที่สุดในธุรกิจความปลอดภัยไซเบอร์ของช่องทางนี้</li>
+<li>b. ช่องทางคาดว่ารอบการเติบโตนี้จะยืดไปอีกสองถึงสามปี</li>
+</ul>
+<blockquote>“ในมุมของผม ไฟร์วอลล์ซอฟต์แวร์จะโตต่อไปอีกสองถึงสามปี … เมื่อการนำ AI และ agentic มาใช้ [เพิ่มขึ้น และ] การใช้ hyperscaler หลายรายในสภาพแวดล้อมเดียวกันเพิ่มขึ้น Palo Alto ได้ประโยชน์มาก และเราเห็นแรงฉุดของ Palo Alto อย่างมีนัยสำคัญจากมุมนี้”</blockquote>
+<p><strong>2. ช่องทางอเมริกาเหนือ B</strong></p>
+<ul>
+<li>a. ช่องทางประเมินว่าการใช้จ่ายโตราว 21.4% ในไตรมาสนี้ เพิ่มจาก 20.6% ในไตรมาสก่อน และสูงกว่าที่เคยคาดไว้ ช่องทางบอกว่า “ซอฟต์แวร์เติบโตสูงกว่าด้วยเหตุผลที่ต่างออกไป … [มัน] เกิดจากการขยายตัวของ … การใช้งาน public cloud”</li>
+<li>b. ช่องทางคาดว่าการเติบโตของไฟร์วอลล์ซอฟต์แวร์จะยืนยาวกว่าไฟร์วอลล์ฮาร์ดแวร์</li>
+</ul>
+<blockquote>“ผมคาดว่าสำหรับไฟร์วอลล์ซอฟต์แวร์ โมเมนตัมจะอยู่ได้นานกว่า … แม้ธุรกิจ [Fortinet] ของผมเองก็ได้ประโยชน์จากเรื่องนี้ … ผลจะยืดยาวกว่า เพราะ … ข้อกำหนดเรื่อง microsegmentation มีมากขึ้นเรื่อยๆ และเมื่อลูกค้ากระจายระบบนิเวศคลาวด์ของตน … ลดการพึ่งพาผู้ให้บริการรายเดียว [และ] มีแนวคิดเรื่องผู้ให้บริการ … หลัก รอง และอันดับสาม ซึ่งแน่นอนว่าจะผลักดันความต้องการไฟร์วอลล์ซอฟต์แวร์มากขึ้น”</blockquote>
+<p><strong>3. ช่องทางยุโรป A</strong></p>
+<ul>
+<li>a. ในกลุ่มลูกค้าที่ผู้เชี่ยวชาญดูแลอยู่ตอนนี้ การเติบโตของการใช้จ่ายไฟร์วอลล์ซอฟต์แวร์เพิ่มจากราว 20% ในไตรมาสก่อนเป็นราว 25% ในไตรมาสนี้ ช่องทางเห็นลูกค้าเดิมค่อยๆ ย้ายการใช้จ่ายไปที่ไฟร์วอลล์ซอฟต์แวร์และไฟร์วอลล์เสมือน (virtual firewall)</li>
+<li>b. ช่องทางคาดว่าการเติบโตของไฟร์วอลล์ซอฟต์แวร์จะยืนยาวสามถึงสี่ปี และอาจนานกว่านั้น</li>
+</ul>
+<blockquote>“ไฟร์วอลล์ซอฟต์แวร์เป็นแนวโน้มระยะยาวกว่า … คุณมี [ไฟร์วอลล์ซอฟต์แวร์] สำหรับเวิร์กโหลดบนคลาวด์และศูนย์ข้อมูล AI ซึ่งตัวมันเองเป็นแนวโน้มที่กำลังโต ดังนั้นตรงนี้เรากำลังพูดถึง … สามถึงสี่ปี ในฐานะวงจรการเติบโต อาจจะ [นานกว่านั้น] ด้วยซ้ำ”</blockquote>
+<p><strong>4. ช่องทางยุโรป B</strong></p>
+<ul>
+<li>a. ลูกค้าจำนวนมากขึ้นย้ายมาใช้ไฟร์วอลล์ซอฟต์แวร์เมื่อนำ SASE มาใช้ ช่องทางติดตามการแปลงโครงการซอฟต์แวร์ และประเมินการเติบโตที่ราว 15%–18% ในปี 2026 และราว 25%–27% ในปี 2027</li>
+<li>b. ช่องทางคาดว่าซอฟต์แวร์จะโตเร็วกว่าฮาร์ดแวร์ต่อไป โดยเฉพาะในอุตสาหกรรมที่มีสาขาจำนวนมากและลูกค้ายังมีที่ว่างให้รวมการใช้จ่ายด้านความปลอดภัยเครือข่าย</li>
+</ul>
+<blockquote>“ลูกค้าจำนวนมากกำลังค่อยๆ ย้ายไปที่ซอฟต์แวร์ … ฮาร์ดแวร์ไม่ได้หายไปแน่นอน … แต่เราเห็นกระบวนการที่ค่อยเป็นค่อยไปของการหันมาให้น้ำหนักกับซอฟต์แวร์ชัดเจน … ในบางอุตสาหกรรม … ที่เรามีสาขา เรื่องนี้จะพัฒนาต่อไป Palo Alto จะยังคง … รวมลูกค้าเหล่านั้นไว้เป็นจำนวนมาก แม้แต่ลูกค้าที่ยังไม่มีกับมัน”</blockquote>
+<p><strong>5. ช่องทางออสเตรเลีย</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางประเมินการเติบโตของ FY26Q4 ที่ 20%–25% ซึ่งขับเคลื่อนหลักจากการเติบโตของเวิร์กโหลดบนคลาวด์ virtualization และการติดตั้ง hybrid cloud</li>
+<li>b. การใช้จ่ายโต 20%–25% อีกครั้งในไตรมาสนี้ ช่องทางคาดว่าไตรมาสหน้าจะโตในช่วงเดียวกัน</li>
+<li>c. ช่องทางคาดว่ารอบการเติบโตปัจจุบันจะยืดไป 12–18 เดือนหรือนานกว่านั้น</li>
+</ul>
+<blockquote>“ไฟร์วอลล์ซอฟต์แวร์มีรันเวย์การเติบโตที่ยาวกว่า อาจ 12 ถึง 18 เดือนหรือนานกว่านั้น ขับเคลื่อนโดยการย้ายขึ้นคลาวด์ โครงสร้างพื้นฐานแบบ hybrid และการนำความปลอดภัยแบบเสมือนมาใช้”</blockquote>
+<h3>🌐 3. SASE</h3>
+<p><strong>ตารางที่ 7: การเติบโตของการใช้จ่าย SASE (YoY) รายช่องทาง</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>FY26Q3</th><th>FY26Q4</th><th>FY27Q1</th><th>FY27Q2E</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A</td><td>18%–20%</td><td>24%–25%</td><td>29%–30%</td><td>29%–30%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B (Prisma Access)</td><td class="rn-numcell">23.3%</td><td class="rn-numcell">24.8%</td><td class="rn-numcell">25.6%</td><td>26%+</td></tr><tr><td>ช่องทางยุโรป A</td><td>24%–25%</td><td>~27%</td><td>29%–30%</td><td>30%–31%</td></tr><tr><td>ช่องทางยุโรป B</td><td>15%–18%</td><td>15%–18%</td><td class="rn-numcell">20%</td><td>20%–25%</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td>—</td><td>35%–40%</td><td>35%–40%</td><td>35%–40%</td></tr></tbody></table>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p><strong>1. ช่องทางอเมริกาเหนือ A</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางคาดว่า FY27Q1 จะโต 27%–28% โดยหลักจากดีมานด์การเข้าถึงแอปพลิเคชัน AI อย่างปลอดภัย โครงการที่มาแทน Zscaler และ Cisco และการขยายตัวในกลุ่มลูกค้าเดิม</li>
+<li>b. การใช้จ่ายโต 29%–30% ในไตรมาสนี้ สูงกว่าประมาณการเดิมราวสองจุดเปอร์เซ็นต์ ลูกค้ากำลังรวม SASE และ SD-WAN ขณะที่ความต้องการแบนด์วิดท์ที่ร้านค้าและสำนักงานสาขาเพิ่มขึ้น</li>
+</ul>
+<blockquote>“SASE ทั่วทั้งบริษัท การรวม SD-WAN, Prisma Browser ดีมานด์ของทั้งหมดนี้ยังคงเพิ่มขึ้นต่อเนื่อง … สำหรับลูกค้าหลายราย SASE เป็นอุปสรรคใหญ่ … จำนวนอุปกรณ์ในสำนักงานระยะไกล โดยเฉพาะ … ในธุรกิจที่มีร้านค้า เพิ่มขึ้นอย่างมีนัยสำคัญ ดังนั้นความต้องการแบนด์วิดท์จึงเพิ่มขึ้น”</blockquote>
+<ul>
+<li>ลูกค้าเดิมขยายการใช้งาน SASE ในช่วงไม่กี่ไตรมาสที่ผ่านมา ช่องทางคาดว่าการใช้จ่ายจะโตอีก 29%–30% ในไตรมาสหน้า</li>
+</ul>
+<p><strong>2. ช่องทางอเมริกาเหนือ B</strong></p>
+<ul>
+<li>a. การใช้จ่าย Prisma Access โต 25.6% ในไตรมาสนี้ เพิ่มจาก 24.8% ในไตรมาสก่อน ส่วนใหญ่มาจากการขยายในลูกค้าเดิมและโครงการที่มาแทน Zscaler กับ Cisco การนำ AI ไปใช้ยังสร้างทราฟฟิกของแอปพลิเคชันและข้อมูลมากขึ้น ทำให้ปริมาณที่ลูกค้าต้องตรวจสอบเพิ่มขึ้น</li>
+<li>b. ช่องทางคาดว่าการเติบโตของ Prisma Access จะเกิน 26% ในไตรมาสหน้า</li>
+</ul>
+<p><strong>3. ช่องทางยุโรป A</strong></p>
+<ul>
+<li>a. ในกลุ่มลูกค้าที่ผู้เชี่ยวชาญดูแลอยู่ตอนนี้ การใช้จ่าย SASE โต 29%–30% ในไตรมาสนี้ เพิ่มจากราว 27% ในไตรมาสก่อน ราว 70% ของส่วนที่เพิ่มมาจากลูกค้าเดิม ซึ่งหลายรายใช้ไฟร์วอลล์ของ Palo Alto อยู่แล้ว</li>
+</ul>
+<blockquote>“มีลูกค้าไฟร์วอลล์จำนวนมากที่เปลี่ยนมาใช้ SASE และมีชัยชนะเหนือคู่แข่งอยู่บ้างเช่นกัน … ชัยชนะส่วนใหญ่เป็นการเอาชนะ Cisco … ผมเห็นรายหนึ่งกับ Netskope ด้วย และชัยชนะเหนือคู่แข่งเหล่านี้ … มักเป็นส่วนหนึ่งของการรวมศูนย์เช่นกัน … การแทนที่ Zscaler เกิดขึ้นได้ยาก โดยปกติ Zscaler [อยู่ร่วมกับ] Palo Alto Networks หรือ … พวกเขาแบ่งระบบกัน”</blockquote>
+<ul>
+<li>ช่องทางคาดว่าการใช้จ่ายจะโต 30%–31% ในไตรมาสหน้า Prisma Browser และการควบคุมแอปพลิเคชัน generative AI เริ่มสร้างดีมานด์ แต่ยังเป็นสัดส่วนเล็กของการใช้จ่ายส่วนเพิ่ม</li>
+</ul>
+<p><strong>4. ช่องทางยุโรป B</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางคาดว่าการเติบโตจะเพิ่มจาก 15%–18% ใน FY26Q3 และ FY26Q4 เป็น 20%–25% ในไม่กี่ไตรมาสแรกของ FY27</li>
+<li>b. การใช้จ่ายโตราว 20% ในไตรมาสนี้ ซึ่งอยู่ที่ปลายล่างของช่วงเดิม ช่องทางยังคาดว่าไตรมาสหน้าจะโต 20%–25%</li>
+</ul>
+<p><strong>5. ช่องทางออสเตรเลีย</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางประเมินการเติบโตของ FY26Q4 ที่ 35%–40% ซึ่งขับเคลื่อนหลักจากการรวมผู้ขาย การติดตั้ง zero-trust และการใช้จ่ายด้านความปลอดภัยของการทำงานแบบ hybrid ที่เพิ่มขึ้น</li>
+<li>b. การใช้จ่ายโต 35%–40% อีกครั้งในไตรมาสนี้ ช่องทางคาดว่าไตรมาสหน้าจะโตในช่วงเดียวกัน โดยมีการขยายตัวในลูกค้าเดิมและชัยชนะเหนือคู่แข่งเป็นปัจจัยหนุน</li>
+</ul>
+<h3>🔒 4. ผลิตภัณฑ์ความปลอดภัยเครือข่ายและ AI อื่นๆ (Other Network &amp; AI Security Products)</h3>
+<p>เรายังถามด้วยว่าการใช้จ่ายกับผลิตภัณฑ์ Network &amp; AI Security นอกเหนือจากไฟร์วอลล์ SASE และ AI runtime security ปรับตัวขึ้นหรือไม่ การเติบโตโดยรวมยังคงทรงตัว ช่องทางยุโรป A ประเมินการเติบโตราว 10% ตลอดไม่กี่ไตรมาสที่ผ่านมา โดยลูกค้ามักซื้อผลิตภัณฑ์เหล่านี้ควบคู่กับการเปลี่ยนไฟร์วอลล์ ช่องทางออสเตรเลียเห็นว่าการใช้จ่าย CDSS ขับเคลื่อนหลักจากการต่ออายุและการอัปเกรดในลูกค้าเดิม ลูกค้าบางรายซื้อ CDSS ร่วมกับผลิตภัณฑ์อื่นในสัญญาแพลตฟอร์ม ช่องทางยุโรป B มี pipeline ขนาดใหญ่ แต่ดีลที่ปิดแล้วยังไม่ช่วยดันการใช้จ่ายอย่างมีนัยสำคัญ ช่องทางอเมริกาเหนือ B ติดตามกลุ่มผลิตภัณฑ์ที่กว้างกว่า ซึ่งรวม Cortex Cloud, DSPM และ AI runtime security การเติบโตเพิ่มจากค่าเฉลี่ยราว 23% ใน FY26Q3–Q4 เป็นราว 27%–28% ในไตรมาสนี้ ความปลอดภัยของข้อมูล รวมถึง DSPM โตมากกว่า 21%</p>
+<h3>⛅ 5. Cortex Cloud</h3>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p><strong>1. ช่องทางอเมริกาเหนือ A</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางอธิบายว่าการเติบโตของ Cortex Cloud ค่อนข้างทรงตัว การแข่งขันใน CNAPP ทวีความรุนแรง และช่องทางยังไม่เห็นการปรับตัวขึ้นชัดเจน</li>
+</ul>
+<p><strong>ตารางที่ 8: การเติบโตของการใช้จ่าย Cortex Cloud (YoY) รายช่องทาง</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>FY26Q3</th><th>FY26Q4</th><th>FY27Q1</th><th>FY27Q2E</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A</td><td>~29%</td><td>32%–33%</td><td>35%–36%</td><td>38%–42%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td class="rn-numcell">20.8%</td><td class="rn-numcell">21.6%</td><td class="rn-numcell">23.5%</td><td>24.5%+</td></tr><tr><td>ช่องทางยุโรป A</td><td class="rn-numcell">17%</td><td class="rn-numcell">18%</td><td class="rn-numcell">20%</td><td class="rn-numcell">21%</td></tr><tr><td>ช่องทางยุโรป B</td><td>—</td><td>—</td><td class="rn-numcell">20%</td><td>22%–23%</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td>—</td><td>25%–30%</td><td>25%–30%</td><td>25%–30%</td></tr></tbody></table>
+<ul>
+<li>b. การใช้จ่ายโต 35%–36% ในไตรมาสนี้ เพิ่มจาก 32%–33% ในไตรมาสก่อน ลูกค้า multicloud บางรายอยากมาตรฐานความปลอดภัยไว้กับผู้ขายที่เป็นอิสระจากผู้ให้บริการคลาวด์ของตน ซึ่งเปิดโอกาสให้ Palo Alto มากขึ้น</li>
+</ul>
+<blockquote>“การแข่งขันรุนแรง Wiz ตอนนี้เป็นส่วนหนึ่งของ Google แล้ว … Microsoft Defender … เน้นไปที่ Microsoft เป็นหลัก … เมื่อลูกค้าของเราจำนวนมากมองหาการมาตรฐานความปลอดภัยบนโซลูชันที่ไม่ใช่ของ hyperscaler นั่นก็เปิดโอกาสให้เรากับ Palo Alto มากขึ้น”</blockquote>
+<ul>
+<li>ช่องทางคาดว่าไตรมาสหน้าจะโต 38%–42% เมื่อลูกค้า Prisma Cloud ย้ายมาใช้ Cortex Cloud ต่อเนื่อง</li>
+</ul>
+<p><strong>2. ช่องทางอเมริกาเหนือ B</strong></p>
+<ul>
+<li>a. การใช้จ่ายโตราว 23.5% ในไตรมาสนี้ เพิ่มจาก 21.6% ในไตรมาสก่อน การใช้จ่ายที่เคยถูกเลื่อนไว้บางส่วนมาตกในไตรมาสนี้ ช่องทางคาดว่า containerization และการใช้ Kubernetes จะยังหนุนการเติบโตต่อไป</li>
+</ul>
+<blockquote>“ส่วนหนึ่งเป็นการใช้จ่ายที่ค้างสะสม แต่ผมคิดว่ายั่งยืน เพราะโดยพื้นฐานแล้ว … containerization และ Kubernetes [เป็นตัวขับ] การเติบโตส่วนใหญ่นี้ โดยเฉพาะเมื่อลูกค้าขยับไปสู่ระบบนิเวศ multicloud … [สิ่งเหล่านี้] เป็นตัวขับหลัก ตามด้วยข้อกำหนด compliance บนคลาวด์ จากนั้นความปลอดภัยของข้อมูล … [และ] การรวม CNAPP เป็นอีกตัวขับ … มีตัวชี้วัดช่วงแรก … ว่าลูกค้าที่ติดตั้งคลัสเตอร์ GPU ก็เข้ามาอยู่ใต้ Cortex Cloud ด้วย … ตอนนี้แทบจะเล็กมาก แต่ก็เริ่มปรากฏให้เห็นแล้ว”</blockquote>
+<ul>
+<li>ช่องทางคาดว่าการเติบโตจะอยู่ที่ 24.5% หรือมากกว่าในไตรมาสหน้า</li>
+</ul>
+<p><strong>3. ช่องทางยุโรป A</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางระมัดระวังกับ Cortex Cloud มากกว่า ผู้เชี่ยวชาญเห็นเหตุผลสนับสนุน Cortex Cloud ในลูกค้า multicloud ขณะที่ลูกค้าที่ใช้ผู้ให้บริการคลาวด์เพียงรายเดียวอาจพึ่งเครื่องมือความปลอดภัยแบบเนทีฟของผู้ให้บริการนั้น เขามองในแง่ดีขึ้นหลังเปลี่ยนบทบาท ในดีลที่เขาเห็นตอนนี้ Cortex Cloud มักถูกซื้อควบคู่กับผลิตภัณฑ์อื่น และ Palo Alto มีโอกาสชนะสูงขึ้นเมื่อขายเป็นชุดร่วมกัน</li>
+</ul>
+<blockquote>“Cortex Cloud … อิงตามเวิร์กโหลด และเป็นเพียงชิ้นหนึ่งของจิ๊กซอว์ ถ้าจะพูดอย่างนั้น แต่ … มันเติมเต็มบทบาทสำคัญภายในระบบนิเวศ … จริงๆ แล้วผลรวมของโมดูลและวิธีที่มันประกอบกันเป็นภาพสมบูรณ์ … ต่างหากที่ … ขับเคลื่อนรายได้ของแพลตฟอร์มจริงๆ … ผมมองบวกขึ้น … และไม่ใช่เฉพาะ Cortex Cloud แต่รวมถึงโมดูลส่วนใหญ่เหล่านี้ ผมเห็นว่ามันเข้ากันอย่างไรในมุมที่ต่างออกไป”</blockquote>
+<ul>
+<li>ในกลุ่มลูกค้าที่ผู้เชี่ยวชาญดูแลอยู่ตอนนี้ การใช้จ่ายโตราว 20% ในไตรมาสนี้ เพิ่มจากราว 18% ในไตรมาสก่อน เวิร์กโหลด AI, GPU และ container ก็มีส่วนช่วยเช่นกัน โดยหลักอยู่ในลูกค้ารายใหญ่ไม่กี่ราย</li>
+<li>ช่องทางคาดว่าไตรมาสหน้าจะโตราว 21% และมีโอกาสถึง 22%</li>
+</ul>
+<p><strong>4. ช่องทางยุโรป B</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางคาดว่า Cortex Cloud จะโตราว 20% และเห็นช่องให้คงที่ 20%–25% ใน FY27 การใช้จ่ายโตราว 20% ในไตรมาสนี้ ตรงกับประมาณการเดิม</li>
+<li>b. ช่องทางคาดว่าไตรมาสหน้าจะโต 22%–23% โดยมีโอกาสถึง 25% ขึ้นอยู่หลักกับว่าลูกค้าลงทุนในสภาพแวดล้อม multicloud เร็วเพียงใด และดีลหลายปีขนาดใหญ่ที่รวม Cortex Cloud จะปิดได้หรือไม่ ช่องทางยังคาดว่า FY27Q3 และ FY27Q4 จะโต 20%–25%</li>
+</ul>
+<blockquote>“ถ้ามองกลยุทธ์ลูกค้าของเรา เช่น กลยุทธ์ multicloud ลูกค้าจำนวนมากกำลังลงทุนใน … สภาพแวดล้อมคลาวด์ของพวกเขา มันเป็นพื้นที่โฟกัสใหญ่ของเรา ดังนั้น pipeline ที่เราสร้างขึ้นมา … เราจะเห็นสัญญาหลายปีที่ใหญ่ขึ้น … ซึ่งจะรวม Cortex อยู่ในนั้นด้วย … Prisma และ Cortex คือสองสิ่งหลักที่เรามุ่งเน้น … ไตรมาสสองจะมี … การใช้งบ … ให้ Palo Alto อย่างแน่นอน ดังนั้นใช่ เราคาดว่าจะมีการเร่งตัวตอนนี้”</blockquote>
+<p><strong>5. ช่องทางออสเตรเลีย</strong></p>
+<ul>
+<li>a. ในการสำรวจรอบก่อน ช่องทางประเมินการเติบโตของ FY26Q4 ที่ 25%–30% ซึ่งขับเคลื่อนหลักจากการใช้จ่ายด้านการปกป้องเวิร์กโหลดบนคลาวด์ และการรวมเครื่องมือความปลอดภัยคลาวด์ที่แยกกันเข้าเป็น CNAPP</li>
+<li>b. การใช้จ่ายโต 25%–30% อีกครั้งในไตรมาสนี้ ตัวขับดีมานด์ทั้งสองยังอยู่ และช่องทางคาดว่าไตรมาสหน้าจะโตในช่วงเดียวกัน</li>
+</ul>
+<p><strong>6. ช่องทางอเมริกาเหนือ C</strong></p>
+<ul>
+<li>a. ธุรกิจ Cortex Cloud ของช่องทางนี้ตามหลัง Prisma Access และ Strata แต่อัตราการชนะ (win rate) ดีขึ้นจากฐานต่ำในไตรมาสนี้ ผู้เชี่ยวชาญให้เครดิตการจ้างช่วง (subcontracting) และการฝึกอบรมบุคลากร ซึ่งขยายความสามารถของช่องทางในการส่งมอบโครงการความปลอดภัย multicloud</li>
+</ul>
+<blockquote>“เราเซ็นความร่วมมือแล้ว เป็นข้อตกลงรับช่วง … เราต้องการรักษาขีดความสามารถด้าน multicloud, [ความปลอดภัยของ container] และ microservice … ดังนั้นอัตราการชนะของเราจึงดีขึ้นจาก … ฐานที่ต่ำกว่า เพราะ [การ] จ้างช่วงและการฝึกอบรม ซึ่งสร้างกำลังการส่งมอบ … มันช่วยเราได้จริงๆ”</blockquote>
+<ul>
+<li>ช่องทางกำลังตามหาโครงการใหม่กับลูกค้าภาครัฐที่มีอยู่แล้ว โดยเฉพาะภาครัฐและ sovereign cloud ผู้เชี่ยวชาญบอกว่าดีลเหล่านี้ใช้เวลานานกว่าจะปิดได้</li>
+</ul>
+<blockquote>“[เรา] กำลัง … มุ่งเป้าไปที่บัญชีภาครัฐที่มีอยู่แล้ว … ลูกค้าภาครัฐมีวิธีทำธุรกิจของตัวเอง … ลูกค้ารายใหญ่เหล่านี้ทั้ง sovereign [cloud] ภาครัฐ และรัฐบาล … วงจรชีวิตของดีลยาวมาก”</blockquote>
+<h3>🛰️ 6. XSIAM และ SecOps</h3>
+<p><em>แหล่งที่มา: การสำรวจช่องทางจำหน่ายของ FUNDA</em></p>
+<p><strong>1. ช่องทางอเมริกาเหนือ A</strong></p>
+<ul>
+<li>a. ในการสำรวจครั้งล่าสุด ช่องทางประเมินการเติบโตของ XSIAM ใน FY26Q4 ที่ 25%–28% ลูกค้าเริ่มพิจารณาเปลี่ยนระบบ SIEM รุ่นเก่าอยู่แล้ว โครงการใหญ่มักใช้เวลา 8–12 เดือนตั้งแต่เซ็นสัญญาจนถึงติดตั้งและเรียกเก็บเงินเต็มรูปแบบ บางโครงการใช้ถึง 14 เดือน</li>
+</ul>
+<p><strong>ตารางที่ 9: การเติบโตของการใช้จ่าย XSIAM (YoY) รายช่องทาง</strong></p>
+<table><thead><tr><th>ช่องทาง</th><th>FY26Q3</th><th>FY26Q4</th><th>FY27Q1</th><th>FY27Q2E</th></tr></thead><tbody><tr><td>ช่องทางอเมริกาเหนือ A</td><td class="rn-numcell">26%</td><td class="rn-numcell">30%</td><td>34%–35%</td><td>36%–38%</td></tr><tr><td>ช่องทางอเมริกาเหนือ B</td><td class="rn-numcell">40.6%</td><td class="rn-numcell">43.1%</td><td>45%–46%</td><td>47.5%+</td></tr><tr><td>ช่องทางยุโรป A</td><td class="rn-numcell">30%</td><td class="rn-numcell">50%</td><td class="rn-numcell">60%</td><td class="rn-numcell">30%</td></tr><tr><td>ช่องทางยุโรป B</td><td>—</td><td>15%–18%</td><td>18%–20%</td><td>18%–20%</td></tr><tr><td>ช่องทางออสเตรเลีย</td><td>—</td><td class="rn-numcell">100%</td><td>70%–100%</td><td>80%–100%</td></tr></tbody></table>
+<ul>
+<li>b. ตอนนี้ช่องทางประเมินการเติบโตของ FY26Q4 ที่ราว 30% และเพิ่มเป็น 34%–35% ในไตรมาสนี้ ดีมานด์ส่วนหนึ่งมาจากลูกค้าที่อัปเกรดจาก XDR และ XSOAR แบบแยกเดี่ยว และส่วนหนึ่งมาจากลูกค้าที่เปลี่ยนจาก Splunk และ QRadar</li>
+<li>c. ช่องทางคาดว่าไตรมาสหน้าจะโต 36%–38%</li>
+</ul>
+<p><strong>2. ช่องทางอเมริกาเหนือ B</strong></p>
+<ul>
+<li>a. XSIAM โต 45%–46% ในไตรมาสนี้ เพิ่มจาก 43.1% ในไตรมาสก่อน การเติบโตรวมของ XSIAM และ XSOAR เพิ่มเป็น 24.6%–25% จากราว 23.5%</li>
+</ul>
+<blockquote>“ลูกค้ากำลังอยู่ระหว่างเปลี่ยน SIEM รุ่นเก่า บางรายกำลังเปลี่ยนบางส่วนของ Splunk เช่น การเก็บรักษาข้อมูล การประมวลผลข้อมูล และการประมวลผลล็อก … ระบบอัตโนมัติด้านความปลอดภัยส่วนใหญ่จะไปลงที่ SOC และ SecOps นั่นคือที่ที่เราเห็นกิจกรรมมากที่สุด และทั้ง XSIAM กับผลิตภัณฑ์คู่เทียบของ CrowdStrike ก็ได้ประโยชน์ทั้งคู่”</blockquote>
+<ul>
+<li>ช่องทางคาดว่าการเติบโตของ XSIAM จะเกิน 47.5% ในไตรมาสหน้า</li>
+</ul>
+<p><strong>3. ช่องทางยุโรป A</strong></p>
+<ul>
+<li>a. ในกลุ่มลูกค้าที่ผู้เชี่ยวชาญดูแลในบทบาทใหม่ การเติบโตของ SecOps โดยรวมเพิ่มจากราว 25% ในไตรมาสก่อนเป็น 26%–27% ในไตรมาสนี้ การเติบโตของ XSIAM เพิ่มจากราว 50% เป็นสูงถึง 60% โดยหลักเพราะลูกค้ากลุ่มหนึ่งย้ายระบบในช่วงเวลาใกล้เคียงกัน ลูกค้าบางรายยังเปลี่ยนระบบ SIEM รุ่นเก่าด้วย ในการสำรวจครั้งล่าสุด ช่องทางเห็นลูกค้าเปลี่ยนเครื่องมือความปลอดภัยที่ซื้อแยกกันมาเป็น XSIAM อยู่แล้ว ทำให้ดีลใหญ่ขึ้น ครั้งนี้ผู้เชี่ยวชาญสังเกตว่าผู้ให้บริการ managed service (MSP) เริ่มสร้างบริการปฏิบัติการด้านความปลอดภัยของตนเองบน XSIAM เขาคาดว่าสิ่งนี้จะช่วยให้ PANW เข้าถึงลูกค้าได้มากขึ้น</li>
+</ul>
+<blockquote>“เรากำลังสร้างบริการ SOC บน XSIAM ด้วย และผมเห็นผู้ให้บริการ managed service รายอื่นสร้างบริการปฏิบัติการด้านความปลอดภัยของตนเองบนแพลตฟอร์ม XSIAM … นั่นจะช่วยให้ Palo Alto เข้าถึงลูกค้าได้มากขึ้น ผมค่อนข้างมองบวกกับเรื่องนี้ในครั้งนี้”</blockquote>
+<ul>
+<li>เมื่อคลื่นการย้ายระบบผ่านจุดสูงสุดไปแล้ว ช่องทางคาดว่าการเติบโตของ XSIAM จะกลับมาที่ราว 30% ในไตรมาสหน้า ช่องทางยังมี pipeline ของดีลเปลี่ยน SIEM รุ่นเก่าอยู่</li>
+</ul>
+<blockquote>“ลูกค้าชื่นชมแพลตฟอร์มแบบรวมศูนย์ แต่การย้าย playbook, XDR agent และเครื่องมือที่ใช้อยู่เดิมนั้นยุ่งยากอยู่บ้าง … ลองคิดว่าการเติบโตในช่วงไม่กี่ไตรมาสที่ผ่านมาคือคลื่นลูกค้าที่ย้ายจากผลิตภัณฑ์อย่าง XDR ไปที่ XSIAM มันเป็นการย้ายครั้งเดียวที่กระจายอยู่ในหลายไตรมาส เมื่อคลื่นผ่านพ้นไป การเติบโตจะกลับสู่อัตราที่ยั่งยืนกว่า”</blockquote>
+<p><strong>4. ช่องทางยุโรป B</strong></p>
+<ul>
+<li>a. ในการสำรวจครั้งล่าสุด ช่องทางประเมินการเติบโตของ FY26Q4 ที่ราว 10% ช่องทางมี proof of concept ของ XSIAM ราว 30–40 รายการกำลังดำเนินอยู่ โดยหลักเป็นลูกค้าที่ต้องการเปลี่ยนระบบ SIEM รุ่นเก่าอย่าง Splunk</li>
+<li>b. ตอนนี้ช่องทางประเมินการเติบโตของ FY26Q4 ที่ 15%–18% หลังปิดดีลหลายรายการในไตรมาสนั้น การเติบโตเร่งขึ้นอีกเป็น 18%–20% ในไตรมาสนี้</li>
+<li>c. ช่องทางคาดว่าการเติบโตจะคงที่ที่ 18%–20% ในไตรมาสหน้า ช่องทางมี pipeline ขนาดใหญ่ แต่ดีลมักใช้เวลานานจากการทดสอบจนถึงการเซ็นสัญญา</li>
+</ul>
+<blockquote>“โอกาสเหล่านี้มักเริ่มล่วงหน้าหนึ่งปี ดังนั้นการคาดการณ์ว่าจะปิดเมื่อไรจึงยากมาก บางรายอยู่ใน pipeline มาหนึ่งปีครึ่งหรือแม้แต่สองปี ลูกค้าทำ pilot และทดสอบกันมากมาย และกว่าคุณจะปิดโอกาสหนึ่งได้ ก็เข้าสู่ปีถัดไปหรือแม้แต่ปีถัดจากนั้นแล้ว”</blockquote>
+<p><strong>5. ช่องทางออสเตรเลีย</strong></p>
+<ul>
+<li>a. ในการสำรวจครั้งล่าสุด ช่องทางประเมินการเติบโตของ XSIAM ใน FY26Q4 ที่ราว 100% จากฐานต่ำ</li>
+<li>b. XSIAM โต 70%–100% ในไตรมาสนี้ และ SecOps โดยรวมโต 25%–30% ลูกค้าจำนวนมากขึ้นย้ายเวิร์กโหลด XDR, XSOAR และ SIEM รุ่นเก่ามาที่ XSIAM เพื่อลดภาระการดูแลรายวันและทำให้การปฏิบัติงานเป็นอัตโนมัติมากขึ้น</li>
+<li>c. สำหรับไตรมาสหน้า ช่องทางคาดว่า XSIAM จะโต 80%–100% และการเติบโตของ SecOps โดยรวมจะอยู่ที่ 25%–30%</li>
+</ul>
+<h3>🧬 7. ผลิตภัณฑ์ Cortex อื่นๆ</h3>
+<p><strong>1. ช่องทางอเมริกาเหนือ A</strong></p>
+<ul>
+<li>i. ลูกค้าที่เคยซื้อ XDR และ XSOAR แบบแยกเดี่ยวกำลังอัปเกรดไปที่ XSIAM AgentiX ภายใน XSIAM รับช่วงบางฟังก์ชันของ XSOAR และรายได้ประจำที่เกี่ยวข้องย้ายไปอยู่กับแพลตฟอร์มเมื่อลูกค้าย้ายระบบ</li>
+<li>ii. Xpanse มักขายเป็นส่วนหนึ่งของข้อเสนอ exposure management ที่กว้างกว่า</li>
+</ul>
+<blockquote>“ลูกค้า XDR และ XSOAR แบบแยกเดี่ยวกำลังอัปเกรดไปที่ XSIAM ถ้าดู ARR มันย้ายจากผลิตภัณฑ์หนึ่งไปอีกผลิตภัณฑ์หนึ่ง … Xpanse ก็ขายเป็นส่วนหนึ่งของ exposure management เช่นกัน XSIAM ดูดซับฟังก์ชันจากผลิตภัณฑ์แยกเดี่ยวหลายตัว ดังนั้นจึงกระทบการเติบโตของแต่ละตัวเมื่อมองแยกกัน”</blockquote>
+<p><strong>2. ช่องทางอเมริกาเหนือ B</strong></p>
+<ul>
+<li>a. นอกจาก XSIAM แล้ว exposure management เป็นส่วนที่โตเร็วที่สุดของช่องทางนี้ การเติบโตของผลิตภัณฑ์ที่เกี่ยวข้องเพิ่มจาก 25.2% ใน FY26Q3 และ 25.8% ใน FY26Q4 เป็น 27.9%–28.2% ในไตรมาสนี้</li>
+<li>b. XSOAR แบบแยกเดี่ยวยังโตอยู่ราว 20% หรือสูงกว่าเล็กน้อย ช่องทางคาดว่าดีมานด์ XSOAR จะเพิ่มขึ้นเมื่อลูกค้าสร้างและใช้เวิร์กโฟลว์อัตโนมัติใน SOC มากขึ้น</li>
+</ul>
+<p><strong>3. ช่องทางยุโรป A</strong></p>
+<ul>
+<li>a. การใช้จ่ายกับ XDR แบบแยกเดี่ยวทรงตัวโดยประมาณ ขณะที่การใช้จ่ายกับ XSOAR แบบแยกเดี่ยวลดลง ส่วนหนึ่งเพราะลูกค้าย้ายไปที่ XSIAM</li>
+<li>b. ดีมานด์ Xpanse ปรับขึ้นเล็กน้อยในช่วงสั้นๆ หลังมีการเปิดเผยช่องโหว่ PHP2Shell</li>
+</ul>
+<p><strong>4. ช่องทางออสเตรเลีย</strong></p>
+<ul>
+<li>a. การใช้จ่ายกับ XDR และ XSOAR แบบแยกเดี่ยวทรงตัวถึงลดลงราว 5% โดยหลักเพราะลูกค้าย้ายการซื้อเดิมไปที่ XSIAM</li>
+<li>b. การใช้จ่ายกับ Xpanse ค่อนข้างคงที่ โดยลูกค้าบางรายยังคงลงทุนใน exposure management</li>
+</ul>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ทุกกลุ่มผลิตภัณฑ์หลักยังเติบโตแข็งแรง โดยซอฟต์แวร์และ SecOps โตเร็วกว่าฮาร์ดแวร์</p><ul class="rn-sum-list"><li>ช่องทางยุโรป A เตือนว่าคลื่นการย้ายระบบมา XSIAM ผ่านจุดสูงสุดแล้ว การเติบโตอาจกลับมาราว 30%</li><li>XDR และ XSOAR แบบแยกเดี่ยวทรงตัวหรือลดลง เพราะลูกค้าย้ายมาที่ XSIAM</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">~42%</div><div class="rn-stat-c">ไฟร์วอลล์ซอฟต์แวร์ — อเมริกาเหนือ A ใน FY27Q1</div></div><div class="rn-stat"><div class="rn-stat-v">29%–30%</div><div class="rn-stat-c">SASE — อเมริกาเหนือ A ใน FY27Q1</div></div><div class="rn-stat"><div class="rn-stat-v">45%–46%</div><div class="rn-stat-c">XSIAM — อเมริกาเหนือ B ใน FY27Q1</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span>ผลิตภัณฑ์ใหม่และการผนวกรวมบริษัทที่ซื้อมา</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>การผนวกรวม CyberArk คืบหน้าช้า — ทีมขาย การซื้อ และโปรแกรมพาร์ตเนอร์ยังแยกกันหรือยังไม่รวมเสร็จ</li><li>Chronosphere ถูกขายข้ามผลิตภัณฑ์ได้น้อยกว่า CyberArk และช่องทางยุโรป B คาดการผนวกรวมเต็มรูปแบบในไตรมาสสองปีปฏิทิน 2027</li><li>Prisma AIRS ยังเป็น pilot และบันเดิลเป็นหลัก โดยลูกค้าไม่ถึง 4% ใช้ในไตรมาสนี้ (ช่องทางอเมริกาเหนือ B)</li></ul></div>
+<p>การสำรวจช่องทางจำหน่ายล่าสุดของเราชี้ว่า การผนวกรวม CyberArk และ Chronosphere จะใช้เวลามากกว่าที่คิด</p>
+<h3>🔑 1. CyberArk</h3>
+<ul>
+<li>a. ช่องทางยุโรป B เห็นลูกค้าเดิมเพิ่มการใช้จ่ายด้านความปลอดภัยของ identity ในไตรมาสก่อน และเห็นโอกาสขาย CyberArk ข้ามผลิตภัณฑ์ให้ลูกค้า Palo Alto CyberArk โตราว 20% ในไตรมาสนี้ ตรงตามที่คาด ตอนนี้ช่องทางนับ CyberArk รวมในเป้าขาย Palo Alto แล้ว แต่ยังต้องซื้อผลิตภัณฑ์แยกกัน และทีมขายยังแยกกันอยู่</li>
+</ul>
+<blockquote>“เรารวมมันไว้ในรายได้ Palo Alto อยู่แล้ว เพราะเรากำหนดเป้าช่องทางแบบนั้น เรายังต้องซื้อแยกต่างหาก และซื้อผ่าน Palo Alto ไม่ได้ ผลิตภัณฑ์ยังผนวกรวมไม่สมบูรณ์ ในมุมการขายผ่านช่องทาง ยังมีพนักงานขายคนละกลุ่มและองค์กรแยกกันอยู่”</blockquote>
+<ul>
+<li>ช่องทางยุโรป A เห็นการสื่อสารที่ประสานกันมากขึ้นจากสองธุรกิจ CyberArk กำลังเริ่มถูกรวมเข้ากับโปรแกรมพาร์ตเนอร์ ขณะที่แรงจูงใจด้านการขายยังอยู่ระหว่างการรวม ในกลุ่มลูกค้าที่ผู้เชี่ยวชาญดูแลในบทบาทใหม่ การเติบโตของ CyberArk เพิ่มจาก 15%–20% ในไตรมาสก่อนเป็นราว 18%–23% ในไตรมาสนี้ เขาคาดว่าไตรมาสหน้าจะใกล้เคียงกัน</li>
+</ul>
+<blockquote>“การขายข้ามผลิตภัณฑ์และการผนวกรวมการขายกำลังเดินหน้า แต่แผนค่าตอบแทนและโปรแกรมพาร์ตเนอร์ยังอยู่ระหว่างการรวมกัน เราเห็นการสื่อสารที่เป็นหนึ่งเดียวมากขึ้นและสัญญาณว่า CyberArk กำลังถูกผนวกเข้ากับโปรแกรมพาร์ตเนอร์ของเรา … AI และ agent identity ดึงดูดความสนใจมาก แต่ยังไม่ได้ผลักดัน pipeline ก้อนใหญ่ และยอดจอง (bookings) ยังเล็ก”</blockquote>
+<ul>
+<li>ช่องทางอเมริกาเหนือ B เห็นลูกค้าบางรายติดตั้งทั้งผลิตภัณฑ์ Palo Alto และ CyberArk โดยลูกค้ามักใช้ CyberArk สำหรับ privileged access ขณะยังคง Microsoft หรือ Okta ไว้สำหรับ identity และการเข้าถึงของพนักงาน ช่องทางประเมินว่าลูกค้า Okta ของตนไม่ถึง 4% ที่เปลี่ยนมาใช้ CyberArk ทั้งหมด</li>
+</ul>
+<blockquote>“ผมยังคงดำเนินงาน CyberArk เป็นสายธุรกิจแยกต่างหาก เพราะผลิตภัณฑ์ยังไม่ได้ผนวกรวมกันจริงๆ CyberArk ยังคงชนะดีลด้วยตัวเอง … บางการติดตั้งซ้อนทับกัน และผมก็ยังติดตั้ง CyberArk ในกรณีที่ไม่ซ้อนทับกับ Palo Alto เลย”</blockquote>
+<ul>
+<li>ช่องทางอเมริกาเหนือ A เห็นดีมานด์ที่แข็งแรงขึ้นสำหรับ privileged access management และ machine identity ในไตรมาสก่อน ดีมานด์ machine identity ยังแข็งแรงในไตรมาสนี้ โดยส่วนที่เพิ่มส่วนใหญ่มาจากลูกค้าเดิม</li>
+</ul>
+<blockquote>“ดีมานด์ machine identity แข็งแรงมาก … จำนวน identity ที่บริษัทต้องจัดการเพิ่มขึ้น API gateway และ AI gateway ก็เข้ามาอยู่ในภาพด้วย … ทั้งหมดนี้เติบโตอยู่ภายในฐานลูกค้าเดิม”</blockquote>
+<ul>
+<li>ช่องทางออสเตรเลียรายงานการเติบโตของ CyberArk ราว 30%–32% YoY ในไตรมาสนี้ สูงกว่าเกณฑ์เดิมที่ราว 30% เล็กน้อย</li>
+</ul>
+<blockquote>“สำหรับ FY27 ผมคาดว่าการเติบโตของ CyberArk จะอยู่ระหว่าง 30% ถึง 35% จะมีการเร่งตัวบ้าง แต่ผมไม่คาดว่าจะพุ่งทะยานกะทันหัน การติดตั้ง AI agent เพิ่มดีมานด์สำหรับ privileged access, machine identity และการจัดการ credential อย่างไรก็ตาม การนำไปใช้ในองค์กรและการแปลงเป็นงบประมาณต้องใช้เวลา ผมจึงคาดว่าส่วนช่วยจาก AI จะชัดขึ้นใน FY28”</blockquote>
+<ul>
+<li>ช่องทางอเมริกาเหนือ C เห็นการเติบโตบางส่วนจากการย้ายลูกค้าและการขายข้ามผลิตภัณฑ์ในไม่กี่ไตรมาสที่ผ่านมา ช่องทางระบุลูกค้าร่วมและดีลที่เป็นไปได้ แต่การย้ายระบบยังดำเนินอยู่ และโอกาสเหล่านั้นแปลงเป็นยอดขายได้น้อยใน FY27Q1</li>
+</ul>
+<blockquote>“ในไตรมาสก่อนๆ เราเห็นการเติบโตเร่งตัว โดยเฉพาะจากการย้ายระบบและการขายข้ามผลิตภัณฑ์ เราก้าวหน้าเรื่องการย้ายอย่างมีนัยสำคัญ แต่งานยังไม่เสร็จ เรามีรายชื่อบัญชีร่วมและโอกาสรายได้ แต่เรายังคว้าสิ่งเหล่านั้นไม่ได้ใน Q1 … ผมนับด้วยนิ้วมือข้างเดียวได้เลยว่ามีกี่โครงการที่เราทำได้ยอดเยี่ยมกับ CyberArk”</blockquote>
+<h3>📊 2. Chronosphere</h3>
+<ul>
+<li>a. ช่องทางยุโรป B เห็นความสนใจจากลูกค้าในไตรมาสก่อน และเริ่มทำงานกับการติดตั้งบางรายการแล้ว ช่องทางคาดว่าการผนวกรวมแพลตฟอร์มเต็มรูปแบบและแผน go-to-market จะใช้เวลาอีกราวหกเดือน ช่องทางยังไม่ได้รับแผนการขายฉบับสมบูรณ์ และตอนนี้คาดว่าการผนวกรวมเต็มรูปแบบจะเกิดขึ้นในไตรมาสสองของปีปฏิทิน 2027</li>
+</ul>
+<blockquote>“มันยังไม่ได้ผนวกรวมเต็มที่ และเรายังไม่มีกลยุทธ์ go-to-market ฉบับเต็มสำหรับ Chronosphere เราอาจเห็นการผนวกรวมเต็มรูปแบบภายในไตรมาสสองของปีปฏิทิน เรารู้ว่าผลิตภัณฑ์มีอยู่แล้ว แต่ยังไม่ได้รับข้อมูลส่วนนั้นจาก Palo Alto”</blockquote>
+<ul>
+<li>ช่องทางอเมริกาเหนือ A เห็นโครงการ Chronosphere น้อยกว่าโครงการ CyberArk ในไตรมาสก่อน และ Chronosphere มีส่วนสร้างรายได้ให้ธุรกิจน้อยกว่า การนำไปใช้เพิ่มขึ้นในไตรมาสนี้ แต่องค์กรบางแห่งที่เซ็นดีลแพลตฟอร์ม Palo Alto ขนาดใหญ่ ยังเลือกเก็บเครื่องมือ observability เดิมไว้ วันครบกำหนดสัญญาและความเป็นไปได้ในการลดต้นทุนการจัดการล็อกและการเก็บข้อมูลซ้ำซ้อน มีผลต่อการตัดสินใจว่าจะย้ายหรือไม่</li>
+</ul>
+<blockquote>“หนึ่งในความท้าทายที่ใหญ่ที่สุดของ observability คือการจัดการล็อก Datadog และ Splunk คิดค่าธรรมเนียมเพิ่มสำหรับการเก็บข้อมูลซ้ำซ้อน และ Chronosphere ยังไม่มีคำตอบที่ดีสำหรับเรื่องนั้น … ลูกค้าองค์กรบางรายของเราไม่อยากยุ่งกับเรื่องนั้นเป็นส่วนหนึ่งของดีลแพลตฟอร์มขนาดใหญ่ เราเห็นการนำ Chronosphere ไปใช้น้อยกว่าผลิตภัณฑ์อื่นบางตัว”</blockquote>
+<ul>
+<li>ช่องทางอเมริกาเหนือ B กล่าวว่า “Chronosphere อยู่ภายใต้ Cortex แต่ตอนนี้ส่วนใหญ่เป็นแค่ป้ายชื่อ ฟีเจอร์ของผลิตภัณฑ์ยังไม่ได้ผนวกรวมกันจริงๆ” การเติบโตของธุรกิจ Chronosphere ของช่องทางนี้เพิ่มขึ้นเพียงราว 2 จุดเปอร์เซ็นต์ในสามไตรมาสที่ผ่านมา ลูกค้าใช้มันหลักๆ กับ telemetry ของ Kubernetes และข้อมูล high-cardinality ช่องทางแทบไม่เห็นมันมาแทนที่การติดตั้ง Datadog หรือ Dynatrace เดิม</li>
+<li>ช่องทางยุโรป A คาดว่าจะมียอดขายส่วนเพิ่มบางส่วนจากการขาย Chronosphere ข้ามผลิตภัณฑ์ให้ลูกค้า XSIAM เดิม Chronosphere ยังค่อนข้างหาได้ยากในตลาดนอร์ดิกและยุโรปเหนือที่ช่องทางนี้ดูแล ซึ่งจำกัดส่วนที่ช่วยในระยะใกล้</li>
+<li>ช่องทางออสเตรเลียเห็นปริมาณ telemetry ที่สูงขึ้นจากเวิร์กโหลด AI เริ่มขับเคลื่อนโครงการ observability ในไตรมาสก่อน ช่องทางยังคาดว่า pipeline จะโตราว 30%–35% ในไตรมาสนี้ การใช้จ่ายจริงขึ้นอยู่กับดีลใดปิดได้และติดตั้งเมื่อไร ช่องทางคาดว่าโอกาสสำหรับการติดตั้งในวงกว้างขึ้นและการขายข้ามผลิตภัณฑ์ให้ลูกค้า Palo Alto จะปรากฏในอีก 12–18 เดือนข้างหน้า</li>
+<li>ช่องทางอเมริกาเหนือ C เริ่มพยายามขาย Chronosphere ข้ามผลิตภัณฑ์ให้ลูกค้า managed services เดิม เริ่มจากลูกค้า XSIAM และลูกค้าคลาวด์อื่น ผู้เชี่ยวชาญเห็นโอกาสน้อยกว่า CyberArk ในระยะนี้ ผลกระทบต่อยอดจองและรายได้จะชัดขึ้นเมื่อ pipeline คืบหน้า</li>
+</ul>
+<blockquote>“Chronosphere ต่างจาก CyberArk เล็กน้อย ธุรกิจเล็กกว่าและมีโอกาสน้อยกว่า … เรากำลังพยายามขายข้ามผลิตภัณฑ์ให้บัญชี managed เดิม รวมถึงบัญชี XSIAM และคลาวด์อื่นๆ … เราจะเห็นภาพยอดจองและรายได้ที่เป็นไปได้ชัดขึ้นในภายหลัง ตอนนี้ปริมาณยังเล็ก”</blockquote>
+<h3>🤖 3. Prisma AIRS</h3>
+<ul>
+<li>a. ช่องทางอเมริกาเหนือ A ประเมินในไตรมาสก่อนว่า AIRS และความปลอดภัยด้าน AI ที่เกี่ยวข้องโตราว 40%–45% จากฐานต่ำ โดยลูกค้าส่วนใหญ่อยู่ในขั้น pilot หรือการติดตั้งใช้งานจริงขนาดเล็ก ช่องทางประเมินว่าไตรมาสนี้โตราว 50%–55% โดยอ้างการนำไปใช้ในองค์กรที่กว้างขึ้น และสิทธิ์การใช้งานที่รวมมากับไฟร์วอลล์รุ่นถัดไป (next-generation firewall)</li>
+<li>b. ช่องทางยุโรป A รายงานว่า ในกลุ่มลูกค้าที่ผู้เชี่ยวชาญดูแลในบทบาทใหม่ สัดส่วนที่กำลังทำ pilot เพิ่มจากราว 5%–10% ใน FY26Q4 เป็นราว 10%–15% ในไตรมาสนี้ การใช้จ่ายที่เกี่ยวข้องเพิ่มจากน้อยกว่า 1% เป็นราว 1%–2% ของการใช้จ่ายกับ Palo Alto ของลูกค้าเหล่านั้น</li>
+</ul>
+<blockquote>“มันยังเป็น pilot และบันเดิลเป็นส่วนใหญ่ มักได้ส่วนลด และอาจถึงขั้นให้ฟรีเมื่อการว่าจ้างโดยรวมใหญ่พอ มีเพียงราว 20%–30% ของงานที่อยู่ใน production”</blockquote>
+<ul>
+<li>ช่องทางอเมริกาเหนือ B ประเมินว่า AI runtime security คิดเป็นราว 1.5% ของการใช้จ่ายกับ Palo Alto ของลูกค้าในไตรมาสนี้ และอาจถึงราว 2% ในไตรมาสหน้า ลูกค้าไม่ถึง 4% ใช้ผลิตภัณฑ์เหล่านี้ในไตรมาสนี้ รวม pilot การประเมินแบบบันเดิล และการติดตั้งใช้งานจริง</li>
+<li>ช่องทางออสเตรเลียเห็น pilot และการติดตั้งใช้งานจริงช่วงแรกมากขึ้น แต่การใช้จ่ายเฉพาะด้านนี้ยังคิดเป็นน้อยกว่า 1% ของงบความปลอดภัยไซเบอร์โดยรวมของลูกค้า ช่องทางคาดว่างบจะเติบโตให้เห็นชัดขึ้นใน 1–2 ปีข้างหน้า</li>
+</ul>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ผลิตภัณฑ์ที่ซื้อมาและผลิตภัณฑ์ AI ยังไม่ช่วยตัวเลขอย่างมีนัยสำคัญ</p><ul class="rn-sum-list"><li>ดีมานด์ machine identity แข็งแรง โดยส่วนใหญ่มาจากลูกค้าเดิม</li><li>ARR ส่วนเพิ่มของ Chronosphere พึ่งลูกค้ารายใหญ่ไม่กี่ราย คาดการณ์รายไตรมาสจึงยาก</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">30%–32%</div><div class="rn-stat-c">การเติบโตของ CyberArk ใน YoY ในไตรมาสนี้ — ช่องทางออสเตรเลีย</div></div><div class="rn-stat"><div class="rn-stat-v">~1.5%</div><div class="rn-stat-c">สัดส่วน AI runtime security ในการใช้จ่ายกับ Palo Alto — ช่องทางอเมริกาเหนือ B</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span>ติดตามผล: องค์กรใช้โมเดล AI ในงานปฏิบัติการด้านความปลอดภัยอย่างไร</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>สำหรับงานประจำวัน องค์กรมักคงแพลตฟอร์มความปลอดภัยแบบรวมศูนย์ไว้ แล้วเลือกโมเดลพื้นฐานตามงาน</li><li>เมื่อซื้อ token แยก มักผ่านผู้ให้บริการคลาวด์ที่ใช้อยู่ เช่น AWS และ Azure</li><li>เมื่อใช้ฟีเจอร์ AI ที่มากับผลิตภัณฑ์ความปลอดภัย การใช้จ่ายไหลผ่านผู้ขายด้านความปลอดภัย</li></ul></div>
+<p>ในงานวิจัยก่อนหน้า เราดูว่าองค์กรอาจสร้างความสามารถด้านปฏิบัติการความปลอดภัยบางส่วนขึ้นเองโดยใช้โมเดลระดับแนวหน้า (frontier model) หรือไม่ และนั่นหมายถึงอะไรต่อดีมานด์ผลิตภัณฑ์ความปลอดภัยที่มีอยู่ ครั้งนี้เราติดตามต่อว่าองค์กรเลือกแพลตฟอร์มความปลอดภัยอย่างไร เมื่อผู้ให้บริการโมเดลเปิดตัวผลิตภัณฑ์ความปลอดภัยของตนเอง และองค์กรจัดซื้อการใช้งานโมเดลสำหรับงานเหล่านั้นจากที่ใด</p>
+<ul>
+<li>เราคุยกับช่องทางยุโรป A ว่าองค์กรจะนำผลิตภัณฑ์ความปลอดภัยจาก OpenAI หรือ Anthropic มาใช้โดยตรง หรือจะใช้ความสามารถของโมเดลผ่านแพลตฟอร์มอย่าง Palo Alto และ Microsoft ต่อไป ผู้เชี่ยวชาญเห็นว่าผู้ให้บริการโมเดลมีที่ทางในกรณีใช้งานเฉพาะทางบางอย่าง สำหรับงานปฏิบัติการความปลอดภัยประจำวัน องค์กรมักคงแพลตฟอร์มความปลอดภัยแบบรวมศูนย์ไว้ แล้วเลือกโมเดลพื้นฐานตามงาน</li>
+</ul>
+<blockquote>“เราเห็นลูกค้ามากขึ้นที่ถือว่าโมเดลพื้นฐานเป็นสิ่งที่เลือกได้ทันที คุณจะเลือก OpenAI, Anthropic หรือรายอื่นก็ได้ แล้วคุณก็อยากให้ความปลอดภัยไซเบอร์ของคุณอยู่ในชั้นที่เหนือขึ้นไปอีกชั้น … ผมคิดว่า hyperscaler อยู่ในตำแหน่งที่ดีกว่าที่จะคว้าส่วนแบ่งความปลอดภัยไซเบอร์ก้อนใหญ่ โดยเฉพาะ Microsoft แต่ลูกค้าองค์กรส่วนใหญ่มีกลยุทธ์ multicloud ดังนั้นพวกเขาอาจต้องการความปลอดภัยไซเบอร์ในชั้นที่อยู่เหนือ hyperscaler ด้วยเช่นกัน”</blockquote>
+<ul>
+<li>เรายังถามช่องทางอเมริกาเหนือ B ว่าองค์กรจัดซื้อ token สำหรับงานความปลอดภัยอย่างไร ช่องทางบอกว่า เมื่อบริษัทซื้อการใช้งานโมเดลแยกต่างหาก มักผ่านผู้ให้บริการคลาวด์ที่ใช้อยู่ เช่น AWS และ Azure สามารถใช้ข้อผูกพันการใช้จ่ายคลาวด์ที่มีอยู่ และเลี่ยงการเริ่มต้นทำงานกับผู้ขายรายใหม่ เมื่อใช้ฟีเจอร์ AI ที่มากับผลิตภัณฑ์ความปลอดภัย การใช้จ่ายจะไหลผ่านผู้ขายด้านความปลอดภัยนั้น</li>
+</ul>
+<blockquote>“ถ้าลูกค้าลงทุนกับ AI Runtime Security ของ Palo Alto หรือฟีเจอร์ AI ของ XSIAM การใช้จ่ายนั้นจะไหลผ่าน Palo Alto … CrowdStrike กับ Charlotte ก็คล้ายกัน ผู้ขายด้านความปลอดภัยอาจเสนอการปรับแต่งให้ด้วย”</blockquote>
+<ul>
+<li>เราได้ยินจากอีกแหล่งว่า ในการเปรียบเทียบการสแกนช่องโหว่ครั้งหนึ่ง Mythos ระบุช่องโหว่ได้ราว 55%–60% และ Astra ระบุได้ราว 35%–40% โดยทับซ้อนกันเพียงบางส่วน แพลตฟอร์มความปลอดภัยที่ใช้หลายโมเดลสามารถรวมผลการค้นพบของทุกโมเดล ตัดรายการซ้ำ และคัดกรองผลบวกเท็จ (false positive) ซึ่งอาจเผยปัญหาที่โมเดลเดียวมองข้ามไป จากการสำรวจช่องทางจำหน่ายของเรา เราคิดว่าองค์กรที่มีแพลตฟอร์มความปลอดภัยอยู่แล้วมีแนวโน้มใช้ความสามารถของโมเดลภายในแพลตฟอร์มเหล่านั้นมากกว่า</li>
+</ul>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">องค์กรที่มีแพลตฟอร์มความปลอดภัยอยู่แล้วมีแนวโน้มใช้ความสามารถของโมเดลภายในแพลตฟอร์มนั้น</p><ul class="rn-sum-list"><li>แพลตฟอร์มที่ใช้หลายโมเดลรวมผลการค้นพบ ตัดรายการซ้ำ และคัดกรองผลบวกเท็จได้</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">55%–60%</div><div class="rn-stat-c">สัดส่วนช่องโหว่ที่ Mythos ระบุได้ในการเปรียบเทียบครั้งหนึ่ง</div></div><div class="rn-stat"><div class="rn-stat-v">35%–40%</div><div class="rn-stat-c">สัดส่วนช่องโหว่ที่ Astra ระบุได้ในการเปรียบเทียบเดียวกัน</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span>แนวโน้มรายไตรมาส</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>คาดการเติบโตออร์แกนิกของ PANW เร่งเล็กน้อยใน FY27Q1 และเร่งต่อใน FY27Q2</li><li>งบความปลอดภัยไซเบอร์ CY27 จากสี่ช่องทางโตเร็วกว่า CY26 โดยเฉลี่ยราว 2–3 จุดเปอร์เซ็นต์</li><li>การผนวกรวม CyberArk และ Chronosphere ใช้เวลา และ Prisma AIRS ยังอยู่ช่วง pilot</li></ul></div>
+<ol>
+<li>เราคาดว่าการเติบโตของรายได้แบบออร์แกนิกของ PANW จะเร่งขึ้นเล็กน้อยใน FY27Q1 และเร่งต่อใน FY27Q2 ช่องทางส่วนใหญ่รายงานว่าการเติบโตของการใช้จ่ายของลูกค้าคงที่หรือสูงขึ้นเล็กน้อยจากไตรมาสก่อน ลูกค้ายังซื้อภายในงบประมาณเดิมเป็นหลัก และบางโครงการมีแนวโน้มปิดได้เมื่องบประมาณใหม่ถูกปล่อยออกมาต้นปีปฏิทิน</li>
+<li>การสำรวจช่องทางจำหน่ายของเราให้ภาพแรกของงบประมาณความปลอดภัยไซเบอร์ของลูกค้าใน CY27 จากสี่ช่องทาง ประมาณการชี้ว่าการเติบโตของงบ YoY จะเร็วกว่า CY26 โดยเฉลี่ยราว 2–3 จุดเปอร์เซ็นต์ ช่องทางโดยทั่วไปคาดว่าส่วนแบ่งงบของ PANW จะเพิ่มขึ้นในระดับต่ำหลักเดียวของจุดเปอร์เซ็นต์ เมื่อลูกค้ารวมผู้ขายและซื้อผลิตภัณฑ์มากขึ้นข้ามแพลตฟอร์ม</li>
+<li>การผนวกรวม CyberArk และ Chronosphere จะใช้เวลา พาร์ตเนอร์ช่องทางบางรายเริ่มขายผลิตภัณฑ์ข้ามไปยังลูกค้าเดิมแล้ว แต่โอกาสยังไม่แปลงเป็นออร์เดอร์ที่มีนัยสำคัญ ควรสังเกตด้วยว่า ARR ส่วนเพิ่มของ Chronosphere ในหลายไตรมาสที่ผ่านมาขับเคลื่อนโดยลูกค้ารายใหญ่จำนวนน้อยเป็นหลัก ทำให้การเติบโตรายไตรมาสคาดการณ์ยากขึ้นเพราะอ่อนไหวต่อจังหวะการติดตั้ง ส่วน Prisma AIRS ก็ยังอยู่ในขั้น pilot และการติดตั้งใช้งานช่วงแรก โดยสัดส่วนที่ช่วยการใช้จ่ายรวมของลูกค้ากับ PANW ยังจำกัด</li>
+</ol>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ภาพรวมของเราคือการใช้จ่ายของลูกค้าคงแข็งแรง โดยตัวช่วยจาก platformization มาก่อนผลิตภัณฑ์ที่ซื้อมา</p></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">+2–3 จุด</div><div class="rn-stat-c">การเติบโตของงบความปลอดภัย CY27 เทียบกับ CY26 โดยเฉลี่ย</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span>อัปเดตตัวชี้วัดหลัก</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ตารางสรุปประมาณการ Revenue, NGS ARR และ Organic NGS ARR ของ FUNDA ทั้งรายไตรมาสและรายปี</li></ul></div>
+<div class="figure"><img src="data:image/jpeg;base64,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e+DVUhOzb49/65+CiP7z8Hthom/YccocK/fuwqc++PnDlyeYK031f9+BonPvKX/TkOASrgrSc5EjaTXP3/c3ceKObtx8C3WIKOeVj84tbI6DoOg6DoOg6DoOg6DoOgbPB4x1HQdGZug6DoPNBI4R0HUN3ISuEdA2co6MboOgSOFjLmRMY6joxug6DoxIeDoOg6iXgW9EKFCPYq9hQN31DdymNcpw4TK2FpG68p7QbuhOHCZTjIG67oN0SREQiIiIa9BQUyiIfWYhzxmKEWUl5EllEQ+tDSGllSCS85RsOeBJshRGxpr04x7Zg1NEeUqJN5W5B7ZjGtC3JlbkOMxoaa5EyUKWVyV6dZzmjdynCvjKcKzwV6Ky6E4XPBR75obomilRdyoqKvQTQmllMo81DdzVINrKaQmsrYTG7oqG8pwTWVsUboqE7HCHODKDU9DlB7Zg1MpUey5Srgq0mo5mbUcaEqLZpNRzLDUIbkIQhGb64TMpHojJMx8keUqR55JpjI1mEeeSEgmUpSlZSlHv6K2KPfN0XwXKcLlbYe+il1rYo9/yv//EACsQAQEAAgEEAgICAQUBAQEAAAERACExQVHR8WHhIIFxkRAwQKHB8GCxcP/aAAgBAQABPxD/AOoibTipnreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet563nreet4Uoh3X/ABE2nFTPW89bz1vPW89bz1vPW89bz1vPW89bz1vPW89bz1vPW89bz1vPW89bz1vPW89bz1vPW8qaTmrn/h9//p37D/zO+P8Aw+/+5U+gUKl1grwdc4bkgsClKppOjhA8OdhJAYR26YRgoGZhRZCRb51kCuGFsAliOVtxROowGvUjRXdQzOkZ949EQDx3/wAiFg7VaqG5u9GKJG2mwsQ+JcdsWHXL/wA1ACI42DHPK4AAAmwK8fvF85ToYH35Hw41gCJPr+i0TXGOmP8AhaEEyEE1PHPDkCfENjkJDSTHaGUjBqCxJ2yWsbscJBo4O64J3wNTpxCF6wkxFJmjYdORVeg/5xCdtOec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0Zc8yEEi6IDShtwoqSChRKiQE1bV/GdRhIBd7B3LNO8DyYqSUVFa05mdwSRpvvpy1rv1zYDKirpLLDuXnLx9kU9iC/0c/ivt8NW+QKNQpvOCIZq0aOwj+JjSMhiqiCJAO9b2M3WUOSjEcDgwWvjDQGGtE+Rf+8n33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995yffecn33nJ995zW0n4T/AUod4v/AHk++85PvvOT77zk++85PvvOT77zk++85PvvOT77zk++85PvvOT77zk++85PvvOT77zk++85PvvOT77zk++85PvvOT77zk++85PvvOT77zk++84BaXaJ/wB//wBR/9k=" alt="figure 1"><div class="figure-caption">รูปที่ 1: ตาราง — ตัวชี้วัดหลักของ PANW (Key Metrics Update) แถบหัวตารางสีน้ำเงินเข้ม แบ่งสองกลุ่มคอลัมน์ คือรายไตรมาส FY26 Q3A, FY26 Q4A, FY27 Q1E, FY27 Q2E, FY27 Q3E, FY27 Q4E และรายปี FY26A, FY27E, FY28E ป้ายในภาพ: Revenue ($B) = รายได้ (พันล้านดอลลาร์) · Revenue YoY Growth = การเติบโตของรายได้ YoY · NGS ARR ($B) = ARR ของ NGS (พันล้านดอลลาร์) · NGS ARR YoY Growth = การเติบโตของ NGS ARR YoY · Organic NGS ARR ($B) = NGS ARR แบบออร์แกนิก (พันล้านดอลลาร์) · Organic NGS ARR YoY Growth = การเติบโตของ NGS ARR แบบออร์แกนิก YoY</div></div>
+<p><em>แหล่งที่มา: ข้อมูลสาธารณะ และประมาณการของ FUNDA</em></p>
+<hr>
+<h3>⚖️ แถลงการณ์ความเป็นอิสระของนักวิเคราะห์</h3>
+<p>ความเห็นที่แสดงในรายงานฉบับนี้สะท้อนมุมมองส่วนตัวและเป็นอิสระของนักวิเคราะห์ที่มีต่อหลักทรัพย์และผู้ออกหลักทรัพย์ที่กล่าวถึงในที่นี้อย่างถูกต้อง ค่าตอบแทนของนักวิเคราะห์ไม่ว่าส่วนใดไม่เคย ไม่ได้ และจะไม่เกี่ยวข้องโดยตรงหรือโดยอ้อมกับคำแนะนำหรือมุมมองเฉพาะที่แสดงในรายงานนี้ บริษัทยึดมั่นในขั้นตอนการกำกับดูแลอย่างเคร่งครัด เพื่อให้มั่นใจในความถูกต้องครบถ้วน ความมั่นคงปลอดภัย และความชอบด้วยกฎหมายของแหล่งข้อมูลและข้อมูลที่ใช้</p>
+<h3>ℹ️ เกี่ยวกับ FUNDA</h3>
+<p>Consensus AI Technology Pte. Ltd. (“บริษัท” หรือ “FUNDA”) เป็นบริษัทวิจัยอิสระที่จดทะเบียนในสิงคโปร์ บริษัทไม่มีความเกี่ยวข้องกับผู้ค้าหลักทรัพย์ ธนาคารเพื่อการลงทุน หรือบริษัทจัดการสินทรัพย์ใดๆ และไม่ได้จดทะเบียนเป็นที่ปรึกษาการลงทุนหรือโบรกเกอร์-ดีลเลอร์ในเขตอำนาจรัฐใดเลย บริษัทไม่มีความสัมพันธ์ด้านวาณิชธนกิจหรือการรับประกันการจำหน่ายหลักทรัพย์กับบริษัทที่ครอบคลุมในรายงานนี้ และไม่รับการสนับสนุนหรือเงินทุนจากบริษัทจดทะเบียน</p>
+<h3>🚫 ไม่ใช่คำแนะนำการลงทุน และความเป็นกลางของรายงาน</h3>
+<p>เนื้อหาของรายงานนี้และข้อมูลที่ปรากฏในที่นี้มีไว้เพื่อให้ข้อมูลเท่านั้น และไม่ถือเป็นคำแนะนำการลงทุนหรือเป็นฐานของการตัดสินใจทางธุรกิจ ความเห็นที่แสดงในที่นี้เป็นความเห็นส่วนตัวของผู้เขียนแต่ละท่าน ณ ช่วงเวลาหนึ่งเท่านั้น และไม่สะท้อนจุดยืนของ FUNDA ในฐานะแพลตฟอร์มที่ดำเนินงานอย่างอิสระ FUNDA คงสถานะบุคคลที่สามที่เป็นกลาง และไม่ให้การรับรองใดๆ ไม่ว่าโดยชัดแจ้งหรือโดยนัย ต่อความถูกต้อง ความครบถ้วน หรือความเหมาะสมในการนำไปใช้ของความเห็นเหล่านั้น</p>
+<p><strong>ไม่ใช่การเสนอขายหรือชักชวน:</strong> รายงานนี้ไม่ถือเป็นการเสนอขาย การชักชวน การแนะนำ หรือคำแนะนำให้ซื้อ ขาย หรือถือหลักทรัพย์หรือเครื่องมือทางการเงินใดๆ และไม่ให้คำแนะนำด้านกฎหมาย ภาษี หรือบัญชี</p>
+<p><strong>ข้อมูลของบุคคลที่สาม:</strong> ข้อมูลของบุคคลที่สามทั้งหมดที่อ้างอิงในรายงานนี้ได้มาจากแหล่งสาธารณะหรือแหล่งที่ได้รับอนุญาต บริษัทไม่ให้การรับรองหรือรับประกันใดๆ ไม่ว่าโดยชัดแจ้งหรือโดยนัย ต่อความถูกต้องหรือความครบถ้วนของข้อมูลเหล่านั้น</p>
+<p><strong>ไม่มีส่วนร่วมในการตัดสินใจ:</strong> บริษัทไม่มีส่วนร่วมทั้งโดยตรงหรือโดยอ้อมในกระบวนการตัดสินใจลงทุนของลูกค้าหรือผู้อ่าน ผู้อ่านควรตัดสินใจลงทุนด้วยตนเองโดยอิงตามวัตถุประสงค์การลงทุนและสถานการณ์ทางการเงินของตน และควรปรึกษาที่ปรึกษาทางการเงินหรือกฎหมายมืออาชีพก่อนทำธุรกรรมใดๆ</p>
+<h3>⏱️ แถลงการณ์เรื่องความทันสมัยของข้อมูล</h3>
+<p>เนื่องจากสภาพแวดล้อมตลาดและแนวโน้มทางเทคโนโลยีเปลี่ยนแปลงอย่างรวดเร็ว รายงานนี้สะท้อนสภาวะตลาด ณ วันก่อนการเผยแพร่ ข้อมูลที่เกี่ยวข้องอาจล้าสมัยเมื่อเวลาผ่านไป FUNDA ไม่มีหน้าที่ต้องปรับปรุงเนื้อหาของรายงานนี้แบบเรียลไทม์</p>
+<h3>🔐 ทรัพย์สินทางปัญญา การรักษาความลับ และข้อจำกัดการใช้เชิงพาณิชย์</h3>
+<p>รายงาน ข้อมูล โมเดล และเนื้อหาทั้งหมดที่บริษัทจัดทำให้เป็นทรัพย์สินทางปัญญาที่เป็นกรรมสิทธิ์เฉพาะของบริษัท และได้รับความคุ้มครองตามกฎหมายลิขสิทธิ์และทรัพย์สินทางปัญญา</p>
+<p><strong>กรรมสิทธิ์:</strong> เว้นแต่จะกำหนดไว้เป็นอย่างอื่นโดยชัดแจ้งในข้อตกลงเป็นลายลักษณ์อักษร สิทธิในทรัพย์สินทางปัญญาทั้งหมด (รวมถึงลิขสิทธิ์) ที่เกิดจากหรือเกี่ยวข้องกับรายงานนี้เป็นของบริษัทแต่เพียงผู้เดียว</p>
+<p><strong>การใช้ที่ได้รับอนุญาต:</strong> ลูกค้าสถาบันอาจใช้รายงานนี้ภายในองค์กรตามขอบเขตที่นโยบายกำกับดูแลภายในอนุญาต อย่างไรก็ตาม ห้ามเปิดเผยหรือแบ่งปันให้บุคคลที่สามโดยเด็ดขาด</p>
+<p><strong>ข้อห้ามใช้เชิงพาณิชย์:</strong> หากไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรอย่างชัดแจ้งล่วงหน้าจากบริษัท บุคคลหรือนิติบุคคลใดไม่อาจทำซ้ำ เผยแพร่ซ้ำ แจกจ่าย ขายต่อ บรรจุใหม่ หรือใช้รายงานนี้หรือส่วนใดส่วนหนึ่งเพื่อวัตถุประสงค์เชิงพาณิชย์หรือแสวงหากำไรใดๆ</p>
+<p><strong>การดำเนินการทางกฎหมาย:</strong> บริษัทสงวนสิทธิ์ในการดำเนินการตามกฎหมายและเรียกร้องทุกวิถีทางที่มี ต่อการใช้เชิงพาณิชย์ที่ไม่ได้รับอนุญาต การแจกจ่ายซ้ำ หรือการละเมิดสิทธิในทรัพย์สินทางปัญญาของบริษัท</p>
+<h3>📉 ข้อความเชิงคาดการณ์และข้อสงวนสิทธิ์</h3>
+<p>รายงานนี้อาจมีข้อความเชิงคาดการณ์ รวมถึงการพยากรณ์ ประมาณการ และการวิเคราะห์แนวโน้มอุตสาหกรรม ข้อความเหล่านี้อยู่ภายใต้ความเสี่ยงและความไม่แน่นอนที่อาจทำให้ผลที่เกิดขึ้นจริงแตกต่างอย่างมีนัยสำคัญจากที่คาดไว้ บริษัทไม่รับผิดชอบต่อความเสียหายทางตรง ทางอ้อม หรือที่เป็นผลสืบเนื่องใดๆ ที่เกิดจากการใช้หรือพึ่งพาเนื้อหาของรายงานนี้</p>
+<hr>
+<p><strong>เชิญเพื่อนของคุณและรับรางวัล</strong></p>
+<p>หากคุณชอบ FUNDA ลองแบ่งปันให้เพื่อนๆ และรับรางวัลเมื่อพวกเขาสมัครรับ — ปุ่ม “เชิญเพื่อน” (Invite Friends)</p>
+<p>👍 ถูกใจ (LIKE) · 💬 แสดงความคิดเห็น (COMMENT) · 🔁 รีสแต็ก (RESTACK)</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ตัวเลขทั้งหมดในตารางเป็นประมาณการของ FUNDA จากข้อมูลสาธารณะ</p></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$14.64B</div><div class="rn-stat-c">ประมาณการรายได้ FY27E (โต 27.5%)</div></div><div class="rn-stat"><div class="rn-stat-v">$17.08B</div><div class="rn-stat-c">ประมาณการรายได้ FY28E (โต 16.7%)</div></div></aside>
+</section>
+<section class="rn-sec" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>📈 การใช้จ่ายของลูกค้า PANW เร่งตัวต่อเนื่อง</strong> — ช่องทางอเมริกาเหนือ A ปรับ FY27Q1 เป็น 34%–35% (สูงกว่าช่วงเดิม 32%–34%) และคาด FY27Q2 ที่ 36%–38% ส่วนช่องทางยุโรปและออสเตรเลียก็ทรงตัวหรือขยับขึ้นเล็กน้อย</li>
+<li><strong>🧲 Platformization คือเครื่องยนต์หลัก</strong> — ช่องทางอเมริกาเหนือ A ประเมินส่วนแบ่งของ PANW ในงบความปลอดภัยองค์กรใหญ่เพิ่มจาก 26%–30% ใน CY25 เป็น 30%–35% ใน CY26 และอาจแตะ 40%–42% ใน CY27 โดยลูกค้าอยากลดจำนวนผู้ขายลง</li>
+<li><strong>💼 งบความปลอดภัย CY27 มีแนวโน้มโตเร็วกว่า CY26 ราว 2–3 จุดเปอร์เซ็นต์</strong> — จากการสำรวจสี่ช่องทาง โดย AI คือตัวขับสำคัญ เช่น ธนาคารที่ช่องทางหนึ่งดูแลซึ่งเห็นสัดส่วนความปลอดภัยใน IT เพิ่มจากราว 12% เป็นราว 20%</li>
+<li><strong>🔥 ไฟร์วอลล์ยังแข็งแรงทั้งฮาร์ดแวร์และซอฟต์แวร์</strong> — ฮาร์ดแวร์ได้แรงจากรอบเปลี่ยนอุปกรณ์ (ช่องทางยุโรป A คาดยืดอีก 4–6 ไตรมาส) ส่วนซอฟต์แวร์ใน NA A โตราว 42% และคาดโตต่ออีก 2–3 ปี</li>
+<li><strong>🌐 SASE และ Cortex Cloud เร่งตัว</strong> — SASE ของ NA A โต 29%–30% สูงกว่าที่คาดราว 2 จุด ส่วน Cortex Cloud ของ NA A เพิ่มเป็น 35%–36% จาก 32%–33% และคาด 38%–42% ไตรมาสหน้า</li>
+<li><strong>🛰️ XSIAM ยังโตแรง แต่คลื่นย้ายระบบใกล้ผ่านจุดสูงสุดในบางตลาด</strong> — NA B โต 45%–46% และคาดเกิน 47.5% ขณะที่ช่องทางยุโรป A เตือนว่าหลังคลื่น migration การเติบโตอาจกลับมาราว 30%</li>
+<li><strong>🧩 การผนวกรวม CyberArk และ Chronosphere ต้องใช้เวลา</strong> — ทีมขายและการซื้อยังแยกกัน ช่องทางยุโรป B คาดการผนวกรวมเต็มรูปแบบของ Chronosphere ไตรมาสสองปีปฏิทิน 2027 และ ARR ส่วนเพิ่มของ Chronosphere พึ่งลูกค้ารายใหญ่ไม่กี่ราย จึงคาดการณ์รายไตรมาสยาก</li>
+<li><strong>🤖 Prisma AIRS ยังอยู่ช่วง pilot</strong> — ช่องทางอเมริกาเหนือ B ประเมินว่า AI runtime security คิดเป็นราว 1.5% ของการใช้จ่ายกับ Palo Alto และมีลูกค้าใช้ไม่ถึง 4% ส่วนช่องทางออสเตรเลียเห็นการใช้จ่ายเฉพาะด้านนี้ต่ำกว่า 1% ของงบความปลอดภัยรวม</li>
+<li><strong>🧠 องค์กรที่มีแพลตฟอร์มอยู่แล้วมักใช้ความสามารถของโมเดล AI ภายในแพลตฟอร์มนั้น</strong> — เมื่อซื้อ token แยก มักผ่านผู้ให้บริการคลาวด์ที่ใช้อยู่ และเมื่อใช้ฟีเจอร์ AI ในผลิตภัณฑ์ความปลอดภัย เงินจะไหลผ่านผู้ขายด้านความปลอดภัย ซึ่งเป็นแรงหนุนต่อแพลตฟอร์มอย่าง PANW</li>
+<li><strong>⚠️ ความเสี่ยงที่ควรจับตา</strong> — ดีลแพลตฟอร์มหลายปีอาจเลื่อนข้ามปี ไตรมาส 1 มักมีการรีเซ็ตงบและรออนุมัติจัดซื้อ และคู่แข่งแบบ best-of-breed อย่าง CrowdStrike (endpoint) กับ Okta (identity) ยังมีลูกค้าภักดี</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>FUNDA, “Preview|PANW FY27Q1: An Early Quantitative Read on a Platformization Winner”, 13 พฤศจิกายน 2026 (2026-11-13_-_PreviewPANW_FY27Q1_An_Early_Quantitative_Read_on_a_Platformization_Winner_-_id2673.pdf)</li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+FundaAI<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+
+
+</body></html>
