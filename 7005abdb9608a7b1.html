@@ -1,0 +1,1143 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>TMTB: ไฮไลต์จาก TomorrowX — SpaceX เรื่องคอมพิวต์, Lisa Su แห่ง AMD, Fireworks เรื่อง Inference, Druckenmiller เรื่องการวางพอร์ต และอื่น ๆ</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">TMT Breakout</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+<div class="rn-lang" id="rn-lang" role="group" aria-label="Language"><div class="rn-sheen" aria-hidden="true"></div><div class="rn-lpill" aria-hidden="true"></div><button class="rn-lopt" type="button" data-lang-opt="th" aria-pressed="true">ไทย</button><button class="rn-lopt" type="button" data-lang-opt="en" aria-pressed="false">EN</button></div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMD?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMD</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NVDA?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NVDA</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/DELL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$DELL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/META?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$META</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GS?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GS</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/APO?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$APO</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GOOGL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GOOGL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MSFT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MSFT</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ORCL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ORCL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ABNB?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ABNB</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/UBER?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$UBER</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/SPOT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$SPOT</span>
+<span class="rn-deck">TMT BREAKOUT · 17 พ.ย. · เนื้อหาสำหรับสมาชิกแบบเสียเงิน</span>
+</div>
+<h1>🚀 TMTB: ไฮไลต์จาก TomorrowX — SpaceX เรื่องคอมพิวต์, Lisa Su แห่ง AMD, Fireworks เรื่อง Inference, Druckenmiller เรื่องการวางพอร์ต และอื่น ๆ</h1>
+<div class="rn-byline"><b>TMT Breakout</b><span class="rn-sep">·</span>2026-11-18<span class="rn-sep">·</span><span class="rn-th">อ่าน 40 นาที</span><span class="rn-en">40 min read</span></div>
+</div>
+<p class="rn-notice rn-en">Headings, summaries, figure captions and key numbers are shown in English. Body paragraphs remain in Thai.</p>
+<div class="rn-lede"><p>งานเปิดตัวครั้งแรกของ TomorrowX ออกมาดีมาก พรุ่งนี้บรรยากาศที่ออสตินน่าจะดียิ่งกว่านี้ ถ้ากลุ่มเซมิคอนดักเตอร์ยังรักษากำไรช่วงหลังตลาดปิดไว้ได้ วันนี้มีหลายเวทีที่น่าสนใจมาก…</p></div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🛰 SpaceX ตั้งใจชนะที่ต้นทุนคอมพิวต์ — ต้นทุนบนพื้นดินราว $30 ต้น ๆ ถึงกลาง ๆ ต่อวัตต์ เทียบ $50–60 ของอุตสาหกรรม คืนทุนในไม่เกินหนึ่งปี และคอมพิวต์ในวงโคจรมีไทม์ไลน์ชัด: ดาวเทียมชุดแรกปี 2027 เร่งผลิตปี 2028 ระดับกิกะวัตต์ปี 2029</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="สารบัญ" data-en="สารบัญ" data-th-full="สารบัญ" data-en-full="สารบัญ" title="สารบัญ">สารบัญ</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="1. SpaceX" data-en="1. SpaceX" data-th-full="1. SpaceX" data-en-full="1. SpaceX: Hosting economics, orbital compute, financing and direct-to-cell" title="1. SpaceX">1. SpaceX</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="2. AMD" data-en="2. AMD" data-th-full="2. AMD" data-en-full="2. AMD: Easier software migration, the $220B CPU opportunity and Helios deployments" title="2. AMD">2. AMD</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="3. Fireworks" data-en="3. Fireworks" data-th-full="3. Fireworks" data-en-full="3. Fireworks: $1.5B revenue run rate, specialized inference and enterprise AI economics" title="3. Fireworks">3. Fireworks</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="4. Druckenmiller" data-en="4. Druckenmiller" data-th-full="4. Druckenmiller" data-en-full="4. Druckenmiller: Capital preservation, AI applications and the next investment opportunity" title="4. Druckenmiller">4. Druckenmiller</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="5. Altimeter" data-en="5. Altimeter" data-th-full="5. Altimeter" data-en-full="5. Altimeter: Anthropicʼs compute economics, IPO positioning and modellayer concentration" title="5. Altimeter">5. Altimeter</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="6. Apollo" data-en="6. Apollo" data-th-full="6. Apollo" data-en-full="6. Apollo: AI infrastructure financing, private credit and the capital spending cycle" title="6. Apollo">6. Apollo</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="7. Dell" data-en="7. Dell" data-th-full="7. Dell" data-en-full="7. Dell: 6,500 AI-factory customers, enterprise adoption and infrastructure demand" title="7. Dell">7. Dell</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s9" data-sec="s9" aria-controls="rn-p-s9" aria-selected="false" data-th="8. Meta" data-en="8. Meta" data-th-full="8. Meta" data-en-full="8. Meta: Data-center community agreements, smart glasses and AI safety" title="8. Meta">8. Meta</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s10" data-sec="s10" aria-controls="rn-p-s10" aria-selected="false" data-th="9. ผู้ก่อตั้ง TomorrowX" data-en="9. TomorrowX Founders" data-th-full="9. ผู้ก่อตั้ง TomorrowX" data-en-full="9. TomorrowX Founders: The AI capex cycle and the changing influence of retail investors" title="9. ผู้ก่อตั้ง TomorrowX">9. ผู้ก่อตั้ง TomorrowX</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s11" data-sec="s11" aria-controls="rn-p-s11" aria-selected="false" data-th="10. Goldman Sachs" data-en="10. Goldman Sachs" data-th-full="10. Goldman Sachs" data-en-full="10. Goldman Sachs: Application-layer opportunities, AI-driven productivity and engineering jobs" title="10. Goldman Sachs">10. Goldman Sachs</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s12" data-sec="s12" aria-controls="rn-p-s12" aria-selected="false" data-th="11. Sound Ventures" data-en="11. Sound Ventures" data-th-full="11. Sound Ventures" data-en-full="11. Sound Ventures: Anthropic, founder selection and private-market investing" title="11. Sound Ventures">11. Sound Ventures</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s13" data-sec="s13" aria-controls="rn-p-s13" aria-selected="false" data-th="ข้อสงวนสิทธิ์ (Disclaimer)" data-en="ข้อสงวนสิทธิ์ (Disclaimer)" data-th-full="ข้อสงวนสิทธิ์ (Disclaimer)" data-en-full="ข้อสงวนสิทธิ์ (Disclaimer)" title="ข้อสงวนสิทธิ์ (Disclaimer)">ข้อสงวนสิทธิ์ (Disclaimer)</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s14" data-sec="s14" aria-controls="rn-p-s14" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span>สารบัญ</span></h2>
+
+<ol>
+<li><strong>SpaceX:</strong> เศรษฐศาสตร์ของการให้เช่าโฮสติ้ง, เงินชำระล่วงหน้าจากลูกค้า, คอมพิวต์ในวงโคจร และ direct-to-cell — Bret Johnsen (CFO, SpaceX)</li>
+<li><strong>AMD:</strong> ต้นทุนการย้ายซอฟต์แวร์ที่ลดลง, โอกาสในตลาด CPU มูลค่า $220B และการติดตั้ง Helios — Lisa Su (ประธานกรรมการและ CEO, AMD)</li>
+<li><strong>Fireworks:</strong> รายได้ run rate $1.5B, inference แบบเฉพาะทาง และข้อโต้แย้งต่อการขายต่อคอมพิวต์แบบโภคภัณฑ์ — Lin Qiao (ผู้ร่วมก่อตั้งและ CEO, Fireworks AI)</li>
+<li><strong>Druckenmiller:</strong> วันนี้คือการรักษาเงินต้น ถัดไปคือแอปพลิเคชัน AI และการสร้างรายได้แบบคิดตามงาน — Stanley Druckenmiller (CEO, Duquesne Family Office)</li>
+<li><strong>Altimeter:</strong> เศรษฐศาสตร์ inference ของ Anthropic, การวางตำแหน่ง IPO และมูลค่าที่กระจุกตัวในชั้นโมเดล — Brad Gerstner (ผู้ก่อตั้งและ CEO, Altimeter)</li>
+<li><strong>Apollo:</strong> การจัดหาเงินทุนให้ AI โดยไม่ต้องรับความเสี่ยงชุดเดียวกับนักลงทุนหุ้น — Marc Rowan (ผู้ร่วมก่อตั้งและ CEO, Apollo Global Management)</li>
+<li><strong>Dell:</strong> ลูกค้า AI factory 6,500 ราย และเหตุผลที่ผลตอบแทนขององค์กรกว้างกว่ารายได้ของแล็บโมเดล — Michael Dell (ประธานกรรมการและ CEO, Dell Technologies)</li>
+<li><strong>Meta:</strong> การขอ &quot;ใบอนุญาต&quot; ก่อนสร้าง, การนำร่องแว่นอัจฉริยะในภาคอุตสาหกรรม และธรรมาภิบาลด้านความปลอดภัยของ AI — Dina Powell McCormick (ประธานบริษัทและรองประธานกรรมการ, Meta)</li>
+<li><strong>ผู้ก่อตั้ง TomorrowX:</strong> ทำไมการสร้างที่ช้าลงอาจยืดวัฏจักรให้ยาวขึ้น และรีเทลเปลี่ยนการกระจายข้อมูลอย่างไร — Gavin Baker (Managing Partner และ CIO, Atreides Management); Antonio Gracias (ผู้ก่อตั้ง CEO และ CIO, Valor Equity Partners); Ron Biscardi (ผู้ร่วมก่อตั้งและ CEO, iConnections)</li>
+<li><strong>Goldman Sachs:</strong> มูลค่าในชั้นแอปพลิเคชัน, ตำแหน่งงานเขียนโค้ดประจำที่จะน้อยลง และการนำประสิทธิภาพจาก AI ไปลงทุนต่อ — David Solomon (ประธานกรรมการและ CEO, Goldman Sachs)</li>
+<li><strong>Sound Ventures:</strong> ความเชื่อมั่นใน Anthropic, การจัดจำหน่ายในฐานะจุดต่าง และการเข้าถึงตลาดเอกชน — Guy Oseary (ผู้ร่วมก่อตั้ง, Sound Ventures)</li>
+</ol>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span><span class="rn-th">1. SpaceX: เศรษฐศาสตร์ของการให้เช่าโฮสติ้ง, คอมพิวต์ในวงโคจร, การจัดหาเงินทุน และ direct-to-cell</span><span class="rn-en">1. SpaceX: Hosting economics, orbital compute, financing and direct-to-cell</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>คอมพิวต์บนพื้นดินของ SpaceX ต้นทุนราว $30 ต้น ๆ ถึงกลาง ๆ ต่อวัตต์ เทียบ $50–60 ของอุตสาหกรรม</li><li>ระยะคืนทุนของงานโฮสติ้งต่ำกว่าหนึ่งปี ใช้วงเงินสินเชื่อ GPU $40B ร่วมกับ Apollo และ Goldman</li><li>คอมพิวต์ในวงโคจร: ดาวเทียมชุดแรกปี 2027 เร่งผลิตปี 2028 ระดับกิกะวัตต์ปี 2029</li></ul></div>
+<p><strong>ผู้พูด:</strong> Bret Johnsen, CFO, SpaceX</p>
+<p><strong>สรุป:</strong> Johnsen บอกว่า SpaceX กำลังติดตั้งคอมพิวต์บนพื้นดินด้วยต้นทุนราว $30 ต้น ๆ ถึงกลาง ๆ ต่อวัตต์ เทียบกับที่เขาประเมินว่าที่อื่นอยู่ที่ $50–60 และระยะเวลาคืนทุนของงานโฮสติ้งสั้นกว่าหนึ่งปี เขาเล่าแผนระดมทุนขยายกิจการจากกระแสเงินสดจากการดำเนินงาน เงินชำระล่วงหน้าจากลูกค้า เงื่อนไขการชำระเงินกับซัพพลายเออร์ และหนี้ รวมถึงวงเงินสินเชื่อ GPU มูลค่า $40B ส่วนคอมพิวต์ในวงโคจร SpaceX วางแผนส่งดาวเทียมชุดแรกในปี 2027 เร่งกลุ่มดาวเทียมในปี 2028 และมีกำลังระดับกิกะวัตต์ที่มีนัยสำคัญในปี 2029</p>
+<h3>1) ต้นทุนคอมพิวต์บนพื้นดินและการรวมห่วงโซ่แนวดิ่ง</h3>
+<p>Johnsen บอกว่าคอมพิวต์บนพื้นดินสองสามกิกะวัตต์แรกของ SpaceX มีต้นทุนเฉลี่ยราว $30 ต้น ๆ ถึงกลาง ๆ ต่อวัตต์ เทียบกับประมาณ $50–60 ต่อวัตต์ของทั้งอุตสาหกรรม เขาคาดว่าเส้นต้นทุนของ SpaceX จะลดลงอีกตามปริมาณ การปรับปรุงการผลิต และความก้าวหน้าของเทคโนโลยี ขณะที่ข้อจำกัดด้านไฟฟ้า แรงงาน และการก่อสร้างผลักต้นทุนของที่อื่นให้สูงขึ้น</p>
+<p>เขาอธิบายว่าความได้เปรียบของ SpaceX มาจากการรวมห่วงโซ่แนวดิ่งตั้งแต่วิศวกรรม งานผู้รับเหมาทั่วไป การผลิต ไปจนถึงการผลิตไฟฟ้า บริษัทใช้เวลาพัฒนาความสามารถด้านการผลิตไฟฟ้ามากกว่าหนึ่งปี ทำให้ตั้งโครงสร้างพื้นฐานได้ภายในไม่กี่เดือน และจ่ายไฟให้แร็คที่ติดตั้งแล้วได้ภายในไม่กี่วัน</p>
+<p>ตัวอย่างหนึ่งคือผู้ผลิตเทอร์ไบน์รายนอกแจ้งว่าใบพัดและใบนำ (blades and vanes) จะมาถึงหลังตัวเทอร์ไบน์เองถึง 18–24 เดือน SpaceX จึงกำลังตั้งโรงหล่อแบบ investment casting ของตัวเองเพื่อผลิตชิ้นส่วนเหล่านั้นภายในบริษัท โดยใช้ความเชี่ยวชาญที่สะสมจากเครื่องยนต์ Raptor และงานผลิตอื่น ๆ</p>
+<p>Johnsen บอกว่า ถ้า SpaceX ทำได้ตามแผนที่เคยสื่อสารไว้ บริษัทอาจกลายเป็นหนึ่งในผู้ให้บริการโครงสร้างพื้นฐาน AI รายใหญ่ที่สุดในปี 2027</p>
+<h3>2) ระยะคืนทุนต่ำกว่าหนึ่งปี และการจัดหาเงินทุนโครงสร้างพื้นฐาน</h3>
+<p>Johnsen บอกว่าดีลโฮสติ้งบนพื้นดินในปัจจุบันของ SpaceX ให้ระยะคืนทุนต่ำกว่าหนึ่งปี บางดีลสั้นกว่านั้นมาก</p>
+<p>บริษัทวางแผนใช้กระแสเงินสดจากการดำเนินงานและการบริหารเงินทุนหมุนเวียนที่ดีขึ้นมาหนุนการเติบโต ซึ่งรวมถึงการเก็บเงินมัดจำจากลูกค้าเร็วขึ้นและการขยายเงื่อนไขการชำระเงินกับซัพพลายเออร์ เพราะ SpaceX เพิ่งให้บริการโฮสติ้งคอมพิวต์แก่บุคคลที่สามมาประมาณสองไตรมาส Johnsen จึงบอกว่าโอกาสเหล่านี้ยังไม่ถูกใช้เต็มที่</p>
+<p>เขาแบ่งแหล่งเงินทุนเป็นสามทาง ได้แก่ กระแสเงินสดจากการดำเนินงาน การเพิ่มประสิทธิภาพเงินทุนหมุนเวียน และหนี้ ส่วนหนี้นั้น เขาอ้างถึงพันธบัตรระดับลงทุนที่ออกในเดือนมิถุนายน และวงเงินสินเชื่อ GPU มูลค่า $40B ที่จัดร่วมกับ Apollo และ Goldman Sachs โดยเริ่มเสนอขายต่อสาธารณะ (syndication) ตั้งแต่วันที่ 17 พฤศจิกายน</p>
+<p>Gavin Baker เสนอว่าเงินชำระล่วงหน้าจากลูกค้าอาจทำให้กระแสเงินสดจากการดำเนินงานสูงกว่า EBITDA อย่างมีนัยสำคัญ และ Johnsen เห็นด้วย เมื่อระยะคืนทุนของงานโฮสติ้งอยู่ในหนึ่งปี Johnsen มองว่าความต้องการเงินทุนเป็นเพียงการเชื่อมช่วง &quot;เป็นเดือน&quot; ไม่ใช่ &quot;เป็นปี&quot;</p>
+<h3>3) สัญญาระยะสั้น ความต้องการคอมพิวต์ และการที่ Anthropic นำคอมพิวต์กลับมาทำเอง</h3>
+<p>Johnsen บอกว่าความต้องการคอมพิวต์ยังเพิ่มขึ้นต่อเนื่องทั่วทั้งอุตสาหกรรม เพราะ SpaceX มีธุรกิจดาวเทียมและอวกาศที่ทำกำไรอยู่แล้ว จึงไม่จำเป็นต้องล็อกสัญญาโฮสติ้งระยะยาวขนาดใหญ่ล่วงหน้าเพื่อหาเงินมาสร้าง</p>
+<p>แต่ SpaceX เลือกคงความยืดหยุ่นในการเสนอกำลังการผลิตแบบระยะสั้นและตลาดสปอต ซึ่ง Johnsen บอกว่าให้ผลตอบแทนสูงกว่า พร้อมรักษาความสามารถในการอัปเดตฮาร์ดแวร์และโยกกำลังการผลิตไปที่อื่นได้</p>
+<p>เมื่อถูกถามถึงเจตนาของ Anthropic ที่จะนำโครงสร้างพื้นฐานคอมพิวต์กลับมาดูแลเองมากขึ้น Johnsen บอกว่าการเติบโตที่คาดไว้ของ Anthropic ต้องใช้กำลังการผลิตเพิ่มอีกมาก ไม่ใช่แค่ทดแทนคอมพิวต์เช่าที่ใช้อยู่ เขายังเน้นว่ามีความต้องการจากลูกค้ารายอื่นที่กำลังหาไฟฟ้าและคอมพิวต์ที่พร้อมใช้งาน</p>
+<p>กลยุทธ์โฮสติ้งระยะสั้นนี้ทำให้ SpaceX มีความยืดหยุ่นในการจัดสรรกำลังการผลิตให้ผลิตภัณฑ์ซอฟต์แวร์ของตัวเองเมื่อธุรกิจเหล่านั้นโตขึ้น</p>
+<h3>4) คอมพิวต์ในวงโคจร: ดาวเทียมปี 2027, เร่งการผลิตปี 2028 และกิกะวัตต์ในปี 2029</h3>
+<p>Johnsen มองว่าการกู้คืนจรวดท่อนที่สองของ Starship ได้สำเร็จหลังปล่อยดาวเทียม 26 ดวง เป็นหมุดหมายสำคัญบนทางไปสู่คอมพิวต์ในวงโคจร</p>
+<p>เขาคาดว่าการนำท่อนที่สองกลับมาใช้ซ้ำได้อย่างรวดเร็วจะลดต้นทุนการปล่อยต่อกิโลกรัมลงได้อีก 10 เท่า การสร้างจังหวะบินซ้ำอย่างสม่ำเสมอในหนึ่งถึงสองปีข้างหน้าเป็นหัวใจของแผนที่จะทำให้คอมพิวต์ในวงโคจรประหยัดกว่าทางเลือกบนพื้นดิน</p>
+<p>ไทม์ไลน์คือ:</p>
+<ul>
+<li><strong>2027:</strong> ปล่อยดาวเทียมคอมพิวต์ในวงโคจรชุดแรก</li>
+<li><strong>2028:</strong> กลุ่มดาวเทียมคอมพิวต์ในวงโคจรเริ่มเร่งการผลิตและขยายตัว</li>
+<li><strong>2029:</strong> กำลังการผลิตคอมพิวต์ในวงโคจรระดับกิกะวัตต์ที่มีนัยสำคัญเข้าสู่ตลาด</li>
+</ul>
+<p>SpaceX ตั้งใจใช้สถาปัตยกรรมที่อิงแพลตฟอร์มดาวเทียม Starlink V3 โดยเปลี่ยนอุปกรณ์สื่อสารบางส่วนเป็น GPU เพิ่มแผงโซลาร์เซลล์ และหม้อน้ำระบายความร้อนแบบกางออกได้ ดาวเทียมจะโคจรแบบ sun-synchronous เพื่อให้ได้รับแสงอาทิตย์ดีและลดความต้องการแบตเตอรี่</p>
+<p>Johnsen ชี้ว่า SpaceX มีประสบการณ์อยู่แล้วเรื่องการป้องกันรังสี การระบายความร้อนด้วยการแผ่รังสี ลิงก์เลเซอร์ระหว่างดาวเทียม และการสื่อสาร RF จากดาวเทียม Starlink ราว 11,000 ดวงที่ส่งขึ้นไปแล้ว</p>
+<p>เขาอธิบายว่าการทำงานในวงโคจรตัดต้นทุนไฟฟ้า การระบายความร้อน และที่ดินบนพื้นดินออกไป ทำให้การปล่อยและการติดตั้งดาวเทียมกลายเป็นปัจจัยทางเศรษฐศาสตร์หลัก</p>
+<h3>5) Grokbot, Cursor และการสร้างรายได้จากซอฟต์แวร์ของตัวเอง</h3>
+<p>Johnsen บอกว่าพอร์ตซอฟต์แวร์ของ SpaceX เป็นอีกช่องทางสร้างรายได้จากการลงทุนด้านคอมพิวต์ ซึ่งรวมถึง Grok, Grokbot และ Cursor</p>
+<p>เขาบอกว่า Grokbot เติบโตแข็งแกร่ง และบริษัทกำลังปรับต้นทุนให้เหมาะสมเมื่อการใช้งานเพิ่มขึ้น ส่วน Cursor นำความเชี่ยวชาญด้านการพัฒนาผลิตภัณฑ์ การขาย และการจัดจำหน่ายมาให้ ซึ่ง SpaceX ไม่เคยมีมากเท่านี้มาก่อน</p>
+<p>Baker ประเมินว่า SpaceX อาจใกล้ถึงรายได้ซอฟต์แวร์ของตัวเองที่ $10B โดยระบุชัดเจนว่าตัวเลขนี้เป็นการประเมินของเขาเอง</p>
+<p>Johnsen ไม่ได้ให้ตัวเลขรายได้ แต่แสดงความกระตือรือร้นต่อธุรกิจซอฟต์แวร์</p>
+<p>เรื่อง Grok 4.8 และ 4.9 เขาบอกเพียงว่าจะออกเร็ว ๆ นี้ โดยไม่ระบุวันที่</p>
+<h3>6) Starlink Direct-to-Cell: เป้าหมายบริการ 5G ในครึ่งแรกของปี 2028</h3>
+<p>Johnsen บอกว่า Starlink broadband ให้บริการผู้คนมากกว่า 13 ล้านคนแล้ว และเป้าหมายระยะยาวของ SpaceX คือเชื่อมต่ออีกหลายพันล้านคนผ่านโทรศัพท์มือถือธรรมดา</p>
+<p>กลุ่มดาวเทียม direct-to-cell ชุดแรกราว 600 ดวง ออกแบบเป็นการพิสูจน์แนวคิด รองรับการส่งข้อความ รวมถึงการสื่อสารฉุกเฉิน</p>
+<p>SpaceX วางแผนเริ่มปล่อยดาวเทียม direct-to-cell รุ่นถัดไปในปี 2027 โดยตั้งเป้าให้บริการคุณภาพ 5G จริงตรงถึงโทรศัพท์ที่ไม่ต้องดัดแปลงในครึ่งแรกของปี 2028</p>
+<p>บริษัทซื้อคลื่นความถี่ mid-band จาก EchoStar และคลื่น low-band เพิ่มเติม Johnsen บอกว่า SpaceX กำลังทำงานกับหน่วยงานกำกับดูแลต่างประเทศและผู้ให้บริการโทรคมนาคมเพื่อให้บริการทั่วโลก</p>
+<p>ต่างจากเครือข่ายเซลลูลาร์ทั่วไป ระบบที่เสนอนี้สามารถส่งทราฟฟิกกลับ (backhaul) ผ่านดาวเทียมได้ ทำให้ติดตั้งสถานีภาคพื้นดินแบบ phased-array ขนาดเล็กได้ แทนที่จะพึ่งเสาสัญญาณขนาดใหญ่เป็นหลัก</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">SpaceX ใช้การรวมห่วงโซ่แนวดิ่งและสัญญาระยะสั้นเพื่อชนะที่ต้นทุนและความเร็ว</p><ul class="rn-sum-list"><li>ผลิตไฟฟ้าและชิ้นส่วนเทอร์ไบน์เอง ติดตั้งภายในเดือน จ่ายไฟแร็คภายในวัน</li><li>Direct-to-cell 5G ตั้งเป้าครึ่งแรกปี 2028 ด้วยคลื่น mid-band จาก EchoStar</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$30s/W</div><div class="rn-stat-c">ต้นทุนคอมพิวต์บนพื้นดินของ SpaceX เทียบ $50–60 ของอุตสาหกรรม</div></div><div class="rn-stat"><div class="rn-stat-v">$40B</div><div class="rn-stat-c">วงเงินสินเชื่อ GPU ที่จัดกับ Apollo และ Goldman Sachs</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span><span class="rn-th">2. AMD: ย้ายซอฟต์แวร์ง่ายขึ้น, โอกาส CPU มูลค่า $220B และการติดตั้ง Helios</span><span class="rn-en">2. AMD: Easier software migration, the $220B CPU opportunity and Helios deployments</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ดาต้าเซ็นเตอร์โตมากกว่าสองเท่าในปี 2026 และเกิน 60% ของรายได้</li><li>Anthropic ย้ายโมเดลขึ้นฮาร์ดแวร์ AMD ในราวสามวัน จากเดิมเก้าถึงสิบสองเดือน</li><li>ตลาด CPU จาก $20–30B ขยายเป็นราว $220B เพราะเวิร์กโหลดแบบเอเจนต์</li></ul></div>
+<p><strong>ผู้พูด:</strong> Lisa Su, ประธานกรรมการและ CEO, AMD</p>
+<p><strong>สรุป:</strong> Su บอกว่าธุรกิจดาต้าเซ็นเตอร์ของ AMD จะโตมากกว่าสองเท่าในปี 2026 และเกิน 60% ของรายได้ พร้อมพูดถึงการเติบโตเกิน 80% และสัดส่วนดาต้าเซ็นเตอร์ที่ใหญ่ขึ้นไปอีกในปีข้างหน้า เธออธิบายโอกาสในตลาด CPU มูลค่า $220B ที่ขับเคลื่อนโดยเอเจนต์ ยืนยันว่าเริ่มส่ง GPU MI455 และแร็ค Helios ในไตรมาส 3 และเน้นว่า Anthropic นำโมเดลของตัวเองขึ้นบนฮาร์ดแวร์ AMD ได้โดยใช้ Claude ในช่วงสุดสัปดาห์เดียว Su ระบุว่าความต้องการ AI เป็นการเปลี่ยนผ่านระดับยุค ไม่ใช่วัฏจักรเซมิคอนดักเตอร์แบบเดิม</p>
+<h3>1) การเติบโตของดาต้าเซ็นเตอร์และสัดส่วนรายได้ที่เปลี่ยนไป</h3>
+<p>Su อธิบายตลาดคอมพิวต์ TAM มูลค่า $2T ในห้าปีข้างหน้า โดยการเติบโตจำนวนมากกระจุกอยู่ที่ดาต้าเซ็นเตอร์</p>
+<p>ดาต้าเซ็นเตอร์คิดเป็นน้อยกว่า 50% ของรายได้ AMD ในปี 2025 และคาดว่าจะจบปี 2026 เกิน 60% โดยธุรกิจนี้โตมากกว่าสองเท่าในปีนี้</p>
+<p>เมื่อพูดถึงปี 2027 เป็นต้นไป เธออ้างการเติบโตของทั้งบริษัทเกิน 80% เมื่อเทียบรายปี และดาต้าเซ็นเตอร์ที่ในที่สุดจะเกิน 80% ของธุรกิจ AMD</p>
+<p>เธอยกความได้เปรียบเชิงตำแหน่งของ AMD ให้การลงทุนระยะยาวใน high-performance computing, chiplet, แพ็กเกจจิ้ง และการทำงานร่วมกับลูกค้า AMD มุ่งออกแบบฮาร์ดแวร์ตามความต้องการที่เปลี่ยนไปของไฮเปอร์สเกลเลอร์และแล็บ AI แนวหน้า</p>
+<h3>2) ROCm และการย้ายซอฟต์แวร์ด้วยความช่วยเหลือของ AI</h3>
+<p>Su พูดถึงการที่โมเดลแนวหน้าดีขึ้นทำให้งานรองรับสถาปัตยกรรมฮาร์ดแวร์ที่ต่างกันลดลง</p>
+<p>เธออ้างว่า Anthropic นำโมเดลของตัวเองขึ้นบนฮาร์ดแวร์ AMD ได้โดยใช้วิศวกรหนึ่งคนกับ Claude ในช่วงสุดสัปดาห์ ผู้ดำเนินรายการบอกว่ากระบวนการนี้ใช้เวลาราวสามวัน เทียบกับเก้าถึงสิบสองเดือนในอดีต</p>
+<p>Su บอกว่าโมเดลแนวหน้ามีความสามารถด้านวิศวกรรมซอฟต์แวร์และการปรับแต่ง kernel สูงมากในช่วงหกถึงเก้าเดือนที่ผ่านมา</p>
+<p>AMD ซื้อบริษัทซอฟต์แวร์ราวสิบแห่งและขยายทีมวิศวกรซอฟต์แวร์อย่างมากเพื่อยกระดับ ROCm และระบบนิเวศนักพัฒนาโดยรวม</p>
+<p>เธอเน้นการทำงานร่วมกับแล็บแนวหน้าต่อไป และความสำคัญที่เพิ่มขึ้นของการให้ลูกค้าเลือกระหว่าง CPU, GPU, FPGA และตัวเร่งแบบกำหนดเอง</p>
+<h3>3) การประมวลผลแบบเอเจนต์ขยายโอกาส CPU เป็น $220B</h3>
+<p>Su บอกว่าตลาด CPU ในอดีตมีขนาดราว $20–30B และโตระดับตัวเลขหลักเดียว ตอนนี้ AMD คาดว่าตลาดที่เข้าถึงได้จะแตะประมาณ $220B ภายในสี่ถึงห้าปีข้างหน้า</p>
+<p>เธออธิบายว่าการขยายตัวนี้มาจากเวิร์กโหลดแบบเอเจนต์ ที่ CPU ทำหน้าที่ประสานงาน ควบคุมการรันซอฟต์แวร์ และจัดการการเรียกใช้เครื่องมือควบคู่กับ inference บนตัวเร่ง</p>
+<p>Su ชูพอร์ต EPYC ของ AMD รวมถึง Genoa, Turin และรุ่น Venice ที่เพิ่งเปิดตัว โดยเน้นประสิทธิภาพ ประสิทธิภาพต่อวัตต์ และประสิทธิภาพต่อดอลลาร์</p>
+<p>เธอคาดว่าเวิร์กโหลดแบบเอเจนต์จะต้องใช้การผสมระหว่างคอมพิวต์ของ CPU และตัวเร่ง เมื่อแอปพลิเคชันมีความสามารถมากขึ้นและทำงานซับซ้อนขึ้นเรื่อย ๆ</p>
+<h3>4) MI455 และการติดตั้ง Helios</h3>
+<p>Su บอกว่า AMD เริ่มส่ง GPU MI455 และระบบ Helios ระดับแร็คในไตรมาส 3 ปี 2026</p>
+<p>เธอระบุว่า OpenAI, Anthropic, Meta, Microsoft และ Oracle เป็นลูกค้าที่กำลังนำระบบเหล่านี้ขึ้นใช้งานในดาต้าเซ็นเตอร์ของตน</p>
+<p>เธอบอกว่า AMD กำลังเร่งจังหวะการออกผลิตภัณฑ์เพื่อยกระดับประสิทธิภาพต่อดอลลาร์ ตามที่โมเดลและเวิร์กโหลดวิวัฒน์ไป</p>
+<p>เรื่องความกว้างของพอร์ต Su เน้นว่า AMD รวม CPU, GPU, FPGA, เครือข่าย และเทคโนโลยีซิลิคอนแบบกำหนดเองเข้าด้วยกันได้ เธอยังชูฐานลูกค้า Xilinx กว่า 6,000 รายในตลาดการบินและอวกาศ กลาโหม อุตสาหกรรม และเครื่องมือทดสอบวัดผล</p>
+<h3>5) วัฏจักรลงทุน AI, อุปทาน และการควบคุมการส่งออก</h3>
+<p>เมื่อถูกถามว่าวัฏจักรนี้อาจเดินตามรูปแบบเซมิคอนดักเตอร์ในอดีตคือขาดแคลนก่อนแล้วล้นกำลังการผลิตหรือไม่ Su บอกว่า AMD ไม่ได้เห็นช่วงย่อยสต็อก (digestion) แบบที่เคยเกิด</p>
+<p>เธออธิบาย AI ว่าเป็นการเปลี่ยนผ่านระดับยุค ได้แรงหนุนจากการเพิ่มผลิตภาพในธุรกิจต่าง ๆ โดยลูกค้าลงทุนในกรอบเวลาสามถึงห้าปี</p>
+<p>Su เน้นการสร้างสมดุลระหว่างการลงทุนกับผลตอบแทนที่คาดไว้ เพื่อหลีกเลี่ยงทั้งการลงทุนน้อยเกินไปและการขยายกำลังการผลิตมากเกินไป</p>
+<p>เรื่องมาตรการควบคุมการส่งออกใหม่ของสหรัฐฯ เธอบอกว่า AMD คาดการณ์การเปลี่ยนแปลงหลายอย่างไว้ล่วงหน้าและได้รับอนุมัติสำหรับแพ็กเกจการส่งออกหลายชุดแล้ว แม้มีข้อจำกัด เธอยังคาดว่าความต้องการจะสูงกว่าอุปทานอย่างมาก</p>
+<p>ส่วนสถานการณ์ผู้นำของ NVIDIA Su ชื่นชม NVIDIA และทีมบริหาร และเน้นว่า AMD โฟกัสที่การลงมือทำ ความเป็นหุ้นส่วนกับลูกค้า และการส่งมอบตามที่ให้คำมั่นไว้</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Lisa Su มองความต้องการ AI เป็นการเปลี่ยนผ่านระดับยุค ไม่ใช่วัฏจักรเซมิคอนดักเตอร์เดิม</p><ul class="rn-sum-list"><li>เริ่มส่ง MI455 และแร็ค Helios ในไตรมาส 3 ให้ OpenAI, Anthropic, Meta, Microsoft, Oracle</li><li>คาดความต้องการยังสูงกว่าอุปทานแม้มีการควบคุมการส่งออกใหม่</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$220B</div><div class="rn-stat-c">ตลาด CPU ที่เข้าถึงได้ใน 4–5 ปี</div></div><div class="rn-stat"><div class="rn-stat-v">&gt;60%</div><div class="rn-stat-c">สัดส่วนรายได้จากดาต้าเซ็นเตอร์ปลายปี 2026</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span><span class="rn-th">3. Fireworks: รายได้ run rate $1.5B, inference แบบเฉพาะทาง และเศรษฐศาสตร์ AI ขององค์กร</span><span class="rn-en">3. Fireworks: $1.5B revenue run rate, specialized inference and enterprise AI economics</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>รายได้ run rate $1.5B ณ สิ้นไตรมาส 3 โต 13 เท่าในเก้าเดือน (ไม่รวมลูกค้ารายใหญ่สุด)</li><li>ทราฟฟิกกว่า 80% มาจากโมเดลหรือการติดตั้งที่ปรับแต่งเฉพาะ</li><li>โมเดลเฉพาะทางลดต้นทุน inference 5–10 เท่า</li></ul></div>
+<p><strong>ผู้พูด:</strong> Lin Qiao, ผู้ร่วมก่อตั้งและ CEO, Fireworks AI</p>
+<p><strong>สรุป:</strong> Qiao บอกว่า Fireworks ถึงรายได้ run rate $1.5B ณ สิ้นไตรมาส 3 โดยเติบโต 13 เท่าในเก้าเดือน (ไม่รวมลูกค้ารายใหญ่ที่สุด) และปริมาณโทเค็นขององค์กรโต 12 เท่าในหกเดือน ทราฟฟิกบนแพลตฟอร์มมากกว่า 80% มาจากโมเดลที่ปรับแต่งหรือการติดตั้งที่ออกแบบเฉพาะ Fireworks รวมการเทรน inference และการปรับแต่งโมเดลไว้ด้วยกัน โดย Qiao อ้างต้นทุนที่ต่ำกว่า 5–10 เท่าสำหรับโมเดลเฉพาะทางเทียบกับโมเดลสำเร็จรูป</p>
+<h3>1) การเติบโตของรายได้ การใช้งานในองค์กร และฐานะการเงิน</h3>
+<p>Qiao บอกว่า Fireworks ถึงรายได้ run rate $1.5B ณ สิ้นไตรมาส 3 ปี 2026</p>
+<p>เมื่อไม่นับลูกค้ารายใหญ่ที่สุด บริษัทโต 13 เท่าในเก้าเดือน ผู้ดำเนินรายการอธิบายว่าการเติบโตนั้นคือจากประมาณ $100M ไปเป็น $1.3B</p>
+<p>การใช้โทเค็นขององค์กรเพิ่มขึ้น 12 เท่าในหกเดือนที่ผ่านมา ทำให้เวิร์กโหลดองค์กรเป็นส่วนที่โตเร็วที่สุดของแพลตฟอร์ม</p>
+<p>Qiao บอกว่า Fireworks ถือเงินสดมากกว่ายอดเงินที่ระดมจากนักลงทุนทั้งหมด บริษัทกำลังเพิ่มรายจ่ายด้านการจัดหาคอมพิวต์และบุคลากร พร้อมโฟกัสการปรับปรุง gross margin ผ่านผลิตภัณฑ์ที่แตกต่าง</p>
+<h3>2) ปัญญาเฉพาะทางและข้อมูลกรรมสิทธิ์ขององค์กร</h3>
+<p>Qiao แยกโมเดลฐานรากแบบทั่วไปที่เทรนจากข้อมูลวงกว้าง ออกจากโมเดลเฉพาะทางที่เทรนและปรับแต่งรอบธุรกิจแต่ละราย</p>
+<p>เธอให้เหตุผลว่าเอเจนต์เขียนโค้ดทำให้การพัฒนาแอปง่ายขึ้นและลดความแตกต่างของผลิตภัณฑ์ที่สร้างบน API โมเดลทั่วไปตัวเดียวกัน</p>
+<p>อย่างไรก็ตาม ธุรกิจมีชุดข้อมูลส่วนตัวที่สะท้อนผลิตภัณฑ์ ลูกค้า กระบวนการ และความรู้เฉพาะอุตสาหกรรม Fireworks ตั้งเป้าเปลี่ยนชุดข้อมูลเหล่านั้นให้เป็นปัญญาเฉพาะทางที่พัฒนาต่อเนื่องตามการใช้ผลิตภัณฑ์</p>
+<p>เธอบอกว่าลูกค้ามีสองเรื่องที่ให้ความสำคัญ คือการคุมทรัพย์สินทางปัญญาของตัวเอง และการคุมต้นทุนผันแปรของการรันแอป AI</p>
+<p>Qiao บอกว่าลูกค้าบางรายพบว่าการใช้งานที่เพิ่มขึ้นสร้างค่าใช้จ่าย inference สูงมาก ทำให้การปรับแต่งโมเดลเฉพาะเวิร์กโหลดสำคัญขึ้นเรื่อย ๆ</p>
+<h3>3) แพลตฟอร์มเทรนและ inference แบบรวมศูนย์</h3>
+<p>Fireworks ให้บริการเทรน inference และการประกอบโมเดลบนแพลตฟอร์มเดียว</p>
+<p>Qiao เน้นความสำคัญของความสอดคล้องระหว่างการเทรนกับการติดตั้งใช้งาน โดยเฉพาะเอเจนต์ที่ทำงานยาวนานซึ่งรันเป็นร้อยหรือเป็นพันขั้นตอน เธอบอกว่าความคลาดเคลื่อนเล็ก ๆ ในหลายขั้นตอนสะสมเป็นข้อผิดพลาดใหญ่ได้</p>
+<p>Fireworks รวมทั้งสองฝั่งของกระบวนการเข้าด้วยกันเพื่อรักษาพฤติกรรมของโมเดล และปรับโมเดลที่เทรนแล้วให้เหมาะกับ inference โดยอัตโนมัติ</p>
+<p>เธออ้างบริการ Ultra Fast ที่ให้ความเร็วมากกว่า 2,000 โทเค็นต่อวินาที และบอกว่าโมเดลเฉพาะทางลดต้นทุน inference ได้ 5–10 เท่าเมื่อเทียบกับโมเดลฐานรากสำเร็จรูป</p>
+<p>บริษัทยังทำงานที่เกี่ยวกับกรอบการประเมินและการวางแผนกำลังการผลิตคอมพิวต์ให้อัตโนมัติ ซึ่ง Qiao บอกว่าทีมแมชชีนเลิร์นนิงภายในองค์กรมักต้องใช้เวลาสามถึงหกเดือน</p>
+<h3>4) ทราฟฟิกกว่า 80% ถูกปรับให้เข้ากับเวิร์กโหลดเฉพาะ</h3>
+<p>Qiao บอกว่าทราฟฟิกของ Fireworks มากกว่า 80% มาจากโมเดลแบบปรับแต่งหรือการติดตั้งแบบปรับแต่งที่เหมาะกับเวิร์กโหลดนั้น ๆ</p>
+<p>สัดส่วนทราฟฟิกส่วนนั้นเพิ่มขึ้น 5 เท่าในหกเดือนที่ผ่านมา</p>
+<p>เธอคาดว่าธุรกิจจะพัฒนาโมเดลเฉพาะทางสำหรับแต่ละฟังก์ชันมากขึ้นเรื่อย ๆ ด้วยวงจรของการเทรน ประเมิน ติดตั้ง และปรับปรุงอย่างต่อเนื่อง</p>
+<p>Fireworks ตั้งใจรองรับทั้งโมเดลฐานรากแบบเปิดและแบบปิดควบคู่กัน รวมถึงการส่งเวิร์กโหลดไปยังโมเดลที่เหมาะที่สุด และให้ลูกค้าปรับแต่งโมเดลเปิดด้วยข้อมูลของตนเอง</p>
+<h3>5) กลยุทธ์คอมพิวต์และแนวโน้มความต้องการ</h3>
+<p>Fireworks ทำงานบนการจัดวางโครงสร้างพื้นฐานสามแบบ ได้แก่ กำลังการผลิตที่บริษัทจัดหาให้ลูกค้า กำลังการผลิตที่ลูกค้าเป็นเจ้าของ และกำลังการผลิตที่พันธมิตรจัดให้</p>
+<p>บริษัทเริ่มต้นรับโฮสต์ลูกค้าที่ยังไม่กำหนดความต้องการกำลังการผลิตระยะยาว แล้วค่อยย้ายแพลตฟอร์มไปยังโครงสร้างพื้นฐานที่ลูกค้าจัดหาเองโดยตรงภายหลัง</p>
+<p>Qiao บอกว่าการเป็นเจ้าของคอมพิวต์กายภาพมากขึ้นสุดท้ายเป็นเรื่องของจังหวะเวลา เมื่อ Fireworks โตขึ้น ความพร้อมของอุปทานยิ่งเป็นข้อพิจารณาสำคัญ</p>
+<p>ในภาพตลาดกว้าง เธอพยากรณ์ว่าต้นทุน AI ต่อหนึ่งงานจะลดลง 100 เท่าในสองปีข้างหน้า ขณะที่การใช้โทเค็นเติบโตมากกว่า 1,000 เท่า</p>
+<p>เธอคาดว่าการสื่อสารระหว่างเอเจนต์ด้วยกันและเวิร์กโฟลว์อัตโนมัติที่ทำงานด้วยความเร็วระดับเครื่องจักร จะขับเคลื่อนความต้องการระลอกถัดไป</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Fireworks เดิมพันว่าธุรกิจจะเปลี่ยนข้อมูลส่วนตัวเป็นปัญญาเฉพาะทางที่ถูกกว่าและเร็วกว่า</p><ul class="rn-sum-list"><li>รวมเทรน inference และประกอบโมเดลไว้บนแพลตฟอร์มเดียวเพื่อความสอดคล้อง</li><li>คาดต้นทุนต่องานลด 100 เท่า ขณะโทเค็นโตกว่า 1,000 เท่าใน 2 ปี</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$1.5B</div><div class="rn-stat-c">รายได้ run rate ณ สิ้นไตรมาส 3 ปี 2026</div></div><div class="rn-stat"><div class="rn-stat-v">&gt;80%</div><div class="rn-stat-c">สัดส่วนทราฟฟิกที่เป็นโมเดลปรับแต่ง</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span><span class="rn-th">4. Druckenmiller: การรักษาเงินต้น, แอปพลิเคชัน AI และโอกาสลงทุนครั้งถัดไป</span><span class="rn-en">4. Druckenmiller: Capital preservation, AI applications and the next investment opportunity</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>สัญญาณที่หนุนมุมมองเชิงบวกเดือนมกราคมกลับด้านเกือบหมด: Fed คุมเข้ม โภคภัณฑ์อ่อน spread กว้าง</li><li>พอร์ตหุ้นเกือบเท่าทุนสุทธิ ชอร์ตทองแดง โฟกัสรักษาเงินต้น</li><li>มองหาโอกาส AI ในแอปพลิเคชันมากกว่าโครงสร้างพื้นฐาน รวมถึงแล็บแนวหน้า</li></ul></div>
+<p><strong>ผู้พูด:</strong> Stanley Druckenmiller, ผู้ก่อตั้ง, Duquesne Family Office</p>
+<p><strong>สรุป:</strong> Druckenmiller บอกว่าพอร์ตหุ้นของเขาแทบจะเท่าทุนสุทธิ เขาชอร์ตทองแดง และโฟกัสที่การรักษาเงินต้น สัญญาณเศรษฐกิจและตลาดที่หนุนจุดยืนเชิงบวกของเขาเมื่อเดือนมกราคมกลับด้านไปเกือบหมดแล้ว เขายังสนใจ AI แต่มองหาแอปพลิเคชันมากกว่าโครงสร้างพื้นฐาน รวมถึงความเป็นไปได้ที่แล็บชั้นนำจะเปลี่ยนจากขายโทเค็นไปขายงานที่ทำเสร็จแล้ว</p>
+<h3>1) การวางพอร์ตและแนวโน้มเศรษฐกิจมหภาค</h3>
+<p>Druckenmiller เล่าว่าเมื่อเดือนมกราคมเขาถือหุ้นแบบ long, ชอร์ตพันธบัตรรัฐบาลสหรัฐฯ เพื่อป้องกันความเสี่ยง และ long ทองแดง โดยมองเศรษฐกิจและการใช้จ่ายด้านโครงสร้างพื้นฐาน AI ในแง่ดี</p>
+<p>ภาพรวมของเขาได้แรงหนุนจากการเติบโตเชิงตัวเงินที่แข็งแรง นโยบายการเงินที่ผ่อนคลาย ราคาโภคภัณฑ์ที่สูงขึ้น การมีส่วนร่วมของตลาดหุ้นที่กว้าง และ credit spread ที่แคบ</p>
+<p>เขาบอกว่าตัวชี้วัดเหล่านั้นเกือบทั้งหมดกลับด้านแล้ว ตอนนี้ Fed กำลังคุมเข้ม โภคภัณฑ์อ่อนตัว credit spread กว้างขึ้น และความกว้างของตลาด (market breadth) แย่ลง</p>
+<p>เขาชี้ว่าเส้น advance/decline ทำจุดสูงสุดเมื่อวันที่ 14 สิงหาคม ขณะที่ดัชนีหุ้นหลักทำจุดสูงสุดเมื่อเดือนตุลาคม</p>
+<p>พอร์ตหุ้นของเขาตอนนี้เกือบเท่าทุนสุทธิ โดยมีสถานะ long และ short หักล้างกัน และเขาชอร์ตทองแดง เขาอธิบายแนวทางปัจจุบันว่าเป็นการรักษาเงินต้น โดยอ้างว่ามองเห็นสิบสองเดือนข้างหน้าได้ชัดน้อยมาก</p>
+<p>Druckenmiller ยังกังวลว่าเศรษฐกิจอาจผิดหวังในครึ่งหลังของปี 2027 โดยชี้ไปที่โภคภัณฑ์ที่อ่อนตัวและหุ้นเชิงป้องกันที่ชนะหุ้นวัฏจักร</p>
+<h3>2) กรณีการใช้งาน AI มากกว่าโครงสร้างพื้นฐาน</h3>
+<p>Druckenmiller บอกว่าเขามองหาโอกาสลงทุน AI ครั้งถัดไปในแอปพลิเคชันมากกว่าโครงสร้างพื้นฐาน</p>
+<p>เขายอมรับว่าหุ้นโครงสร้างพื้นฐานอาจมีโอกาสเทรดระยะสั้นหลังร่วงแรง แต่ไม่คาดว่ากลุ่มนี้จะทำผลงานหลายปีซ้ำรอยสี่ปีที่ผ่านมา</p>
+<p>เขาเสนอว่าหนึ่งในโอกาสด้านแอปพลิเคชันที่น่าสนใจที่สุดอาจเป็นตัวแล็บแนวหน้าเอง</p>
+<p>มุมมองของเขาคือแล็บชั้นนำอาจขาย &quot;งานที่ทำเสร็จ&quot; มากขึ้นแทนการขายโทเค็นหรือสิทธิ์เข้าถึงโมเดล โดยสร้างธุรกิจจากปัญญาของตนเอง</p>
+<p>เขาชี้ว่าความปลอดภัยไซเบอร์และสาธารณสุขเป็นสองด้านที่โมเดลแนวหน้าอาจสร้างมูลค่าได้มหาศาล</p>
+<h3>3) ความเสี่ยงของ AI: การเงินและการเมือง</h3>
+<p>เมื่อถูกถามว่าเขาจริงจังกับกรณีหมี (bear case) ของ AI ข้อไหนมากที่สุด Druckenmiller ระบุว่าคือเรื่องการเงินและการเมือง</p>
+<p>เขาบอกว่าตลาดนี้ยังชอร์ตยาก เพราะความเร็วของนวัตกรรมและขนาดของการเทขายหุ้น แม้เขากังวลกับภาพเศรษฐกิจโดยรวม</p>
+<p>เขายังกังวลระยะยาวเรื่องการขาดดุลทางการคลัง โดยทำนายว่าการปฏิรูปการคลังครั้งใหญ่ของสหรัฐฯ อาจเกิดขึ้นในที่สุดหลังวิกฤตตลาดการเงิน</p>
+<p>ประเด็นอื่นที่เขาเน้นคือคุณภาพการศึกษา K–12 ที่เสื่อมถอย และความสำคัญของการเข้าเมืองต่อการรักษาความเป็นผู้นำด้านเทคโนโลยีของอเมริกา</p>
+<h3>4) การบริหารความเสี่ยงและกระบวนการลงทุน</h3>
+<p>Druckenmiller อธิบายว่ากำไรขาดทุนของพอร์ตเป็นตัวชี้วัดการบริหารความเสี่ยงหลักของเขา เมื่อสถานะไม่เคลื่อนไหวตามที่คาด เขาลดการรับความเสี่ยง</p>
+<p>เขาบอกว่าผลตอบแทนที่ดีที่สุดในอดีตมักมาในช่วงที่โอกาสกระจุกตัว สลับกับช่วงเงียบสงบ</p>
+<p>แนวทางของเขาคือเปิดสถานะเริ่มต้นเมื่อมีความเชื่อมั่นพอ แล้วค่อยวิจัยเพิ่มเติมอย่างละเอียดก่อนตัดสินใจเพิ่มหรือออก เขาอธิบายว่าเป็นการ &quot;ลงทุนก่อน สืบสวนทีหลัง&quot;</p>
+<p>เขาเน้นการถ่อมตัวทางปัญญา ความยืดหยุ่น และวินัย โดยยกตัวอย่างการตัดสินใจซื้อหุ้น Nasdaq กลับใกล้จุดสูงสุดปี 2000 หลังเคยขายไป เป็นกรณีที่ปล่อยให้อารมณ์ชนะกระบวนการของตัวเอง</p>
+<p>เมื่อมองสิบปีข้างหน้า เขาให้โอกาสอย่างน้อย 70% ที่ดาต้าเซ็นเตอร์จะทำงานในอวกาศ และมองโลกในแง่ดีเรื่องพลังงานฟิวชันและความก้าวหน้าด้านมะเร็งด้วยความช่วยเหลือของ AI</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Druckenmiller ระวังตัวระยะสั้น แต่ยังเชื่อในพลังของ AI ระยะยาว</p><ul class="rn-sum-list"><li>ความเสี่ยงหลักของ AI ที่เขาห่วง: การเงินและการเมือง</li><li>วิธีลงทุน: เปิดสถานะก่อน แล้วค่อยวิจัยเพิ่ม ลดความเสี่ยงเมื่อสถานะไม่เป็นไปตามคาด</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">70%</div><div class="rn-stat-c">โอกาสอย่างน้อยที่ดาต้าเซ็นเตอร์จะทำงานในอวกาศใน 10 ปี</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span><span class="rn-th">5. Altimeter: เศรษฐศาสตร์คอมพิวต์ของ Anthropic, การวางตำแหน่ง IPO และการกระจุกตัวในชั้นโมเดล</span><span class="rn-en">5. Altimeter: Anthropicʼs compute economics, IPO positioning and modellayer concentration</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Anthropic รายได้ run rate ใกล้ $100B ด้วยพนักงานราว 5,000 คน เทียบ Google ราว 105,000 คนที่ระดับรายได้ใกล้เคียง</li><li>ใช้เพียง 25–26% ของคอมพิวต์ 2GW (ราว 500MW) ให้บริการลูกค้า ที่เหลือส่วนใหญ่ใช้เทรน</li><li>สมุดคำสั่งซื้อ IPO จองเกินราว 10 เท่า</li></ul></div>
+<p><strong>ผู้พูด:</strong> Brad Gerstner, ผู้ก่อตั้งและ CEO, Altimeter</p>
+<p><strong>สรุป:</strong> Gerstner โต้ว่าเศรษฐศาสตร์ inference ของ Anthropic น่าสนใจกว่าที่ตลาดเข้าใจมาก เขาอ้างรายได้ run rate ใกล้ $100B ด้วยพนักงานราว 5,000 คน ขณะที่มีเพียง 25–26% ของฐานคอมพิวต์ 2GW ที่ใช้ให้บริการลูกค้าในช่วงเก้าเดือนแรกของปี 2026 เขาคาดว่ามูลค่าทางเศรษฐกิจจะกระจุกอยู่ที่ผู้ให้บริการโมเดลชั้นนำไม่กี่ราย และบอกว่าความต้องการจากสถาบันต่อ IPO ของ Anthropic แข็งแกร่ง</p>
+<h3>1) เศรษฐศาสตร์คอมพิวต์และความสามารถทำกำไรของ Anthropic</h3>
+<p>Gerstner บอกว่า Anthropic กำลังเข้าใกล้รายได้ run rate รายปีที่ $100B ด้วยพนักงานราว 5,000 คน</p>
+<p>เขาเทียบกับ Google ที่มีพนักงานราว 105,000 คนตอนที่ทำรายได้ระดับใกล้เคียงกัน</p>
+<p>เขาให้เหตุผลว่าความเข้มข้นของแรงงานที่ต่ำกว่ามากทำให้บริษัทโมเดลฐานรากทุ่มรายจ่ายให้คอมพิวต์ได้มากขึ้น โดยยังรักษาเศรษฐศาสตร์ที่น่าสนใจไว้ได้</p>
+<p>เขายังอ้างว่าต้นทุนต่อหน่วยคอมพิวต์ลดลงราว 90% ต่อปี เมื่อประสิทธิภาพของโมเดลดีขึ้น</p>
+<p>ข้อมูลหลักคือการจัดสรรคอมพิวต์ของ Anthropic ในช่วงเก้าเดือนแรกของปี 2026 Gerstner บอกว่าราว 25–26% ของฐานคอมพิวต์ 2GW หรือประมาณ 500MW ใช้รองรับ inference ที่ให้บริการลูกค้า</p>
+<p>กำลังการผลิตที่เหลือส่วนใหญ่ใช้กับการเทรน</p>
+<p>เขาให้เหตุผลว่าการเติบโตของรายได้อย่างมีนัยสำคัญจึงทำได้ด้วยคอมพิวต์ให้บริการส่วนเพิ่มที่น้อยกว่ามาก เมื่อเทียบกับที่ตัวเลขรายจ่ายโครงสร้างพื้นฐานรวมอาจทำให้ดูเหมือน ขณะที่การพัฒนาโมเดลแนวหน้ายังต้องการการลงทุนเทรนขนาดใหญ่ต่อไป</p>
+<h3>2) ความต้องการ IPO และการวางตำแหน่งในตลาดสาธารณะ</h3>
+<p>Gerstner อธิบายว่าสมุดคำสั่งซื้อ IPO ของ Anthropic มีการจองเกินราว 10 เท่า และคาดว่าจะเป็นออร์เดอร์ใหญ่ที่สุดในประวัติศาสตร์บริษัทของเขา</p>
+<p>เขาบอกว่าดีลนี้กำหนดกำหนดราคาและจัดสรรในวันที่ 18 พฤศจิกายน และเริ่มซื้อขายวันที่ 19 พฤศจิกายน</p>
+<p>เขาชี้ให้เห็นฉากหลังตลาดที่ยากลำบาก รวมถึงหุ้นเซมิคอนดักเตอร์ที่ลดลงมาก และความกังวลเรื่องการก่อสร้างดาต้าเซ็นเตอร์ในสหรัฐฯ</p>
+<p>Gerstner คาดว่าหุ้น Anthropic จะผันผวนมากหลังเข้าจดทะเบียน โดยอ้างการลดลงจากจุดสูงสุดถึงจุดต่ำสุดอย่างมากของ IPO รายใหญ่รายอื่น</p>
+<p>เขาแยกแนวทางตามประเภทเครื่องมือลงทุน ในเฮดจ์ฟันด์ เขาจะพิจารณาป้องกันความเสี่ยงหาก valuation ของ Anthropic พุ่งเกิน ขณะที่การถือครองแบบ private และ long-only อาจบริหารด้วยกรอบเวลาลงทุนที่ยาวกว่า</p>
+<h3>3) มูลค่าทางเศรษฐกิจกระจุกตัวในชั้นโมเดล</h3>
+<p>Gerstner เรียกตัวเองว่า &quot;model maximalist&quot; โดยคาดว่ามูลค่าทางเศรษฐกิจส่วนใหญ่ของปัญญารากฐานจะตกแก่ผู้ให้บริการโมเดลอันดับหนึ่ง สอง หรือสามรายบนสุด</p>
+<p>เขาเปรียบความเป็นไปได้ของการกระจุกตัวนี้กับวัฏจักรเทคโนโลยีก่อนหน้า ทั้งการค้นหา มือถือ โซเชียลมีเดีย และคลาวด์</p>
+<p>กรอบการลงทุนของเขาเน้นธุรกิจที่ได้ประโยชน์เมื่อปัญญาทั่วไปดีขึ้น</p>
+<p>เขายกความเป็นไปได้ว่าโมเดลฐานรากที่เก่งขึ้นอาจกลืนฟังก์ชันที่ซอฟต์แวร์แอปพลิเคชันเฉพาะทางหรือ agent harness ให้บริการอยู่ในปัจจุบัน Gerstner บอกว่าทีมของเขาประเมินโอกาสจากขนาดตลาดที่เป็นไปได้ และจากว่าเศรษฐศาสตร์ของบริษัทดีขึ้นหรือไม่เมื่อความสามารถของโมเดลก้าวหน้า</p>
+<h3>4) ธรรมาภิบาลของ NVIDIA และจดหมายถึงบอร์ด</h3>
+<p>Gerstner พูดถึงจดหมายที่เขากับ Gavin Baker ส่งถึงบอร์ด NVIDIA เกี่ยวกับสถานการณ์ผู้นำของบริษัท เขาบอกว่าบอร์ดรับทราบจดหมายนั้น ข้อเรียกร้องหลักของเขาคือให้กรรมการรวบรวมข้อเท็จจริงที่เกี่ยวข้องและตัดสินใจอย่างรอบคอบ ไม่เร่งรีบตามแรงกดดันทางการเมือง เขาเน้นความชอบบริษัทเทคโนโลยีที่มีผู้ก่อตั้งเป็นผู้นำ พร้อมสนับสนุนความรับผิดชอบและหน้าที่ของบอร์ดต่อผู้ถือหุ้น</p>
+<h3>5) Invest America และการขยายความเป็นเจ้าของทุน</h3>
+<p>Gerstner ยังพูดถึง Invest America ซึ่งเป็นโครงการให้เด็กมีบัญชีลงทุน และสนับสนุนให้ครอบครัว นายจ้าง และผู้ใจบุญร่วมสมทบเพิ่ม เขาชูการสมทบของ Michael และ Susan Dell และคำมั่นของ Elon Musk ที่จะบริจาคหุ้น SpaceX Gerstner มองว่าโครงการนี้เป็นวิธีขยายการมีส่วนร่วมในตลาดหุ้น และช่วยให้ชาวอเมริกันได้แบ่งปันผลประโยชน์ทางเศรษฐกิจที่เทคโนโลยีสร้างขึ้น</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Gerstner เป็น &quot;model maximalist&quot; มูลค่าจะกระจุกที่ผู้ให้บริการโมเดลอันดับบนไม่กี่ราย</p><ul class="rn-sum-list"><li>คาดหุ้น Anthropic จะผันผวนมากหลังเข้าจดทะเบียน</li><li>ส่งจดหมายร่วมกับ Baker ถึงบอร์ด NVIDIA ขอให้ตัดสินใจเรื่องผู้นำอย่างรอบคอบ</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$100B</div><div class="rn-stat-c">รายได้ run rate ที่ Anthropic กำลังเข้าใกล้</div></div><div class="rn-stat"><div class="rn-stat-v">25–26%</div><div class="rn-stat-c">สัดส่วนคอมพิวต์ 2GW ที่ใช้ให้บริการลูกค้าช่วง 9 เดือนแรกปี 2026</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span><span class="rn-th">6. Apollo: การจัดหาเงินทุนโครงสร้างพื้นฐาน AI, private credit และวัฏจักรรายจ่ายลงทุน</span><span class="rn-en">6. Apollo: AI infrastructure financing, private credit and the capital spending cycle</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>คาดบริษัทเทคโนโลยีเป็นหกในสิบผู้ออกพันธบัตรองค์กรรายใหญ่ภายใน 3–4 ปี</li><li>ชอบหนี้มีหลักประกันและคู่สัญญาระดับลงทุน เช่น สินเชื่อที่มีชิปรุ่นปัจจุบันเป็นหลักประกัน ทยอยชำระราว 5 ปี</li><li>แคนาดาและกลุ่มประเทศอ่าวอาจลงทุนโครงสร้างพื้นฐานแห่งละราว $1T</li></ul></div>
+<p><strong>ผู้พูด:</strong> Marc Rowan, ผู้ร่วมก่อตั้งและ CEO, Apollo Global Management</p>
+<p><strong>สรุป:</strong> Rowan อธิบายว่ารายจ่าย AI และดาต้าเซ็นเตอร์เป็นส่วนหนึ่งของวัฏจักรลงทุนอุตสาหกรรมระดับโลกที่ต้องการเงินทุนระยะยาวขนาดใหญ่ขึ้นเรื่อย ๆ Apollo โฟกัสโอกาสแบบมีหลักประกันและระดับลงทุน (investment-grade) ที่หนุนด้วยสินทรัพย์โครงสร้างพื้นฐาน พลังงาน และคอมพิวต์ Rowan คาดว่าบริษัทเทคโนโลยีจะเป็นหกในสิบผู้ออกพันธบัตรองค์กรรายใหญ่ที่สุดภายในสามถึงสี่ปี</p>
+<h3>1) การจัดหาเงินทุน AI และวัฏจักรลงทุนอุตสาหกรรมระดับโลก</h3>
+<p>Rowan บอกว่าขนาดของการสร้าง AI กำลังสร้างความต้องการเงินทุนระยะยาวมหาศาล</p>
+<p>เขาอธิบายว่าวัฏจักรลงทุนนี้ไม่ได้จำกัดแค่สหรัฐฯ โดยแคนาดาและกลุ่มประเทศอ่าวอาจลงทุนในโครงการโครงสร้างพื้นฐานใหญ่แห่งละราว $1T</p>
+<p>เขาแบ่งแหล่งเงินทุนตามความต้องการ คือ ธนาคารพาณิชย์สำหรับการกู้ระยะสั้น พันธบัตรสาธารณะสำหรับการจัดหาเงินทุนที่ตรงไปตรงมา และเงินทุนเอกชนสำหรับโครงการซับซ้อนที่ต้องการโครงสร้างเฉพาะ</p>
+<p>Apollo โฟกัสการจัดหาเงินทุนให้สินทรัพย์ระยะยาวและโครงสร้างพื้นฐาน รวมถึงดาต้าเซ็นเตอร์ การผลิตพลังงาน และอุปกรณ์คอมพิวต์</p>
+<p>Rowan บอกว่าวัฏจักรลงทุนเทคโนโลยีปัจจุบันใหญ่ผิดปกติเมื่อเทียบกับการขยายโครงสร้างพื้นฐานในอดีต และคาดว่าบริษัทเทคโนโลยีจะเป็นผู้ออกหนี้องค์กรที่สำคัญมากขึ้นเรื่อย ๆ</p>
+<h3>2) สินเชื่อมีหลักประกันและการจัดหาเงินทุน GPU</h3>
+<p>Rowan บอกว่า valuation ที่สูงและความไม่แน่นอนเอื้อต่อโครงสร้างสินเชื่อที่อนุรักษ์นิยมกว่า</p>
+<p>เขาต้องการย้ายจากการลงทุนแบบไม่มีหลักประกันไปแบบมีหลักประกัน และจากผู้กู้คุณภาพต่ำกว่าไปหาคู่สัญญาระดับลงทุน</p>
+<p>เขาชูการจัดหาเงินทุนที่มีชิปรุ่นปัจจุบันเป็นหลักประกัน พร้อมตารางชำระคืนแบบทยอยตัดต้นเงินราวห้าปี เขาอธิบายว่าเป็นการลงทุนที่มีระยะเวลาเฉลี่ย (duration) ราวสองปีครึ่ง</p>
+<p>เขายังเน้นโครงสร้างพื้นฐานพลังงาน โดยชี้ว่าสหรัฐฯ ลงทุนไม่เพียงพอในการผลิตและกระจายไฟฟ้ามาหลายปี</p>
+<p>Rowan แยกผลตอบแทนที่นักลงทุนหุ้นต้องการ ออกจากเป้าหมายการชำระหนี้ของเจ้าหนี้ ซึ่งรายได้หลักคือดอกเบี้ยและเงินต้น</p>
+<h3>3) บริษัทเทคโนโลยีขนาดใหญ่รองรับผลตอบแทน AI ที่ไม่สม่ำเสมอได้</h3>
+<p>Rowan โต้ว่าบริษัทใหญ่หลายแห่งที่จัดหาเงินทุนให้โครงสร้างพื้นฐาน AI มีธุรกิจเดิมขนาดใหญ่นอกเหนือจากการลงทุน AI</p>
+<p>เขาบอกว่าบางโครงการอาจให้ผลตอบแทนอ่อนหรือรายจ่ายลงทุนที่กลายเป็น stranded โดยไม่จำเป็นต้องบั่นทอนผู้กู้ทั้งบริษัท</p>
+<p>เขาเทียบบริษัทเหล่านั้นกับธุรกิจ neocloud ที่กระจุกตัวกว่า โดยยกตัวอย่างกิจการที่มี valuation ของส่วนผู้ถือหุ้น $50–60B ขณะที่พันธบัตรให้ผลตอบแทนประมาณ 15%</p>
+<p>เขายังบอกว่าผู้กู้เทคโนโลยีเสนอ spread ที่กว้างกว่าบริษัทอุตสาหกรรมที่มีเรตติ้งใกล้เคียง เพราะต้องการเงินทุนจำนวนมากผิดปกติ</p>
+<h3>4) แพลตฟอร์มประกันและเงินทุนระยะยาวของ Apollo</h3>
+<p>Rowan อธิบายว่า Apollo บริหารสินทรัพย์มากกว่า $1T เล็กน้อย แบ่งเกือบเท่า ๆ กันระหว่างเงินทุนที่เกี่ยวกับธุรกิจประกันและกองทุนลงทุนของบุคคลที่สาม</p>
+<p>เขาบอกว่าธุรกิจบริการเกษียณโตจากแทบเป็นศูนย์ในปี 2008 เป็นมากกว่า $500B</p>
+<p>แพลตฟอร์มประกันให้เงินทุนระยะยาวที่ลงทุนร่วมกับนักลงทุนภายนอกในดีลโครงสร้างพื้นฐานและสินเชื่อได้</p>
+<p>Rowan ยังพูดถึงการขยายโครงสร้างพื้นฐานเทคโนโลยีสำหรับตลาดเอกชน รวมถึงการประเมินมูลค่ารายวัน การซื้อขาย การดูแลทรัพย์สิน และการชำระราคา</p>
+<h3>5) ผลิตภาพ เงินเฟ้อ และการเปลี่ยนแปลงของกำลังแรงงาน</h3>
+<p>Rowan บอกว่ารายจ่ายโครงสร้างพื้นฐานกำลังเพิ่มความต้องการเหล็ก คอนกรีต กระจก ทองแดง พลังงาน และแรงงานทักษะ</p>
+<p>เขาคาดว่างานช่างกายภาพ เช่น ช่างไฟฟ้า ช่างประปา และผู้เชี่ยวชาญก่อสร้าง จะยังแข็งแกร่งต่อเนื่อง ขณะที่ AI เปลี่ยนความต้องการจ้างงานด้านที่ปรึกษา กฎหมาย บัญชี และซอฟต์แวร์องค์กร</p>
+<p>ภายใน Apollo เขายกตัวอย่างศูนย์ปฏิบัติการมุมไบ 800 คนที่ตั้งเป้าเพิ่มกำลังการผลิต 50% โดยจำนวนคนคงเดิม ผ่านระบบอัตโนมัติและการออกแบบกระบวนการใหม่</p>
+<p>เขายังอธิบายว่าออสตินเป็นสำนักงานใหญ่แห่งที่สองของ Apollo โดยการเพิ่มจำนวนพนักงานในอนาคตจะกระจุกอยู่ที่นั่น ขณะที่การจ้างงานในนิวยอร์ก แคลิฟอร์เนีย และลอนดอนคงที่</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">เจ้าหนี้ต้องการเงินต้นและดอกเบี้ย ไม่ใช่ผลตอบแทนแบบนักลงทุนหุ้น จึงรับความเสี่ยง AI ต่างกัน</p><ul class="rn-sum-list"><li>บริษัทใหญ่รับมือโครงการที่ผลตอบแทนอ่อนได้ ต่างจาก neocloud ที่กระจุกตัว</li><li>Mumbai 800 คน เพิ่มกำลังการผลิต 50% โดยไม่เพิ่มคน</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$1T+</div><div class="rn-stat-c">สินทรัพย์ที่ Apollo บริหาร</div></div><div class="rn-stat"><div class="rn-stat-v">$500B+</div><div class="rn-stat-c">ธุรกิจบริการเกษียณ จากแทบเป็นศูนย์ในปี 2008</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">08</span><span><span class="rn-th">7. Dell: ลูกค้า AI factory 6,500 ราย, การนำไปใช้ในองค์กร และความต้องการโครงสร้างพื้นฐาน</span><span class="rn-en">7. Dell: 6,500 AI-factory customers, enterprise adoption and infrastructure demand</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ลูกค้า AI factory 6,500 ราย รวม 3,300 รายที่เพิ่มในสามไตรมาสล่าสุด</li><li>ธุรกิจเซิร์ฟเวอร์และเครือข่ายโตมากกว่า 100%</li><li>องค์กรส่วนใหญ่ยังใช้ AI เป็นเครื่องมือส่วนบุคคล โอกาสใหญ่คือออกแบบกระบวนการใหม่รอบเอเจนต์</li></ul></div>
+<p><strong>ผู้พูด:</strong> Michael Dell, ประธานกรรมการและ CEO, Dell Technologies</p>
+<p><strong>สรุป:</strong> Dell บอกว่าบริษัทมีลูกค้า AI factory 6,500 ราย ณ สิ้นไตรมาสล่าสุดที่รายงาน รวมถึง 3,300 รายที่เพิ่มเข้ามาในสามไตรมาสที่ผ่านมา เขาอธิบายว่าการนำ AI ไปใช้ในองค์กรยังอยู่ในช่วงต้น โอกาสที่ใหญ่ที่สุดมาจากการออกแบบกระบวนการทางธุรกิจใหม่รอบเอเจนต์อัตโนมัติ Dell ยังชูการเติบโตสามหลักของเซิร์ฟเวอร์และเครือข่าย การติดตั้งคลัสเตอร์ที่รวดเร็ว และประสิทธิภาพการดำเนินงานภายในที่ AI ขับเคลื่อน</p>
+<h3>1) การเติบโตของลูกค้า AI factory</h3>
+<p>Dell บอกว่าลูกค้าราว 3,200 รายสร้าง AI factory กับบริษัทในสองปีแรก ตามด้วยอีก 3,300 รายในสามไตรมาสล่าสุดที่รายงาน</p>
+<p>ยอดรวมถึงราว 6,500 ลูกค้า ณ สิ้นไตรมาสล่าสุดที่รายงาน</p>
+<p>เขาบอกว่าธุรกิจเซิร์ฟเวอร์และเครือข่ายโตมากกว่า 100% ตลอดช่วงไตรมาสที่รายงานล่าสุด</p>
+<p>Dell เน้นว่าลูกค้ายังขยายการติดตั้งอย่างต่อเนื่อง ไม่ได้มองการซื้อ AI factory ครั้งแรกเป็นการลงทุนครั้งเดียวจบ</p>
+<p>ฐานลูกค้าครอบคลุมไฮเปอร์สเกลเลอร์ แล็บแนวหน้า neocloud ลูกค้ารัฐ (sovereign) องค์กร ธุรกิจขนาดเล็ก และหน่วยงานภาครัฐ</p>
+<h3>2) AI ในองค์กรกำลังเคลื่อนสู่การออกแบบกระบวนการใหม่</h3>
+<p>Dell บอกว่าองค์กรส่วนใหญ่ยังใช้ AI เป็นเครื่องมือเพิ่มผลิตภาพรายบุคคลเป็นหลัก</p>
+<p>เขาเห็นโอกาสที่ใหญ่กว่าเมื่อองค์กรออกแบบกระบวนการใหม่รอบเทคโนโลยีนี้ โดยรวมข้อมูลขององค์กร โมเดลเฉพาะทาง และเอเจนต์อัตโนมัติเข้าด้วยกัน</p>
+<p>เขาอธิบายลำดับตั้งแต่การทำแผนที่กระบวนการเดิมและเตรียมข้อมูล ไปสู่การเลือกโมเดล และสุดท้ายการติดตั้งระบบ AI ทั่วทั้งธุรกิจ</p>
+<p>สิ่งนี้สร้างความต้องการ GPU, CPU, storage และเครือข่าย</p>
+<p>Dell บอกว่า CPU สำคัญต่อการรันเอเจนต์ ขณะที่ storage และเครือข่ายรองรับข้อมูลและหน่วยความจำที่แอปพลิเคชันซับซ้อนขึ้นต้องใช้</p>
+<h3>3) เศรษฐศาสตร์ AI กว้างกว่ารายได้ของโมเดลฐานราก</h3>
+<p>Dell โต้ว่ามูลค่าทางเศรษฐกิจของ AI เกิดขึ้นทั่วทั้งเศรษฐกิจ ไม่ใช่เฉพาะรายได้ที่ผู้ให้บริการโมเดลรายใหญ่หาได้</p>
+<p>เขาชูกรณีใช้งานในสาธารณสุข การผลิต บริการทางการเงิน ขนส่ง โลจิสติกส์ และค้าปลีก เขาเน้นการสร้างปัญญาใกล้กับข้อมูลต้นทาง รวมถึงภายในสิ่งอำนวยความสะดวกขององค์กรและดาต้าเซ็นเตอร์ขนาดเล็ก Dell คาดว่าโมเดลเปิด โมเดลเฉพาะทาง และสถาปัตยกรรมคอมพิวต์ที่ต่างกันจะอยู่ร่วมกัน ตามที่แต่ละองค์กรปรับให้เข้ากับเวิร์กโหลดและความต้องการของตน</p>
+<h3>4) ความเร็วในการติดตั้ง ห่วงโซ่อุปทาน และความน่าเชื่อถือ</h3>
+<p>Dell ยกตำแหน่งของบริษัทให้ฐานธุรกิจเซิร์ฟเวอร์และ storage ที่มีอยู่ ขนาดการผลิต และความเชี่ยวชาญห่วงโซ่อุปทาน เขาบอกว่าบริษัทรองรับลูกค้าที่ติดตั้ง GPU 100,000 ตัวได้ในราวสี่ถึงหกสัปดาห์ โดยประกอบและทดสอบแร็คในโรงงานก่อนส่ง แร็คสามารถใช้งานได้ในวันที่ไปถึงสถานที่ที่เตรียมไว้แล้ว Dell เน้นเรื่อง time to first token เครือข่าย และความน่าเชื่อถือของระบบ ว่าเป็นส่วนสำคัญของการส่งมอบคลัสเตอร์ AI ขนาดใหญ่</p>
+<h3>5) การใช้ AI ภายในและ operating leverage</h3>
+<p>Dell บอกว่าเขากับ COO Jeff Clarke กำลังสร้างกองเอเจนต์ภายในเพื่อช่วยบริหารบริษัท ระบบเหล่านี้ช่วยระบุความผิดปกติในรายงานประจำวันได้มากขึ้น และหนุนการตัดสินใจที่เร็วขึ้น เขายังชี้ถึงประสิทธิภาพที่ดีขึ้นทั่วบริษัท และกำลังพัฒนาซอฟต์แวร์เพิ่มเติมที่เกิดจากวิศวกรรมที่ AI ช่วย Dell คาดว่ากำลังส่วนนั้นจะหนุนการขยายไปยังตลาดใกล้เคียงและเร่งการพัฒนาผลิตภัณฑ์ภายใน</p>
+<p>เรื่องแนวโน้มในภาพกว้าง เขาบอกว่า AI ยังมีความสามารถมากขึ้นเรื่อย ๆ ขับเคลื่อนโอกาสใหม่ในแพทยศาสตร์ ชีววิทยา พลังงาน และวัสดุศาสตร์</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Dell มองว่ามูลค่า AI เกิดทั่วทั้งเศรษฐกิจ ไม่ใช่แค่รายได้ของแล็บโมเดล</p><ul class="rn-sum-list"><li>CPU สำคัญต่อการรันเอเจนต์ ขณะที่ storage และเครือข่ายรองรับข้อมูลและหน่วยความจำ</li><li>ใช้เอเจนต์ภายในหาความผิดปกติในรายงานประจำวัน</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">6,500</div><div class="rn-stat-c">ลูกค้า AI factory ณ สิ้นไตรมาสล่าสุดที่รายงาน</div></div><div class="rn-stat"><div class="rn-stat-v">100,000</div><div class="rn-stat-c">GPU ที่ติดตั้งได้ในราว 4–6 สัปดาห์</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s9" role="tabpanel" aria-labelledby="rn-t-s9" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">09</span><span><span class="rn-th">8. Meta: ข้อตกลงกับชุมชนเรื่องดาต้าเซ็นเตอร์, แว่นอัจฉริยะ และความปลอดภัยของ AI</span><span class="rn-en">8. Meta: Data-center community agreements, smart glasses and AI safety</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Richland Parish: ลดค่าไฟท้องถิ่นมากกว่า $2B ตลอดอายุโครงการ และโบนัสครู $50,000</li><li>โครงการชุมชน $1B ระยะสี่ปี</li><li>เลื่อนเปิดตัว Muse ออกไปแปดสัปดาห์เพื่อทำงานด้านความปลอดภัยเพิ่ม</li></ul></div>
+<p><strong>ผู้พูด:</strong> Dina Powell McCormick, ประธานบริษัทและรองประธานกรรมการ, Meta</p>
+<p><strong>สรุป:</strong> Powell McCormick โฟกัสที่ความพยายามของ Meta ในการสร้างดาต้าเซ็นเตอร์ให้ชุมชนท้องถิ่นสนับสนุนมากขึ้น ขยายการใช้งานแว่นอัจฉริยะ และเสริมการกำกับดูแลความปลอดภัยของ AI เธอชูผลประโยชน์ด้านค่าไฟที่คาดว่าจะเกิน $2B รอบการพัฒนา Richland Parish ของ Meta, โครงการชุมชนมูลค่า $1B, การนำร่องแว่นอุตสาหกรรมกับ NextEra Energy และการเลื่อนเปิดตัว Muse ออกไปแปดสัปดาห์เพื่อทำงานด้านความปลอดภัยเพิ่ม</p>
+<h3>1) ข้อตกลงกับชุมชนและการพัฒนาดาต้าเซ็นเตอร์</h3>
+<p>Powell McCormick บอกว่า Meta ตั้งใจพัฒนาโครงสร้างพื้นฐานในชุมชนที่ยินดีรับการลงทุนและได้รับประโยชน์ทางเศรษฐกิจอย่างมีความหมาย</p>
+<p>เธอยก Richland Parish รัฐลุยเซียนา เป็นตัวอย่าง ที่ Meta ทำงานกับพันธมิตรไฟฟ้าเพื่อลดค่าไฟท้องถิ่นลงมากกว่า $2B ตลอดอายุโครงการ</p>
+<p>เธอยังชูโบนัส $50,000 ที่จ่ายให้ครูผ่านข้อตกลงจากส่วนเกินภาษีท้องถิ่น เทียบกับเงินเดือนเริ่มต้นราว $37,000</p>
+<p>Powell McCormick บอกว่าโครงการดาต้าเซ็นเตอร์ขนาดใหญ่จ้างคนงานก่อสร้างได้ราว 7,000 คน และเน้นความร่วมมือของ Meta กับแรงงานท้องถิ่น สหภาพ และรัฐบาลมลรัฐ</p>
+<p>เธออธิบายว่าโครงสร้างพื้นฐานคอมพิวต์ภายในประเทศสำคัญต่อเศรษฐกิจและความมั่นคงของชาติสหรัฐฯ</p>
+<h3>2) การลงทุนในชุมชนและโครงการ Future Is for Everyone</h3>
+<p>Meta ตั้งโครงการมูลค่า $1B ระยะสี่ปีเพื่อสนับสนุนประโยชน์ต่อชุมชนที่เกี่ยวกับ AI และการพัฒนาโครงสร้างพื้นฐาน Powell McCormick บอกว่าโครงการจะโฟกัสลำดับความสำคัญ เช่น ครูอาจารย์ ผู้ปฏิบัติงานฉุกเฉิน ค่าไฟที่จ่ายไหว และการคุ้มครองเด็ก เธอยังพูดถึงประมาณการของอุตสาหกรรมที่ราว $10T ของการลงทุน ไฟฟ้า 250GW และงานก่อสร้างและช่างสองล้านตำแหน่งในหลายปีข้างหน้า Meta เน้นผลประโยชน์ด้านการจ้างงาน ภาษี และโครงสร้างพื้นฐานของโครงการดาต้าเซ็นเตอร์ ขณะที่พูดคุยกับชุมชนท้องถิ่น</p>
+<h3>3) Muse ธรรมาภิบาลด้านความปลอดภัย และการพัฒนาผลิตภัณฑ์</h3>
+<p>Powell McCormick บอกว่า Zuckerberg ย้ายโต๊ะทำงานเข้าไปในแล็บ AI ของ Meta และทำงานใกล้ชิดกับทีมที่พัฒนาผลิตภัณฑ์ AI ใหม่ เธอชู Muse ซึ่งเป็นผลิตภัณฑ์ AI แบบเอเจนต์ ออกแบบรอบความเรียบง่ายและใช้งานง่าย Meta เลื่อนการเปิดตัวออกไปแปดสัปดาห์เพื่อทำงานด้านความปลอดภัยเพิ่ม เธอบอกว่ามีพนักงานมากกว่า 220 คนรับผิดชอบด้านความปลอดภัยทั่วแล็บ และอธิบายมาตรการธรรมาภิบาลใหม่ รวมถึงช่องทางยกระดับเรื่องถึงบอร์ดอย่างเป็นอิสระสำหรับนักวิจัย และการตรวจสอบขั้นตอนความปลอดภัยโดยหน่วยงานภายนอก</p>
+<h3>4) แว่นอัจฉริยะและการใช้งานในองค์กร</h3>
+<p>Powell McCormick พูดถึงการขยายการใช้แว่น AI ของ Meta เกินกว่าการใช้งานผู้บริโภคแบบเดิม เธอบอกว่าแว่น Oakley ผ่านการรับรองเป็นแว่นนิรภัย และชูการนำร่องกับ NextEra Energy และพันธมิตรอุตสาหกรรมรายอื่น</p>
+<p>พนักงานสามารถใช้แว่นถ่ายภาพสินค้าคงคลัง สื่อสารกับหัวหน้างาน และรับคำแนะนำการซ่อมโดยไม่ต้องใช้แท็บเล็ตหรือวิทยุแยกต่างหาก</p>
+<p>เธอยังเล่าถึงธุรกิจเกษตรที่ใช้แว่นร่วมกับ Muse เพื่อตรวจพืชผลและรับคำแนะนำที่คำนึงถึงสภาพอากาศ</p>
+<p>Powell McCormick พูดถึงแว่นแบรนด์ Meta ที่ราคาราว $240 และรุ่น Ray-Ban ราว $350 ขึ้นไป พร้อมความร่วมมือด้านการออกแบบกับ Ray-Ban, Oakley และ Kylie Jenner</p>
+<p>เธอคาดว่าอุปกรณ์สวมใส่แบบไม่ต้องใช้มือจะสำคัญมากขึ้นในห้าปีข้างหน้า</p>
+<h3>5) การเข้าถึงและการนำ AI ไปใช้</h3>
+<p>Meta บริจาคแว่น Ray-Ban Meta ให้ทหารผ่านศึกสหรัฐฯ ที่ตาบอด โดยพัฒนาผลิตภัณฑ์จากข้อมูลของ Blind Veterans Association</p>
+<p>โครงการนี้รวมความร่วมมือกับ Homes for Our Troops, Tunnel to Towers และ Honor Flight เพื่อช่วยการแจกจ่ายและการฝึกอบรม</p>
+<p>Powell McCormick ยังบอกว่าธุรกิจขนาดเล็กที่ใช้ AI ได้เวลากลับคืนมามากจากงานประจำ ขณะที่เอเจนต์ใหม่ทำให้ผู้ประกอบการรายบุคคลเปิดและบริหารธุรกิจได้ง่ายขึ้น</p>
+<p>เธอเน้นว่าความรู้เท่าทัน AI ความคิดสร้างสรรค์ และทักษะระหว่างบุคคลสำคัญขึ้นเรื่อย ๆ สำหรับแรงงานรุ่นใหม่</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Meta มองการได้รับการยอมรับจากชุมชนเป็นเงื่อนไขของการสร้างดาต้าเซ็นเตอร์</p><ul class="rn-sum-list"><li>นำร่องแว่นอัจฉริยะกับ NextEra Energy และมอบแว่นให้ทหารผ่านศึกที่ตาบอด</li><li>แว่น Meta ราว $240 และ Ray-Ban ราว $350 ขึ้นไป</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$1B</div><div class="rn-stat-c">โครงการชุมชน Future Is for Everyone ระยะสี่ปี</div></div><div class="rn-stat"><div class="rn-stat-v">220+</div><div class="rn-stat-c">พนักงานที่รับผิดชอบด้านความปลอดภัยในแล็บ AI</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s10" role="tabpanel" aria-labelledby="rn-t-s10" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">10</span><span><span class="rn-th">9. ผู้ก่อตั้ง TomorrowX: วัฏจักร AI capex และอิทธิพลที่เปลี่ยนไปของนักลงทุนรายย่อย</span><span class="rn-en">9. TomorrowX Founders: The AI capex cycle and the changing influence of retail investors</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Baker เทียบสองทางเลือก: บูมแล้วพังแบบโทรคมนาคม กับขยายหลายทศวรรษแบบทางรถไฟ</li><li>ดอกเบี้ยสูง spread กว้าง และข้อจำกัดไฟฟ้า/เวเฟอร์ ชะลอการสร้าง ซึ่งอาจลดความเสี่ยงล้นกำลังการผลิต</li><li>หุ้นอุปกรณ์เซมิคอนดักเตอร์ขึ้น 7% แม้ถูกปรับลดอันดับ หลังอยู่ในตะกร้างานวิจัยของ Citrini</li></ul></div>
+<p><strong>ผู้พูด:</strong> Gavin Baker, Managing Partner และ CIO, Atreides Management; Antonio Gracias, ผู้ก่อตั้ง CEO และ CIO, Valor Equity Partners; Ron Biscardi, ผู้ร่วมก่อตั้งและ CEO, iConnections</p>
+<p><strong>สรุป:</strong> Baker โต้ว่าการสร้างโครงสร้างพื้นฐาน AI ที่ช้าลงและถูกจำกัดด้วยอุปทาน อาจหนุนวัฏจักรการลงทุนที่ยาวขึ้น โดยลดความเสี่ยงของกำลังการผลิตล้นเกิน เขาเทียบความเป็นไปได้ของการบูมแล้วพังแบบโทรคมนาคม กับการขยายโครงสร้างพื้นฐานหลายทศวรรษ ผู้ก่อตั้งยังพูดถึงเป้าหมายของ TomorrowX ที่จะเชื่อมทีมบริหารและบริษัทเอกชนกับนักลงทุนรายย่อยและชุมชนสื่อการเงินอิสระ</p>
+<h3>1) วัฏจักรลงทุน AI: โทรคมนาคมเทียบกับทางรถไฟ</h3>
+<p>Baker เปรียบเทียบผลลัพธ์ที่เป็นไปได้สองแบบของรายจ่ายโครงสร้างพื้นฐาน AI</p>
+<p>แบบแรกคล้ายโครงสร้างพื้นฐานโทรคมนาคม ที่การลงทุนพุ่งแรงอย่างรวดเร็วสร้างกำลังการผลิตส่วนเกินมหาศาล ตามมาด้วยช่วงการลงทุนอ่อนแอยาวนาน</p>
+<p>แบบที่สองคล้ายการสร้างทางรถไฟ ซึ่งต่อเนื่องหลายทศวรรษเมื่อความต้องการโครงสร้างพื้นฐานขยายต่อไปเรื่อย ๆ</p>
+<p>เขาบอกว่าปัจจัยชี้ขาดคือ AI จะมีประโยชน์ทางเศรษฐกิจมากขึ้นหรือไม่ และต้นทุนโทเค็นที่ต่ำลงจะสร้างความต้องการเพิ่มเติมต่อไปหรือไม่</p>
+<p>Baker ยังชี้ว่ารายจ่ายสามารถเคลื่อนย้ายระหว่างที่ดิน ไฟฟ้า คอมพิวต์ หน่วยความจำ เครือข่าย และ storage ตามที่แต่ละส่วนของโครงสร้างพื้นฐานพัฒนา</p>
+<h3>2) ทำไมการสร้างที่ช้าลงอาจเป็นผลดี</h3>
+<p>Baker บอกว่าอัตราดอกเบี้ยที่สูงขึ้น credit spread ที่กว้างขึ้น และการขาดแคลนไฟฟ้าและกำลังผลิตเซมิคอนดักเตอร์ กำลังชะลอจังหวะการขยาย AI</p>
+<p>เขาให้เหตุผลว่าข้อจำกัดเหล่านี้ลดความเสี่ยงของกำลังการผลิตที่พุ่งฉับพลันแล้วตามด้วยการตกต่ำรุนแรง</p>
+<p>วิถีที่เขาชอบคือช่วงขยายที่ช้ากว่าและราบรื่นกว่า แทนการพุ่งสูงอย่างรวดเร็วแล้วหดตัวตาม</p>
+<p>เขาอธิบายว่า valuation ของหุ้น AI สะท้อนความกังวลอย่างมากเรื่องรายจ่ายโครงสร้างพื้นฐานที่แตะจุดสูงสุดไปแล้ว</p>
+<h3>3) บทบาทของนักลงทุนรายย่อยและงานวิจัยอิสระ</h3>
+<p>Baker เล่าถึงหุ้นอุปกรณ์เซมิคอนดักเตอร์ตัวหนึ่งที่ขึ้น 7% ทั้งที่ถูกธนาคารเพื่อการลงทุนรายใหญ่ปรับลดอันดับ หลังปรากฏในตะกร้าวิจัยที่ Citrini เผยแพร่</p>
+<p>เขาใช้ตัวอย่างนี้แสดงอิทธิพลที่เพิ่มขึ้นของงานวิจัยอิสระ Substack, X และชุมชนนักลงทุนรายย่อย</p>
+<p>TomorrowX ถูกออกแบบส่วนหนึ่งเพื่อเชื่อมกลุ่มผู้ชมเหล่านี้กับทีมบริหารบริษัทและบริษัทเอกชน ให้การเข้าถึงที่คล้ายกับที่การประชุมนักลงทุนสถาบันเคยมอบให้</p>
+<h3>4) TomorrowX และการนำ AI ไปใช้ในวงกว้าง</h3>
+<p>ผู้จัดงานบอกว่ามีบริษัทเอกชนมากกว่า 100 แห่งมาร่วมงาน หลายแห่งมี CEO มาด้วยตนเอง</p>
+<p>พวกเขายังเล่าว่ามีทุนการศึกษามากกว่า 1,000 ทุนสำหรับผู้มีส่วนร่วมที่กระตือรือร้นบน X, Substack และ Reddit</p>
+<p>Gracias เน้นความสำคัญของการแสดงให้ชาวอเมริกันทั่วไปเห็นประโยชน์ของ AI ทั้งการเพิ่มผลิตภาพ สาธารณสุข การศึกษา และความคิดสร้างสรรค์</p>
+<p>Biscardi พูดถึงบทบาทของ iConnections ในการนำโครงสร้างพื้นฐานงานอีเวนต์และเครือข่ายระดับสถาบันไปสู่กลุ่มผู้ชมที่กว้างขึ้น</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">การสร้างที่ช้าลงและราบรื่นกว่าเป็นผลดีต่อวัฏจักร AI ยาว</p><ul class="rn-sum-list"><li>valuation ของหุ้น AI สะท้อนความกังวลเรื่องรายจ่ายสูงสุดไปมากแล้ว</li><li>TomorrowX เชื่อมนักลงทุนรายย่อยกับทีมบริหาร แบบที่การประชุมสถาบันเคยให้</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">100+</div><div class="rn-stat-c">บริษัทเอกชนที่เข้าร่วมงาน</div></div><div class="rn-stat"><div class="rn-stat-v">1,000+</div><div class="rn-stat-c">ทุนการศึกษาสำหรับผู้มีส่วนร่วมบน X, Substack, Reddit</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s11" role="tabpanel" aria-labelledby="rn-t-s11" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">11</span><span><span class="rn-th">10. Goldman Sachs: โอกาสในชั้นแอปพลิเคชัน, ผลิตภาพจาก AI และงานวิศวกร</span><span class="rn-en">10. Goldman Sachs: Application-layer opportunities, AI-driven productivity and engineering jobs</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>การปรับฐานตลาด AI คือการปรับเส้นการเติบโตใหม่ ไม่ใช่จุดจบของวัฏจักร</li><li>Goldman มีวิศวกรราว 13,000 คนจากพนักงานราว 45,000 คน และอาจมีน้อยลงใน 5 ปี</li><li>ประสิทธิภาพที่ได้ตั้งใจนำไปลงทุนต่อในการเติบโต</li></ul></div>
+<p><strong>ผู้พูด:</strong> David Solomon, ประธานกรรมการและ CEO, Goldman Sachs</p>
+<p><strong>สรุป:</strong> Solomon อธิบายการปรับฐานของตลาด AI ล่าสุดว่าเป็นการปรับเทียบเส้นการเติบโตใหม่ ไม่ใช่จุดจบของวัฏจักรเทคโนโลยี เขาคาดว่าการสร้างมูลค่าระยะยาวที่ใหญ่ที่สุดจะเกิดในชั้นแอปพลิเคชัน ที่ Goldman AI กำลังเปลี่ยนความต้องการด้านวิศวกรรมและเปิดทางให้ออกแบบกระบวนการดำเนินงานใหม่ โดยประสิทธิภาพที่ได้ตั้งใจนำไปหนุนการขยายธุรกิจ</p>
+<h3>1) วัฏจักรลงทุน AI และชั้นแอปพลิเคชัน</h3>
+<p>Solomon บอกว่าการลงทุน AI ยังอยู่ในช่วงต้นของการเปลี่ยนผ่านเทคโนโลยีระยะยาว</p>
+<p>เขาอธิบายสภาพตลาดปัจจุบันว่าเป็นช่วงที่นักลงทุนประเมินความคาดหวังการเติบโตใหม่ เมื่อมีข้อมูลมากขึ้น</p>
+<p>เขาคาดว่าจะมีการลงทุนเพิ่มอีกมากในโครงสร้างพื้นฐาน AI แต่เชื่อว่าโอกาสทางเศรษฐกิจที่ใหญ่ที่สุดในสิบถึงยี่สิบปีข้างหน้าจะเกิดในแอปพลิเคชัน</p>
+<p>Solomon เปรียบโอกาสนี้กับการพัฒนาแพลตฟอร์มมือถือและอินเทอร์เน็ต ที่ในที่สุดรองรับธุรกิจและผลิตภัณฑ์ซึ่งไม่มีใครคาดคิดในช่วงสร้างโครงสร้างพื้นฐานแรก</p>
+<p>เขาเน้นว่าความก้าวหน้าทางเทคโนโลยีเกิดขึ้นได้เร็วกว่าที่องค์กรจะปรับการดำเนินงานตามทันมาก</p>
+<h3>2) กำลังแรงงานวิศวกรของ Goldman และการนำ AI มาใช้</h3>
+<p>Solomon บอกว่า Goldman มีวิศวกรราว 13,000 คนในกำลังแรงงานราว 45,000 คน</p>
+<p>เขาคาดว่าในห้าปี บริษัทอาจมีวิศวกรน้อยลง เมื่อ AI ทำงานพัฒนาประจำให้อัตโนมัติมากขึ้น ขณะที่วิศวกรอาวุโสทักษะสูงสำคัญขึ้น</p>
+<p>เขายังชี้ว่ากลุ่มพาร์ตเนอร์ใหม่ล่าสุดของ Goldman มีสัดส่วนผู้เชี่ยวชาญด้านวิศวกรรมและเทคโนโลยีสูงที่สุดเท่าที่เคยมี</p>
+<p>บริษัทใช้จ่ายด้านเทคโนโลยีมากกว่า $6B ต่อปี</p>
+<h3>3) ระบบอัตโนมัติของกระบวนการและประสิทธิภาพการดำเนินงาน</h3>
+<p>ตอนแรก Goldman เลือกกระบวนการทางธุรกิจหลักหกอย่างเพื่อออกแบบใหม่ด้วย AI รวมถึงการรับลูกค้าใหม่ ข้อกำหนด know-your-customer และงานต่อต้านการฟอกเงิน</p>
+<p>ต่อมาบริษัทเพิ่มอีกสองกระบวนการ</p>
+<p>Solomon บอกว่า AI ทำให้ทำเวิร์กโฟลว์ที่เคยต้องใช้แรงงานมือมากให้เป็นอัตโนมัติได้</p>
+<p>เขามองประสิทธิภาพที่ได้เป็นช่องทางขยายกำลังการผลิต การดูแลลูกค้า และขอบเขตธุรกิจของ Goldman</p>
+<p>แทนที่จะนำทุกการปรับปรุงประสิทธิภาพไปขยายอัตรากำไร Goldman ตั้งใจนำทรัพยากรไปลงทุนต่อในการเติบโต</p>
+<h3>4) การบริหารความมั่งคั่งและความสัมพันธ์ระหว่างมนุษย์</h3>
+<p>Solomon อธิบายว่าธุรกิจบริหารความมั่งคั่งของ Goldman โฟกัสลูกค้าที่มีสินทรัพย์ลงทุนได้ราว $25M ขึ้นไป</p>
+<p>แพลตฟอร์มให้บริการลูกค้าราว 45,000 รายทั่วโลก และให้บริการบริหารการลงทุน การวางแผน และการเข้าถึงโอกาสในตลาดเอกชน</p>
+<p>เขาคาดว่าเทคโนโลยีจะเสริมธุรกิจนี้ แต่เน้นว่าการบริหารความมั่งคั่งระดับสูงจะยังขับเคลื่อนด้วยความสัมพันธ์</p>
+<p>Solomon ยังพูดถึงพันธสัญญา $500M ของ Goldman ต่อสถาบัน AI ที่เกี่ยวกับโครงการ 10,000 Small Businesses เพื่อสนับสนุนการศึกษา AI การวิจัย และการเข้าถึงเงินทุน</p>
+<h3>5) ภาพเศรษฐกิจมหภาคและ NVIDIA</h3>
+<p>Solomon แสดงความเชื่อมั่นต่อนวัตกรรมเทคโนโลยีของอเมริกาในทศวรรษหน้า พร้อมยอมรับความไม่แน่นอนทางภูมิรัฐศาสตร์และตลาดระยะสั้น</p>
+<p>เขาบอกว่าเศรษฐกิจยังแข็งแรงได้แม้อัตราดอกเบี้ยสูงกว่าช่วงส่วนใหญ่หลังวิกฤตการเงิน</p>
+<p>เรื่อง NVIDIA เขาเน้นความจำเป็นของกระบวนการที่รอบคอบขณะที่ประเด็นเรื่องผู้นำกำลังถูกจัดการ และแสดงความเชื่อมั่นในทีมบริหารโดยรวมของบริษัท รวมถึง CFO Colette Kress</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">มูลค่าสูงสุดในสิบถึงยี่สิบปีข้างหน้าจะอยู่ที่ชั้นแอปพลิเคชัน ตามที่ Solomon มอง</p><ul class="rn-sum-list"><li>ออกแบบกระบวนการหลักใหม่ด้วย AI หกอย่าง แล้วเพิ่มอีกสอง</li><li>การบริหารความมั่งคั่งระดับสูงยังขับเคลื่อนด้วยความสัมพันธ์</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">13,000</div><div class="rn-stat-c">วิศวกรที่ Goldman</div></div><div class="rn-stat"><div class="rn-stat-v">$6B+</div><div class="rn-stat-c">รายจ่ายด้านเทคโนโลยีต่อปี</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s12" role="tabpanel" aria-labelledby="rn-t-s12" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">12</span><span><span class="rn-th">11. Sound Ventures: Anthropic, การเลือกผู้ก่อตั้ง และการลงทุนในตลาดเอกชน</span><span class="rn-en">11. Sound Ventures: Anthropic, founder selection and private-market investing</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ลงทุนครั้งแรก $35M ใน Anthropic ปี 2023 จากความเชื่อมั่นในตัวผู้ก่อตั้ง</li><li>Sound Ventures บริหารสินทรัพย์ราว $2B และใช้ประสบการณ์เล่าเรื่องช่วยบริษัทในพอร์ต</li><li>Get Access รับผู้สมัครน้อยกว่า 7% และรองรับเงินลงทุนเล็กเพียง $2,500 หรือ $5,000</li></ul></div>
+<p><strong>ผู้พูด:</strong> Guy Oseary, ผู้ร่วมก่อตั้ง, Sound Ventures</p>
+<p><strong>สรุป:</strong> Oseary พูดถึงการลงทุนระยะแรกของ Sound Ventures ใน Anthropic ความสำคัญที่เขาให้กับคุณภาพของผู้ก่อตั้ง และบทบาทของการเล่าเรื่อง (storytelling) ในการสร้างความแตกต่างให้บริษัทเทคโนโลยี เขายังเปิดตัว Get Access แพลตฟอร์มการลงทุนแบบคัดสรรที่ออกแบบมาเชื่อมบริษัทเอกชนกับนักลงทุนรายเล็กที่สร้างคุณค่าเชิงกลยุทธ์ได้เกินกว่าเงินทุน</p>
+<h3>1) Anthropic และการลงทุนในตัวผู้ก่อตั้ง</h3>
+<p>Oseary บอกว่าเขามองเห็น AI เป็นโอกาสลงทุนใหญ่ทันทีหลัง ChatGPT เปิดตัวในเดือนพฤศจิกายน 2022</p>
+<p>เขาติดต่อ Salesforce Ventures เพื่อเรียนรู้เกี่ยวกับบริษัทที่กำลังเกิดขึ้น และได้รับการแนะนำให้รู้จัก Anthropic</p>
+<p>ต่อมาเขาพบ Dario Amodei และลงทุนจากความเชื่อมั่นในวิสัยทัศน์ทางเทคนิค ความมุ่งมั่น และเป้าหมายระยะยาวของผู้ก่อตั้ง</p>
+<p>ผู้ดำเนินรายการอ้างถึงการลงทุนครั้งแรก $35M ของ Sound Ventures ใน Anthropic ปี 2023 และการลงทุนเพิ่มในรอบระดมทุนต่อมา</p>
+<p>Oseary เน้นการประเมินคนที่สร้างบริษัท โดยเฉพาะความสามารถในการสื่อสารและลงมือทำตามวิสัยทัศน์ระยะยาว</p>
+<h3>2) Sound Ventures และความสำคัญของการเล่าเรื่อง</h3>
+<p>Oseary บอกว่า Sound Ventures บริหารสินทรัพย์ราว $2B และลงทุนในบริษัทเทคโนโลยีหลายแห่ง รวมถึง Airbnb, Uber, Spotify, OpenAI และ Anthropic</p>
+<p>เขาอธิบายประสบการณ์ของบริษัทด้านบันเทิง การตลาด และการเล่าเรื่อง ว่าเป็นวิธีช่วยให้บริษัทในพอร์ตสร้างความแตกต่างให้ตัวเอง</p>
+<p>แนวทางของเขาคือทำงานกับผู้ก่อตั้งในการอธิบายผลิตภัณฑ์ให้ชัดเจน สื่อสารพันธกิจ และเข้าถึงผู้ชมที่นอกเหนือจากชุมชนเทคนิค</p>
+<p>เขาบอกว่าบริษัทต่าง ๆ เผชิญคู่แข่งที่ได้เงินทุนดีจำนวนมากซึ่งตามหาไอเดียคล้ายกันมากขึ้น ทำให้การวางตำแหน่ง การสื่อสารผลิตภัณฑ์ และการจัดจำหน่ายสำคัญ</p>
+<h3>3) Get Access และการมีส่วนร่วมในตลาดเอกชน</h3>
+<p>Oseary อธิบาย Get Access ว่าเป็นแพลตฟอร์มที่เชื่อมโอกาสลงทุนแบบเอกชนกับชุมชนนักลงทุนที่คัดสรรแล้ว</p>
+<p>เขาบอกว่ามีผู้สมัครได้รับการรับเข้าน้อยกว่า 7% และมีนักลงทุนมากกว่า 100 รายในเครือข่าย</p>
+<p>แพลตฟอร์มออกแบบมาสำหรับบุคคลที่สามารถสร้างคุณค่าด้านความเชี่ยวชาญ ความสัมพันธ์ หรือคุณค่าเชิงกลยุทธ์อื่น ๆ ให้บริษัท</p>
+<p>โอกาสลงทุนรองรับเงินลงทุนเล็กเพียง $2,500 หรือ $5,000 เทียบกับยอดที่ใหญ่กว่ามากซึ่งมักพบในดีลตลาดเอกชนระดับสถาบัน</p>
+<p>Oseary เล่าว่ามีดีลให้เลือกประมาณทุกสัปดาห์ และเน้นเรื่องการให้ความรู้ ทำให้สมาชิกได้เรียนรู้เกี่ยวกับบริษัทที่กำลังเติบโต แม้เลือกที่จะไม่ลงทุน</p>
+<p>เป้าหมายระยะยาวของเขาคือให้ Get Access เป็นแหล่งโอกาสลงทุนในบริษัทเอกชนที่สำคัญสำหรับนักลงทุนรายบุคคลที่มีคุณค่าเชิงกลยุทธ์</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Oseary ประเมินคนที่สร้างบริษัทเป็นอันดับแรก และใช้การเล่าเรื่องสร้างความแตกต่าง</p><ul class="rn-sum-list"><li>Get Access เชื่อมดีลเอกชนกับนักลงทุนรายเล็กที่สร้างคุณค่าเชิงกลยุทธ์</li><li>มีดีลให้เลือกราวทุกสัปดาห์ เน้นการให้ความรู้</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$2B</div><div class="rn-stat-c">สินทรัพย์ที่ Sound Ventures บริหาร</div></div><div class="rn-stat"><div class="rn-stat-v">&lt;7%</div><div class="rn-stat-c">สัดส่วนผู้สมัคร Get Access ที่ได้รับเข้า</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s13" role="tabpanel" aria-labelledby="rn-t-s13" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">13</span><span>ข้อสงวนสิทธิ์ (Disclaimer)</span></h2>
+
+<p>จดหมายข่าวนี้เผยแพร่เพื่อวัตถุประสงค์ด้านข้อมูลและการศึกษาเท่านั้น เนื้อหาใดในที่นี้ไม่ใช่คำแนะนำการลงทุนเฉพาะบุคคล ไม่ใช่คำแนะนำที่ปรับให้เข้ากับสถานการณ์ของบุคคลใด ไม่ใช่การเสนอขาย หรือการชักชวนให้ซื้อหรือขายหลักทรัพย์หรือเครื่องมือทางการเงินใด ๆ จดหมายข่าวนี้ไม่ใช่บริการให้คำปรึกษาด้านการลงทุน และไม่ก่อให้เกิดความสัมพันธ์ในฐานะที่ปรึกษาหรือผู้ดูแลผลประโยชน์ (fiduciary) ระหว่างผมกับผู้อ่านคนใด</p>
+<p>ผมซื้อขายหลักทรัพย์ที่กล่าวถึงในที่นี้อย่างต่อเนื่อง และมักเป็นการเทรดระยะสั้น สถานะของผมอาจไม่สอดคล้องกับมุมมองที่แสดงไว้ และผมอาจซื้อหรือขายได้ — รวมถึงทันทีก่อนหรือหลังการเผยแพร่ — โดยไม่แจ้งหรืออัปเดต ราคาเป้าหมาย สถานการณ์ upside/downside และกรอบเวลา เป็นความเห็นเชิงอธิบายตัวอย่าง ไม่ใช่คำมั่นว่าจะถือครอง</p>
+<p>สิ่งพิมพ์นี้สำหรับการใช้ส่วนตัวของสมาชิกเท่านั้น ห้ามแจกจ่ายต่อ เผยแพร่ซ้ำ ส่งต่อ หรืออ้างอิง โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรล่วงหน้า</p>
+<p>ลิขสิทธิ์ © 2026 TMT Breakout สงวนลิขสิทธิ์</p>
+<p>เปิดเผยข้อมูลฉบับเต็มที่นี่ (Full disclosures here)</p>
+<p>LIKE · COMMENT · RESTACK</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec" id="rn-p-s14" role="tabpanel" aria-labelledby="rn-t-s14" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🛰 SpaceX ตั้งใจชนะที่ต้นทุนคอมพิวต์</strong> — ต้นทุนบนพื้นดินราว $30 ต้น ๆ ถึงกลาง ๆ ต่อวัตต์ เทียบ $50–60 ของอุตสาหกรรม คืนทุนในไม่เกินหนึ่งปี และคอมพิวต์ในวงโคจรมีไทม์ไลน์ชัด: ดาวเทียมชุดแรกปี 2027 เร่งผลิตปี 2028 ระดับกิกะวัตต์ปี 2029</li>
+<li><strong>💵 เงินทุนสร้างได้โดยไม่ต้องล็อกสัญญายาว</strong> — เงินมัดจำล่วงหน้า เงื่อนไขซัพพลายเออร์ และวงเงิน GPU $40B ทำให้กระแสเงินสดจากการดำเนินงานอาจเกิน EBITDA และความต้องการเงินทุนเป็นเพียงการเชื่อมช่วง &quot;เป็นเดือน&quot;</li>
+<li><strong>🔴 AMD: AI ช่วยตัดต้นทุนการย้ายซอฟต์แวร์</strong> — Anthropic ย้ายโมเดลขึ้นฮาร์ดแวร์ AMD ได้ในราวสามวันโดยใช้ Claude จากเดิมเก้าถึงสิบสองเดือน ซึ่งกำลังลดกำแพงของ CUDA และขยายสนามให้ GPU คู่แข่ง</li>
+<li><strong>🧠 เอเจนต์ทำให้ CPU กลับมาเป็นตัวเอก</strong> — AMD ขยายโอกาส CPU จาก $20–30B เป็นราว $220B ใน 4–5 ปี และดาต้าเซ็นเตอร์จะเกิน 60% ของรายได้ปีนี้ แล้วมุ่งสู่เกิน 80%</li>
+<li><strong>🔥 inference แบบเฉพาะทางคือเศรษฐศาสตร์ที่ชนะ</strong> — Fireworks ถึง run rate $1.5B โดยทราฟฟิกกว่า 80% เป็นโมเดลปรับแต่ง และต้นทุนต่ำกว่า 5–10 เท่าเมื่อเทียบกับโมเดลสำเร็จรูป ขณะที่ตัวแทนอัตโนมัติผลักให้ต้นทุนต่องานลดลง 100 เท่าและโทเค็นโตกว่า 1,000 เท่า</li>
+<li><strong>🧭 Druckenmiller: ตอนนี้คือรักษาเงินต้น</strong> — สัญญาณที่เคยหนุนมุมมองเชิงบวกเมื่อเดือนมกราคมกลับด้านเกือบหมด (Fed คุมเข้ม โภคภัณฑ์อ่อน spread กว้าง breadth แย่) พอร์ตหุ้นเกือบเท่าทุนสุทธิ และชอร์ตทองแดง เขามองหาโอกาสใน &quot;แอปพลิเคชัน AI&quot; โดยเฉพาะแล็บแนวหน้าที่อาจขายงานที่ทำเสร็จแทนโทเค็น</li>
+<li><strong>📈 Gerstner: เศรษฐศาสตร์ inference ของ Anthropic ดีกว่าที่ตลาดคิด</strong> — รายได้ run rate ใกล้ $100B ด้วยพนักงานราว 5,000 คน และใช้เพียง 25–26% ของคอมพิวต์ 2GW ให้บริการลูกค้า ที่เหลือส่วนใหญ่ใช้เทรน พร้อมคาดว่ามูลค่าจะกระจุกที่ผู้ให้บริการโมเดลไม่กี่ราย</li>
+<li><strong>🏦 Apollo: ลงทุนผ่านหนี้มีหลักประกันระดับลงทุน</strong> — บริษัทเทคโนโลยีจะเป็นหกในสิบผู้ออกพันธบัตรองค์กรรายใหญ่ภายในสามถึงสี่ปี ความเสี่ยงของเจ้าหนี้ต่างจากนักลงทุนหุ้น และโครงการ AI บางโครงการแย่ได้โดยไม่ทำให้ผู้กู้รายใหญ่ล้ม</li>
+<li><strong>🖥 Dell: ความต้องการ AI ขยายจากแล็บโมเดลสู่องค์กร</strong> — ลูกค้า AI factory 6,500 ราย และโอกาสที่ใหญ่กว่าคือการออกแบบกระบวนการใหม่รอบเอเจนต์ ซึ่งดึงความต้องการ GPU CPU storage และเครือข่ายไปพร้อมกัน</li>
+<li><strong>🏗 การสร้างที่ช้าลงอาจดีต่อวัฏจักร</strong> — Baker มองว่าดอกเบี้ยสูง spread กว้าง และข้อจำกัดด้านไฟฟ้าและเวเฟอร์ ลดความเสี่ยงแบบบูมแล้วพังของโทรคมนาคม และทำให้เส้นทางคล้ายทางรถไฟที่ยืดหลายทศวรรษมีโอกาสมากขึ้น</li>
+<li><strong>💼 AI กำลังเปลี่ยนโครงสร้างงานของวอลล์สตรีท</strong> — Goldman ซึ่งมีวิศวกร 13,000 คน คาดว่าจะมีวิศวกรประจำน้อยลงใน 5 ปี แต่ต้องการวิศวกรอาวุโสมากขึ้น และจะนำประสิทธิภาพไปลงทุนต่อในการเติบโต ไม่ใช่เก็บเป็นอัตรากำไรทั้งหมด</li>
+<li><strong>🏘 &quot;ใบอนุญาตจากชุมชน&quot; กลายเป็นต้นทุนของการสร้างดาต้าเซ็นเตอร์</strong> — Meta ใช้ค่าไฟที่ลด $2B การจ่ายโบนัสครู $50,000 และโครงการชุมชน $1B เป็นเครื่องมือขอการยอมรับ ซึ่งเป็นสัญญาณว่าการเมืองท้องถิ่นเป็นข้อจำกัดจริงของการขยายโครงสร้างพื้นฐาน</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>[TMTB: TomorrowX Highlights - SpaceX on Compute, AMD&#x27;s Lisa Su, Fireworks on Inference, Druckenmiller on Positioning &amp; More](2026-11-18_-_TMTB_TomorrowX_Highlights_-_SpaceX_on_Compute_AMDs_Lisa_Su_Fireworks_on_Inference_Druckenmiller_-_id2734.pdf) — TMT Breakout (Substack), 18 พ.ย. 2026</li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+TMT Breakout<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+
+
+</body></html>
