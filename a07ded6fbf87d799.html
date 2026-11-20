@@ -1,0 +1,796 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>รีวิว|PANW FY27Q1: จุดเริ่มต้นที่แข็งแรงขึ้น สู่การเติบโตแบบออร์แกนิกที่เร็วขึ้นในปี 2027</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">FundaAI</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+<div class="rn-lang" id="rn-lang" role="group" aria-label="Language"><div class="rn-sheen" aria-hidden="true"></div><div class="rn-lpill" aria-hidden="true"></div><button class="rn-lopt" type="button" data-lang-opt="th" aria-pressed="true">ไทย</button><button class="rn-lopt" type="button" data-lang-opt="en" aria-pressed="false">EN</button></div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/PANW?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$PANW</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CYBR?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CYBR</span>
+<span class="rn-deck">อัตราการเติบโตของ NGS ARR แบบออร์แกนิกอยู่ที่ราว 30.4% ในไตรมาส 1 ตามการขยายการซื้อด้านความปลอดภัยของลูกค้ารายใหญ่ · 20 พ.ย.</span>
+</div>
+<h1>🛡️ รีวิว|PANW FY27Q1: จุดเริ่มต้นที่แข็งแรงขึ้น สู่การเติบโตแบบออร์แกนิกที่เร็วขึ้นในปี 2027</h1>
+<div class="rn-byline"><b>FundaAI</b><span class="rn-sep">·</span>2026-11-19<span class="rn-sep">·</span><span class="rn-th">อ่าน 13 นาที</span><span class="rn-en">13 min read</span></div>
+</div>
+<p class="rn-notice rn-en">Headings, summaries, figure captions and key numbers are shown in English. Body paragraphs remain in Thai.</p>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🚀 การเติบโตเร่งขึ้นทั้งรายได้และ ARR — รายได้ FY27Q1 โต 39.2% (จาก 34.4%) เหนือขอบบนของไกด์แนนซ์ 34% และ NGS ARR โต 66% (จาก 63%) เหนือไกด์แนนซ์ 63%</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="I. ผลประกอบการรายไตรมาสและแนวโน้ม" data-en="I. Quarterly Results and Outlook" data-th-full="I. ผลประกอบการรายไตรมาสและแนวโน้ม" data-en-full="I. Quarterly Results and Outlook" title="I. ผลประกอบการรายไตรมาสและแนวโน้ม">I. ผลประกอบการรายไตรมาสและแนวโน้ม</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="II. ไฮไลต์จากการประชุมสายผลประกอบการ" data-en="II. Earnings Call Highlights" data-th-full="II. ไฮไลต์จากการประชุมสายผลประกอบการ" data-en-full="II. Earnings Call Highlights" title="II. ไฮไลต์จากการประชุมสายผลประกอบการ">II. ไฮไลต์จากการประชุมสายผลประกอบการ</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="III. ทำไม Palo Alto จึงซื้อ Applied Comp…" data-en="III. Why Palo Alto Is Acquiring Applied…" data-th-full="III. ทำไม Palo Alto จึงซื้อ Applied Comp…" data-en-full="III. Why Palo Alto Is Acquiring Applied Compute" title="III. ทำไม Palo Alto จึงซื้อ Applied Comp…">III. ทำไม Palo Alto จึงซื้อ Applied Comp…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="IV. อัปเดตตัวชี้วัดหลัก" data-en="IV. Key Metrics Update" data-th-full="IV. อัปเดตตัวชี้วัดหลัก" data-en-full="IV. Key Metrics Update" title="IV. อัปเดตตัวชี้วัดหลัก">IV. อัปเดตตัวชี้วัดหลัก</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span><span class="rn-th">I. ผลประกอบการรายไตรมาสและแนวโน้ม</span><span class="rn-en">I. Quarterly Results and Outlook</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>รายได้ FY27Q1 โต 39.2% เมื่อเทียบกับปีก่อน เหนือขอบบนของไกด์แนนซ์ 34%</li><li>NGS ARR โต 66% เหนือไกด์แนนซ์ 63% ส่วนแบบออร์แกนิกเร่งเป็น 30.4% จาก 28.9%</li><li>ไกด์ไตรมาส 2: รายได้โต 36%–37% และ NGS ARR โต 61% ส่วนไกด์ทั้งปี FY27 ปรับขึ้นเป็น 26%–27%</li><li>ผู้ให้บริการโมเดล AI มีช่องจำกัดที่จะแทนที่ผู้ให้บริการความปลอดภัยไซเบอร์รายเดิม</li></ul></div>
+<ol>
+<li><strong>รายได้และการเติบโตของ NGS ARR เร่งขึ้นทั้งคู่ใน FY27Q1</strong> — รายได้โต 39.2% เมื่อเทียบกับปีก่อน เพิ่มขึ้นจาก 34.4% ในไตรมาสที่แล้ว สูงกว่าขอบบนของไกด์แนนซ์ (34%) และนำหน้ากรอบ 34%–35% ที่เราได้ยินจากฝั่ง buy-side ก่อนประกาศงบอยู่ 4–5 จุดเปอร์เซ็นต์ NGS ARR โต 66% เพิ่มจาก 63% ในไตรมาสก่อน และสูงกว่าไกด์แนนซ์ของฝ่ายบริหารที่ 63% เมื่อหักผลจาก CyberArk และ Chronosphere ออก เราประเมินว่าการเติบโตของ NGS ARR แบบออร์แกนิกเร่งขึ้นเป็น 30.4% จาก 28.9%</li>
+</ol>
+<ol>
+<li><strong>จากการสอบถามช่องทางจำหน่าย (channel checks) เราคาดว่ารายได้และ NGS ARR แบบออร์แกนิกจะเร่งขึ้นอีกเล็กน้อยในไตรมาส 2</strong> — Palo Alto ให้ไกด์แนนซ์รายได้ไตรมาส 2 โต 36%–37% เมื่อเทียบกับปีก่อน และ NGS ARR โต 61% ซึ่งทั้งคู่ต่ำกว่าอัตราการเติบโตของไตรมาส 1 บริษัทปรับไกด์แนนซ์ทั้งปี FY27 ของทั้งรายได้และการเติบโตของ NGS ARR ขึ้นเป็น 26%–27%</li>
+</ol>
+<ol>
+<li><strong>เรายังมองบวกต่อแนวโน้มการเติบโตแบบออร์แกนิกที่เร็วขึ้นของ Palo Alto ในปีปฏิทิน 2027</strong> — เรามองบวกกับไตรมาส 1 อยู่แล้วก่อนประกาศงบ และคาดว่าการเติบโตจะเร่งขึ้น แต่ผลที่ออกมาก็ยังดีกว่าที่เราคาดไว้มาก ลูกค้ารายใหญ่สั่งซื้อผลิตภัณฑ์ใหม่ในปริมาณมากกว่าที่เราคาด และอาจมีลูกค้าจำนวนมากกว่าที่เราสมมติไว้ที่เพิ่มงบประมาณด้านความปลอดภัย ปัจจัยทั้งสองน่าจะยังหนุนการเติบโตในไตรมาสหน้า และช่วยให้การเปลี่ยนผ่านสู่การเติบโตแบบออร์แกนิกที่เร็วขึ้นในปีหน้าราบรื่นขึ้น การสอบถามช่องทางจำหน่ายของเรายังชี้ว่า การใช้จ่ายของลูกค้ากับ Palo Alto จะเติบโตแบบออร์แกนิกเร็วกว่าในปีปฏิทิน 2027 เมื่อเทียบกับปีปฏิทิน 2026 เมื่อ AI เร่งทั้งการค้นพบช่องโหว่และการโจมตี เราคาดว่าความต้องการการทดสอบและการป้องกันอย่างต่อเนื่องจะดันงบประมาณด้านความปลอดภัยให้สูงขึ้น Palo Alto ควรได้อานิสงส์ด้วย เมื่อลูกค้ารวมการใช้จ่ายไปอยู่กับผู้ให้บริการด้านความปลอดภัยน้อยรายลง</li>
+</ol>
+<ol>
+<li><strong>เราเห็นช่องที่จำกัดที่ผู้ให้บริการโมเดล AI จะเข้ามาแทนที่ผู้ให้บริการความปลอดภัยไซเบอร์รายเดิม</strong> — โมเดลกำลังรับช่วงงานค้นหาและทดสอบช่องโหว่บางส่วนที่คนและเครื่องสแกนแบบดั้งเดิมทำอยู่ในปัจจุบัน แต่งานส่วนนี้เป็นสัดส่วนที่ค่อนข้างเล็กของรายได้ผู้ให้บริการรายเดิม ความปลอดภัยด้าน endpoint, คลาวด์ และเครือข่าย ยังต้องใช้งานติดตั้งและการเชื่อมต่อจำนวนมากทั่วระบบของลูกค้า และองค์กรที่เราสอบถามในช่องทางจำหน่ายก็ต้องการเข้าถึงโมเดลผ่านผู้ให้บริการด้านความปลอดภัยหรือคลาวด์รายเดิม เพื่อแยกและปกป้องข้อมูลอ่อนไหวไว้</li>
+</ol>
+<p><em>สมัครสมาชิกแล้ว</em></p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ทั้งรายได้และ NGS ARR เร่งขึ้นเหนือไกด์แนนซ์ และทีมวิจัยยังมองการเติบโตแบบออร์แกนิกเร็วขึ้นในปี 2027</p><ul class="rn-sum-list"><li>ลูกค้ารายใหญ่สั่งซื้อผลิตภัณฑ์ใหม่มากกว่าที่คาด</li><li>AI เร่งการค้นพบช่องโหว่และการโจมตี หนุนงบประมาณด้านความปลอดภัย</li><li>ลูกค้ารวมการใช้จ่ายไปอยู่กับผู้ให้บริการน้อยรายลง</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">39.2%</div><div class="rn-stat-c">รายได้ FY27Q1 โตเทียบปีก่อน (จาก 34.4%)</div></div><div class="rn-stat"><div class="rn-stat-v">66%</div><div class="rn-stat-c">NGS ARR โต (จาก 63%)</div></div><div class="rn-stat"><div class="rn-stat-v">30.4%</div><div class="rn-stat-c">NGS ARR แบบออร์แกนิก (จาก 28.9%)</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span><span class="rn-th">II. ไฮไลต์จากการประชุมสายผลประกอบการ</span><span class="rn-en">II. Earnings Call Highlights</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>platformization ใหม่สุทธิทำสถิติราว 170 ราย; ลูกค้ากลุ่มนี้เป็นสองในสามของ NGS ARR และ net retention เกิน 120%</li><li>ดีล $83 ล้านดอลลาร์กับสถาบันการเงินระดับโลก รวม virtual patching และ identity security</li><li>SASE เพิ่ม ARR สุทธิกว่า $100 ล้านดอลลาร์; XSIAM ARR ราว $800 ล้านดอลลาร์ (โต 65%+)</li><li>Prisma AIRS ราว $170 ล้านดอลลาร์ ARR และลูกค้ากว่า 1,000 รายใน 5 ไตรมาส</li><li>ช่องโหว่วิกฤต/รุนแรงถูกค้นพบเกือบ 7 เท่าของค่าเฉลี่ยรายเดือนปีก่อน</li></ul></div>
+<p><strong>1. Platformization</strong></p>
+<p>a. <strong>การทำ platformization ใหม่สุทธิทำสถิติสูงสุดของไตรมาส 1</strong></p>
+<blockquote>“ในไตรมาส 1 platformization ใหม่สุทธิทำสถิติสูงสุดที่ราว 170 ราย ซึ่งมากกว่าไตรมาส 1 สองปีที่ผ่านมารวมกันเสียอีก”</blockquote>
+<p>ปัจจุบันลูกค้าที่ทำ platformization คิดเป็นสองในสามของ NGS ARR โดยมีอัตราการรักษาลูกค้า (net retention) สูงกว่า 120%</p>
+<p>b. <strong>ลูกค้ารายใหญ่รายหนึ่งซื้อ virtual patching และ identity security ในดีลเดียวกัน</strong></p>
+<blockquote>“ในไตรมาส 1 เราปิดดีลมูลค่า $83 ล้านดอลลาร์กับสถาบันการเงินระดับโลกแห่งหนึ่ง”</blockquote>
+<p>ลูกค้ารายนี้รวมความปลอดภัยเครือข่ายมาไว้กับ Palo Alto และนำ Frontier virtual patching ไปใช้ พร้อมขยายการซื้อด้าน identity security ด้วย โดย “ลงนามในดีลที่ใหญ่ที่สุดเท่าที่เคยมีมาในประวัติศาสตร์ของ CyberArk”</p>
+<p><strong>2. ไฟร์วอลล์, SASE และ XSIAM</strong></p>
+<p>a. ฝ่ายบริหารคาดว่าความต้องการไฟร์วอลล์ฮาร์ดแวร์จะยังแข็งแกร่งต่อไปอย่างน้อยอีก 12 เดือน โดยยกเหตุผลว่า “ผู้คนเร่งซื้อเพราะราคากำลังขึ้นจากราคาชิ้นส่วน” และบอกว่าบริษัท “ได้ประโยชน์จากวงจรการสร้างโครงสร้างพื้นฐานของ neocloud” ในเรื่องการรวมระบบ ฝ่ายบริหารเสริมว่า “ผู้คนอยากเริ่มรื้อโครงสร้างพื้นฐานเก่าบางส่วนออกแล้วเปลี่ยนใหม่”</p>
+<p>b. <strong>SASE เพิ่ม ARR ใหม่สุทธิกว่า $100 ล้านดอลลาร์</strong></p>
+<blockquote>“เริ่มที่ SASE ARR โต 30% เมื่อเทียบกับปีก่อน … ความต้องการแข็งแกร่งเป็นพิเศษใน SD-WAN และ secure browser”</blockquote>
+<p>c. <strong>XSIAM ARR แตะราว $800 ล้านดอลลาร์</strong> “XSIAM ARR โตกว่า 65% เมื่อเทียบกับปีก่อน สู่ราว $800 ล้านดอลลาร์” เมื่อลูกค้าให้ความสำคัญกับการปรับปรุงศูนย์ปฏิบัติการความปลอดภัย (SOC) ให้ทันสมัยเพื่อรับมือภัยคุกคามที่ขับเคลื่อนด้วย AI ปัจจุบัน XSIAM ประมวลผลข้อมูลเทเลเมทรีกว่า 20 เพตะไบต์ต่อวัน โดย “ใช้ AI ลดเวลาตอบสนองจากหลายวันเหลือไม่ถึง 10 นาที”</p>
+<p><strong>3. ผลิตภัณฑ์ AI ใหม่</strong></p>
+<p>a. <strong>Prisma AIRS ขับเคลื่อนการเติบโตของซอฟต์แวร์ไฟร์วอลล์</strong></p>
+<blockquote>“ARR ของซอฟต์แวร์ไฟร์วอลล์เร่งขึ้นเป็นไตรมาสที่สามติดต่อกัน และโต 34% เมื่อเทียบกับปีก่อน ซึ่งส่วนใหญ่มาจาก Prisma AIRS”</blockquote>
+<p>ภายในห้าไตรมาสหลังเปิดตัว Prisma AIRS มี ARR เกือบ $170 ล้านดอลลาร์ และมีลูกค้ามากกว่า 1,000 ราย</p>
+<p>b. <strong>Prisma AIRS รองรับสิทธิ์ของเอเจนต์แล้ว</strong> Agentic IdP ของ Idira เปิดให้ใช้งานทั่วไปในไตรมาส 1 ฝ่ายบริหารอธิบายว่า “ผสานตรงเข้ากับ AI gateway ของ Prisma AIRS ทำให้บังคับใช้นโยบายกับสิทธิ์ของเอเจนต์ได้แบบเรียลไทม์”</p>
+<p>c. <strong>การใช้งาน Prisma AIRS เติบโตตามการบริโภคโทเคนขององค์กร</strong></p>
+<blockquote>“ยิ่งองค์กรใช้โทเคนมากเท่าไร ก็ยิ่งต้องมีโทเคนสำหรับการตรวจสอบมากขึ้นเท่านั้น”</blockquote>
+<p>ฝ่ายบริหารกล่าวว่า ในระยะยาว ค่าใช้จ่ายของ Prisma AIRS อาจสูงถึง 2%–5% ของค่าใช้จ่ายด้านโทเคนของลูกค้า</p>
+<p>d. <strong>Palo Alto เปิดตัว Chronosphere ใหม่ในชื่อ Cortex XCOR</strong> “ARR เพิ่มขึ้นราวสี่เท่าเมื่อเทียบกับปีก่อน” ดังที่ฝ่ายบริหารเคยระบุไว้เมื่อไตรมาสที่แล้ว ตัวเลขนี้รวม “ARR ใหม่สุทธิระดับเก้าหลัก” จากลูกค้ารายใหญ่ที่เป็นแล็บชั้นแนวหน้า (frontier lab) ซึ่งย้ายมาใช้ Chronosphere จากผู้ให้บริการรายเดิม</p>
+<p><strong>4. ภัยคุกคามด้านความปลอดภัยและงบประมาณของลูกค้า</strong></p>
+<p>a. <strong>การค้นพบช่องโหว่เร็วกว่าที่ลูกค้าจะแพตช์ได้ทัน</strong> “เรากำลังเห็นช่องโหว่ระดับวิกฤตและรุนแรงถูกค้นพบเกือบเจ็ดเท่าของค่าเฉลี่ยรายเดือนเมื่อปีที่แล้ว” ฝ่ายบริหารกล่าวว่า “ทีม IT ไม่สามารถแพตช์ช่องโหว่เหล่านี้ได้เร็วพอโดยไม่กระทบสภาพแวดล้อมการผลิตของตน”</p>
+<p>b. <strong>ลูกค้าหาเงินทุนสำหรับการทดสอบช่องโหว่เร่งด่วนได้</strong> “ผมคิดว่างบประมาณ Frontier AI Defense เพิ่งออกมาจากเงินฉุกเฉิน” ลูกค้ามองว่าการทดสอบเหล่านี้เร่งด่วน “ผมไม่รู้ว่าพวกเขาไปหาเงินมาจากไหน แต่พวกเขาหาเงินมาได้จริง ๆ เพื่อให้แน่ใจว่าตรวจสอบช่องโหว่ได้” ส่วนแนวโน้มงบประมาณระยะยาว ฝ่ายบริหารคาดว่าจะมีการรวมผู้ให้บริการต่อไป และกล่าวว่า “คุณจะเห็นงบประมาณด้านไซเบอร์สูงขึ้น ผมมั่นใจ ในอีกสองปีข้างหน้า”</p>
+<p><strong>5. ผู้ให้บริการด้านความปลอดภัยและผู้ให้บริการโมเดล AI</strong></p>
+<p>a. <strong>ลูกค้ากำลังใช้โมเดลชั้นแนวหน้าทดสอบระบบของตนเอง</strong> ฝ่ายบริหารคาดว่าความต้องการการทดสอบอย่างต่อเนื่องจะคงอยู่ 12–18 เดือน และเมื่อเวลาผ่านไป คาดว่า frontier AI defense แบบต่อเนื่องจะกลายเป็น “ความสามารถที่ทุกบริษัทจะได้รับส่งมอบจากผู้ให้บริการแพลตฟอร์มของตน ไม่ว่าจะผ่านแพลตฟอร์ม XSIAM ของเรา หรือผ่านแพลตฟอร์มความปลอดภัยรอบนอก (perimeter) ของเรา”</p>
+<p>b. Palo Alto วางแผนใช้ความเชี่ยวชาญของ Applied Compute ในการปรับโมเดล open-weight ทั้งเพื่อพัฒนาผลิตภัณฑ์ด้านความปลอดภัยของตนเอง และเพื่อช่วยลูกค้าองค์กรฝึกและรันโมเดลของตนเอง</p>
+<blockquote>“ประการแรก เราจะฝังโมเดล AI เข้าไปในทุกความสามารถด้านความปลอดภัยของเรา และกำลังอยู่ระหว่างฝึกกรณีใช้งานเฉพาะทางมากกว่า 35 รายการ … ประการที่สอง เราจะช่วยฝึกและให้บริการระบบ open-weight แบบอธิปไตยที่ปลอดภัยแก่องค์กร”</blockquote>
+<p>c. <strong>Palo Alto ต้องการฝึกโมเดลผู้กำกับดูแล (supervisory model) ควบคู่ไปกับโมเดลธุรกิจของลูกค้า</strong> ฝ่ายบริหารกล่าวว่า การประเมินแอปพลิเคชันโดยไม่รู้ว่ามันถูกฝึกให้ทำงานอย่างไรนั้นเป็นเรื่องยาก</p>
+<blockquote>“ลองนึกภาพว่าคุณฝึกแอปพลิเคชันของคุณได้ และให้ทีมเดียวกันนั้นฝึกอะไรบางอย่างที่คอยกำกับดูแลแอปพลิเคชันของคุณ ผมคิดว่านั่นคืออนาคตของความปลอดภัยด้าน AI”</blockquote>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ฝ่ายบริหารเห็นความต้องการทั้งฮาร์ดแวร์ไฟร์วอลล์ SASE XSIAM และผลิตภัณฑ์ AI ใหม่แข็งแกร่งพร้อมกัน</p><ul class="rn-sum-list"><li>ความต้องการไฟร์วอลล์ฮาร์ดแวร์คาดว่าแข็งแกร่งอย่างน้อยอีก 12 เดือน</li><li>การทดสอบช่องโหว่ต่อเนื่องคาดว่าอยู่ 12–18 เดือน</li><li>Prisma AIRS อาจเป็น 2%–5% ของค่าใช้จ่ายโทเคนของลูกค้าในระยะยาว</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">~170</div><div class="rn-stat-c">platformization ใหม่สุทธิใน Q1 (สถิติสูงสุด)</div></div><div class="rn-stat"><div class="rn-stat-v">$800 ล้านดอลลาร์</div><div class="rn-stat-c">XSIAM ARR โตกว่า 65%</div></div><div class="rn-stat"><div class="rn-stat-v">$170 ล้านดอลลาร์</div><div class="rn-stat-c">Prisma AIRS ARR ภายใน 5 ไตรมาส</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span><span class="rn-th">III. ทำไม Palo Alto จึงซื้อ Applied Compute</span><span class="rn-en">III. Why Palo Alto Is Acquiring Applied Compute</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ซื้อด้วยหุ้นมูลค่า $4.5 พันล้านดอลลาร์</li><li>เสริมการป้องกันเอเจนต์ AI ขณะรันไทม์ของ Prisma AIRS</li><li>ขายบริการฝึกและโฮสต์โมเดลให้องค์กรที่ต้องการควบคุมข้อมูลเอง</li></ul></div>
+<ol>
+<li><strong>Palo Alto ตกลงซื้อ Applied Compute ด้วยหุ้นมูลค่า $4.5 พันล้านดอลลาร์</strong> — Applied Compute ช่วยองค์กรฝึกและรันโมเดลเฉพาะทางโดยใช้ข้อมูลของตนเอง Palo Alto วางแผนใช้ความสามารถนี้ฝึกโมเดลความปลอดภัยของตนเอง และค่อย ๆ เพิ่มกำลังประมวลผลสำหรับ inference โดยเฉพาะ</li>
+</ol>
+<ol>
+<li><strong>การเข้าซื้อกิจการอาจเสริมการป้องกันขณะรันไทม์ของ Prisma AIRS สำหรับเอเจนต์ AI</strong> — Palo Alto ต้องการฝึกโมเดลความปลอดภัยควบคู่ไปกับโมเดลธุรกิจของลูกค้า เพื่อให้จดจำและบล็อกการกระทำที่อยู่นอกขอบเขตงานที่มอบหมายให้เอเจนต์ได้</li>
+</ol>
+<ol>
+<li><strong>Palo Alto อาจขายบริการฝึกและโฮสต์โมเดลให้กับองค์กรที่ต้องการควบคุมข้อมูลอ่อนไหวไว้เองได้ด้วย</strong> — ฝ่ายบริหารคาดว่า Applied Compute จะสร้าง NGS ARR มากกว่า $1 พันล้านดอลลาร์ภายใน FY2029 ประมาณการรายได้ของเราในปัจจุบันยังไม่รวม Applied Compute</li>
+</ol>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ดีลนี้ให้ Palo Alto ความสามารถฝึกโมเดลความปลอดภัยของตนเองและบริการโมเดลสำหรับองค์กร</p><ul class="rn-sum-list"><li>ประมาณการรายได้ของ FUNDA ยังไม่รวม Applied Compute</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$4.5 พันล้านดอลลาร์</div><div class="rn-stat-c">มูลค่าซื้อ Applied Compute (หุ้น)</div></div><div class="rn-stat"><div class="rn-stat-v">&gt;$1 พันล้านดอลลาร์</div><div class="rn-stat-c">NGS ARR ที่ฝ่ายบริหารคาดภายใน FY2029</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span><span class="rn-th">IV. อัปเดตตัวชี้วัดหลัก</span><span class="rn-en">IV. Key Metrics Update</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ประมาณการรายได้ FY27E $15.04B (+31.0%) และ FY28E $17.58B (+16.9%)</li><li>NGS ARR แบบออร์แกนิก FY27E $9.40B (+30.7%) และ FY28E $11.59B (+23.3%)</li></ul></div>
+<blockquote>🖼 ตาราง (ภาพในต้นฉบับ) — ประมาณการและผลจริงรายไตรมาส/รายปีของ Palo Alto ป้ายในภาพ: Revenue ($B) = รายได้ (พันล้านดอลลาร์) · Revenue YoY Growth = การเติบโตของรายได้เทียบปีก่อน · NGS ARR ($B) = NGS ARR (พันล้านดอลลาร์) · NGS ARR YoY Growth = การเติบโตของ NGS ARR เทียบปีก่อน · Organic NGS ARR ($B) = NGS ARR แบบออร์แกนิก (พันล้านดอลลาร์) · Organic NGS ARR YoY Growth = การเติบโตของ NGS ARR แบบออร์แกนิกเทียบปีก่อน · A = ตัวเลขจริง · E = ประมาณการ</blockquote>
+<p><strong>รายไตรมาส</strong></p>
+<table><thead><tr><th></th><th>FY26 Q3A</th><th>FY26 Q4A</th><th>FY27 Q1A</th><th>FY27 Q2E</th><th>FY27 Q3E</th><th>FY27 Q4E</th></tr></thead><tbody><tr><td>รายได้ ($B)</td><td class="rn-numcell">3.00</td><td class="rn-numcell">3.41</td><td class="rn-numcell">3.45</td><td class="rn-numcell">3.62</td><td class="rn-numcell">3.79</td><td class="rn-numcell">4.19</td></tr><tr><td>การเติบโตของรายได้ YoY</td><td class="rn-numcell">31.1%</td><td class="rn-numcell">34.4%</td><td class="rn-numcell">39.2%</td><td class="rn-numcell">39.5%</td><td class="rn-numcell">26.1%</td><td class="rn-numcell">22.9%</td></tr><tr><td>NGS ARR ($B)</td><td class="rn-numcell">8.13</td><td class="rn-numcell">9.10</td><td class="rn-numcell">9.73</td><td class="rn-numcell">10.32</td><td class="rn-numcell">10.97</td><td class="rn-numcell">12.01</td></tr><tr><td>การเติบโตของ NGS ARR YoY</td><td class="rn-numcell">60.0%</td><td class="rn-numcell">63.0%</td><td class="rn-numcell">66.0%</td><td class="rn-numcell">63.0%</td><td class="rn-numcell">34.9%</td><td class="rn-numcell">32.0%</td></tr><tr><td>NGS ARR แบบออร์แกนิก ($B)</td><td class="rn-numcell">6.50</td><td class="rn-numcell">7.19</td><td class="rn-numcell">7.63</td><td class="rn-numcell">8.07</td><td class="rn-numcell">8.57</td><td class="rn-numcell">9.40</td></tr><tr><td>การเติบโตของ NGS ARR แบบออร์แกนิก YoY</td><td class="rn-numcell">27.7%</td><td class="rn-numcell">28.9%</td><td class="rn-numcell">30.4%</td><td class="rn-numcell">31.6%</td><td class="rn-numcell">31.8%</td><td class="rn-numcell">30.7%</td></tr></tbody></table>
+<p><strong>รายปี</strong></p>
+<table><thead><tr><th></th><th>FY26A</th><th>FY27E</th><th>FY28E</th></tr></thead><tbody><tr><td>รายได้ ($B)</td><td class="rn-numcell">11.48</td><td class="rn-numcell">15.04</td><td class="rn-numcell">17.58</td></tr><tr><td>การเติบโตของรายได้ YoY</td><td class="rn-numcell">24.5%</td><td class="rn-numcell">31.0%</td><td class="rn-numcell">16.9%</td></tr><tr><td>NGS ARR ($B)</td><td class="rn-numcell">9.10</td><td class="rn-numcell">12.01</td><td class="rn-numcell">14.81</td></tr><tr><td>การเติบโตของ NGS ARR YoY</td><td class="rn-numcell">63.0%</td><td class="rn-numcell">32.0%</td><td class="rn-numcell">23.3%</td></tr><tr><td>NGS ARR แบบออร์แกนิก ($B)</td><td class="rn-numcell">7.19</td><td class="rn-numcell">9.40</td><td class="rn-numcell">11.59</td></tr><tr><td>การเติบโตของ NGS ARR แบบออร์แกนิก YoY</td><td class="rn-numcell">28.9%</td><td class="rn-numcell">30.7%</td><td class="rn-numcell">23.3%</td></tr></tbody></table>
+<p><em>ที่มา: ประมาณการของ FUNDA</em></p>
+<hr>
+<h3>⚖️ ข้อความแสดงความเป็นอิสระของนักวิเคราะห์</h3>
+<p>มุมมองที่แสดงในรายงานฉบับนี้สะท้อนความคิดเห็นส่วนตัวและเป็นอิสระของนักวิเคราะห์เกี่ยวกับหลักทรัพย์และผู้ออกหลักทรัพย์ที่กล่าวถึงในที่นี้อย่างถูกต้อง ค่าตอบแทนของนักวิเคราะห์ไม่มีส่วนใดที่เกี่ยวข้อง ไม่ว่าทางตรงหรือทางอ้อม กับคำแนะนำหรือมุมมองเฉพาะที่แสดงในรายงานนี้ ในอดีต ปัจจุบัน หรืออนาคต บริษัทยึดมั่นในขั้นตอนการกำกับดูแลอย่างเข้มงวดเพื่อรับรองความถูกต้องสมบูรณ์ ความปลอดภัย และความชอบด้วยกฎหมายของแหล่งข้อมูลและข้อมูลที่ใช้</p>
+<h3>🏢 เกี่ยวกับ FUNDA</h3>
+<p>Consensus AI Technology Pte. Ltd. (“บริษัท” หรือ “FUNDA”) เป็นบริษัทวิจัยอิสระที่จดทะเบียนในสิงคโปร์ บริษัทไม่มีความเกี่ยวข้องกับตัวแทนซื้อขายหลักทรัพย์ วาณิชธนกิจ หรือบริษัทบริหารสินทรัพย์ใด ๆ และไม่ได้จดทะเบียนเป็นที่ปรึกษาการลงทุนหรือโบรกเกอร์-ดีลเลอร์ในเขตอำนาจรัฐใด บริษัทไม่มีความสัมพันธ์ด้านวาณิชธนกิจหรือการรับประกันการจำหน่ายกับบริษัทที่ครอบคลุมในรายงานนี้ และไม่รับการสนับสนุนหรือเงินทุนจากบริษัทจดทะเบียน</p>
+<h3>🚫 ไม่ใช่คำแนะนำการลงทุน และความเป็นกลางของรายงาน</h3>
+<p>เนื้อหาของรายงานนี้และข้อมูลที่ปรากฏในที่นี้มีไว้เพื่อให้ข้อมูลเท่านั้น และไม่ถือเป็นคำแนะนำการลงทุนหรือเป็นพื้นฐานในการตัดสินใจทางธุรกิจ มุมมองที่แสดงในที่นี้เป็นเพียงความเห็นส่วนตัวของผู้เขียนแต่ละท่าน ณ ช่วงเวลาหนึ่ง และไม่สะท้อนจุดยืนของ FUNDA ในฐานะแพลตฟอร์มที่ดำเนินงานอย่างอิสระ FUNDA รักษาสถานะบุคคลที่สามที่เป็นกลาง และไม่ให้การรับรองใด ๆ ทั้งโดยชัดแจ้งหรือโดยนัยเกี่ยวกับความถูกต้อง ความครบถ้วน หรือความเหมาะสมในการนำมุมมองเหล่านั้นไปใช้</p>
+<p>ไม่ใช่การเสนอขายหรือชักชวน: รายงานนี้ไม่ถือเป็นการเสนอขาย การชักชวน คำแนะนำ หรือคำปรึกษาให้ซื้อ ขาย หรือถือหลักทรัพย์หรือเครื่องมือทางการเงินใด ๆ และไม่ถือเป็นคำปรึกษาด้านกฎหมาย ภาษี หรือการบัญชี</p>
+<p>ข้อมูลจากบุคคลที่สาม: ข้อมูลของบุคคลที่สามทั้งหมดที่อ้างอิงในรายงานนี้มาจากแหล่งสาธารณะหรือแหล่งที่ได้รับอนุญาต บริษัทไม่ให้การรับรองหรือรับประกัน ไม่ว่าโดยชัดแจ้งหรือโดยนัย เกี่ยวกับความถูกต้องหรือความครบถ้วนของข้อมูลดังกล่าว</p>
+<p>ไม่มีส่วนร่วมในการตัดสินใจ: บริษัทไม่มีส่วนร่วม ทั้งทางตรงและทางอ้อม ในกระบวนการตัดสินใจลงทุนของลูกค้าหรือผู้อ่าน ผู้อ่านควรตัดสินใจลงทุนด้วยตนเองโดยอิงจากวัตถุประสงค์การลงทุนและสถานะทางการเงินของตน และควรปรึกษาที่ปรึกษาทางการเงินหรือกฎหมายมืออาชีพก่อนทำธุรกรรมใด ๆ</p>
+<h3>⏱️ ข้อความเกี่ยวกับความเป็นปัจจุบันของข้อมูล</h3>
+<p>เนื่องจากสภาพแวดล้อมของตลาดและแนวโน้มเทคโนโลยีเปลี่ยนแปลงอย่างรวดเร็ว รายงานนี้สะท้อนสภาวะตลาด ณ วันก่อนการเผยแพร่ ข้อมูลที่เกี่ยวข้องอาจล้าสมัยเมื่อเวลาผ่านไป FUNDA ไม่มีหน้าที่ต้องอัปเดตเนื้อหาของรายงานนี้แบบเรียลไทม์</p>
+<h3>🔐 ทรัพย์สินทางปัญญา ความลับ และข้อจำกัดการใช้เชิงพาณิชย์</h3>
+<p>รายงาน ข้อมูล โมเดล และเนื้อหาทั้งหมดที่บริษัทจัดให้ เป็นทรัพย์สินทางปัญญาที่บริษัทถือสิทธิ์แต่เพียงผู้เดียว และได้รับความคุ้มครองตามกฎหมายลิขสิทธิ์และทรัพย์สินทางปัญญา</p>
+<p>ความเป็นเจ้าของสิทธิ์: เว้นแต่จะระบุไว้เป็นอย่างอื่นโดยชัดแจ้งในข้อตกลงเป็นลายลักษณ์อักษร สิทธิในทรัพย์สินทางปัญญาทั้งหมด (รวมถึงลิขสิทธิ์) ที่เกิดจากหรือเกี่ยวข้องกับรายงานนี้ เป็นของบริษัทแต่เพียงผู้เดียว</p>
+<p>การใช้ที่ได้รับอนุญาต: ลูกค้าสถาบันสามารถใช้รายงานนี้ภายในองค์กรได้ภายในขอบเขตที่นโยบายกำกับดูแลภายในของตนอนุญาต อย่างไรก็ตาม ห้ามเปิดเผยหรือแบ่งปันกับบุคคลที่สามใด ๆ โดยเด็ดขาด</p>
+<p>ข้อห้ามการใช้เชิงพาณิชย์: หากไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรอย่างชัดแจ้งจากบริษัทล่วงหน้า บุคคลหรือนิติบุคคลใดไม่อาจทำซ้ำ เผยแพร่ซ้ำ แจกจ่าย ขายต่อ บรรจุใหม่ หรือใช้รายงานนี้หรือส่วนใดส่วนหนึ่งเพื่อวัตถุประสงค์เชิงพาณิชย์หรือแสวงหาผลกำไร</p>
+<p>การดำเนินการทางกฎหมาย: บริษัทขอสงวนสิทธิ์ในการดำเนินการตามกฎหมายและเรียกร้องทุกวิถีทางที่มี ต่อการใช้เชิงพาณิชย์ การเผยแพร่ซ้ำ หรือการละเมิดสิทธิในทรัพย์สินทางปัญญาโดยไม่ได้รับอนุญาต</p>
+<h3>⚠️ ข้อความเกี่ยวกับการคาดการณ์อนาคตและข้อสงวนสิทธิ์</h3>
+<p>รายงานนี้อาจมีข้อความที่มองไปข้างหน้า รวมถึงการพยากรณ์ ประมาณการ และการวิเคราะห์แนวโน้มอุตสาหกรรม ข้อความดังกล่าวอยู่ภายใต้ความเสี่ยงและความไม่แน่นอนที่อาจทำให้ผลที่เกิดขึ้นจริงแตกต่างอย่างมีนัยสำคัญจากที่คาดไว้ บริษัทไม่รับผิดชอบต่อความสูญเสียทางตรง ทางอ้อม หรือที่เป็นผลสืบเนื่อง อันเกิดจากการใช้หรือการอ้างอิงเนื้อหาของรายงานนี้</p>
+<p><strong>ชวนเพื่อนมาร่วมสนุกและรับรางวัล</strong> — ถ้าคุณชอบ FUNDA แชร์ให้เพื่อน ๆ และรับรางวัลเมื่อพวกเขาสมัครสมาชิก (ปุ่ม: ชวนเพื่อน)</p>
+<p>ถูกใจ · แสดงความคิดเห็น · รีสแต็ก</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ตารางประมาณการของ FUNDA ชี้ว่าการเติบโตรายไตรมาสชะลอลงในครึ่งหลังของ FY27</p><ul class="rn-sum-list"><li>รายได้ Q3E โต 26.1% และ Q4E โต 22.9%</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$15.04B</div><div class="rn-stat-c">รายได้ FY27E</div></div><div class="rn-stat"><div class="rn-stat-v">$12.01B</div><div class="rn-stat-c">NGS ARR FY27E</div></div></aside>
+</section>
+<section class="rn-sec" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🚀 การเติบโตเร่งขึ้นทั้งรายได้และ ARR</strong> — รายได้ FY27Q1 โต 39.2% (จาก 34.4%) เหนือขอบบนของไกด์แนนซ์ 34% และ NGS ARR โต 66% (จาก 63%) เหนือไกด์แนนซ์ 63%</li>
+<li><strong>🌱 ตัวเลขออร์แกนิกคือหัวใจของเรื่องนี้</strong> — เมื่อหัก CyberArk และ Chronosphere ออก NGS ARR แบบออร์แกนิกเร่งเป็น 30.4% จาก 28.9% และเรามองว่าปีปฏิทิน 2027 จะโตออร์แกนิกเร็วกว่าปี 2026</li>
+<li><strong>🧩 Platformization ทำสถิติ</strong> — ราว 170 รายสุทธิใน Q1 มากกว่า Q1 สองปีก่อนหน้ารวมกัน ลูกค้ากลุ่มนี้เป็นสองในสามของ NGS ARR และมี net retention เกิน 120% ดีลเดียว $83 ล้านดอลลาร์ ผูกทั้งเครือข่ายและ identity เข้าด้วยกัน</li>
+<li><strong>🔥 ฮาร์ดแวร์ไฟร์วอลล์ยังร้อน</strong> — ฝ่ายบริหารคาดว่าความต้องการแข็งแกร่งอย่างน้อยอีก 12 เดือน จากการเร่งซื้อก่อนราคาชิ้นส่วนขึ้น วงจรสร้าง neocloud และการรื้อระบบเก่า ขณะที่ SASE เพิ่ม ARR สุทธิกว่า $100 ล้านดอลลาร์ และ XSIAM แตะราว $800 ล้านดอลลาร์ (โต 65%+)</li>
+<li><strong>🤖 Prisma AIRS คือสินค้า AI ที่ขึ้นมาเร็ว</strong> — เกือบ $170 ล้านดอลลาร์ ARR ใน 5 ไตรมาส ลูกค้ากว่า 1,000 ราย และผูกกับการบริโภคโทเคนขององค์กร ซึ่งฝ่ายบริหารมองว่าอาจเป็น 2%–5% ของค่าใช้จ่ายโทเคนในระยะยาว</li>
+<li><strong>🛠️ ช่องโหว่เกิดเร็วกว่าแพตช์</strong> — ช่องโหว่ระดับวิกฤต/รุนแรงถูกค้นพบเกือบ 7 เท่าของค่าเฉลี่ยรายเดือนปีก่อน ลูกค้าดึงเงินฉุกเฉินมาทดสอบ และฝ่ายบริหารคาดว่าการทดสอบต่อเนื่องจะอยู่ 12–18 เดือน ก่อนกลายเป็นบริการที่แพลตฟอร์มส่งมอบเป็นมาตรฐาน</li>
+<li><strong>🛡️ ผู้ให้บริการโมเดล AI แย่งตลาดได้จำกัด</strong> — งานค้นหา/ทดสอบช่องโหว่เป็นส่วนเล็กของรายได้ผู้ให้บริการเดิม ส่วน endpoint, คลาวด์ และเครือข่ายยังต้องใช้การติดตั้งและเชื่อมต่อหนัก และองค์กรอยากเข้าถึงโมเดลผ่านผู้ให้บริการที่ตนใช้อยู่เพื่อแยกข้อมูลอ่อนไหว</li>
+<li><strong>💼 ซื้อ Applied Compute ด้วยหุ้น $4.5 พันล้านดอลลาร์</strong> — เพื่อฝึกโมเดลความปลอดภัยเอง เสริมการป้องกันเอเจนต์ AI ขณะรันไทม์ของ Prisma AIRS และขายบริการฝึก/โฮสต์โมเดล ฝ่ายบริหารคาดว่าจะเพิ่ม NGS ARR มากกว่า $1 พันล้านดอลลาร์ภายใน FY2029 โดยประมาณการรายได้ของเรายังไม่รวมดีลนี้</li>
+<li><strong>📉 ระวังตัวเลขหลังไตรมาสนี้</strong> — ไกด์ Q2 อยู่ที่รายได้ 36%–37% และ NGS ARR 61% ต่ำกว่าอัตราของ Q1 และประมาณการของเราทั้งปีชี้ว่าอัตราการเติบโตรายไตรมาสชะลอลงในครึ่งหลังของ FY27</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>FUNDA — [Review|PANW FY27Q1: A Stronger Starting Point for Faster Organic Growth in 2027](2026-11-19_-_ReviewPANW_FY27Q1_A_Stronger_Starting_Point_for_Faster_Organic_Growth_in_2027_-_id2770.pdf) (FundaAI, 2026-11-19, 8 หน้า)</li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+FundaAI<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+
+
+</body></html>
