@@ -1,0 +1,950 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>Microsoft (MSFT): ประเด็นสำคัญจากงาน Ignite และการพบ CFO — ดีมานด์ Azure/Copilot แข็งแรง แต่ลูกค้าคุมงบ AI เข้มขึ้น</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">Institute</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+<div class="rn-lang" id="rn-lang" role="group" aria-label="Language"><div class="rn-sheen" aria-hidden="true"></div><div class="rn-lpill" aria-hidden="true"></div><button class="rn-lopt" type="button" data-lang-opt="th" aria-pressed="true">ไทย</button><button class="rn-lopt" type="button" data-lang-opt="en" aria-pressed="false">EN</button></div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MSFT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MSFT</span>
+<span class="rn-deck">ดีมานด์ทั้ง Azure และ M365/Copilot ยังแรง — สิ่งเดียวที่ปนๆ คือลูกค้าเริ่มนับเงินค่า AI token ทุกบาททุกสตางค์ · Equities · United States · Software</span>
+</div>
+<h1>☁️ Microsoft (MSFT): ประเด็นสำคัญจากงาน Ignite และการพบ CFO</h1>
+<div class="rn-byline"><b>Institute</b><span class="rn-sep">·</span>2026-11-18<span class="rn-sep">·</span><span class="rn-th">อ่าน 23 นาที</span><span class="rn-en">23 min read</span></div>
+</div>
+<p class="rn-notice rn-en">Headings, summaries, figure captions and key numbers are shown in English. Body paragraphs remain in Thai.</p>
+<div class="rn-lede"><p><em>ติดต่อ: Karl Keirstead — karl.keirstead@ubs.com, +1-310-734 2455 · Jack Fyda — jack.fyda@ubs.com, +1-212-713 3707</em></p></div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>☁️ ดีมานด์ยังแรงทั้งสองขา — Azure และ M365/Copilot ส่งสัญญาณแข็งแรงจาก Ignite ไม่มีใครเห็นการชะลองบ AI ปี 2027 UBS คงเรตติ้ง Buy และราคาเป้าหมาย $700 (27x non-GAAP EPS CY28) เทียบราคา US$508.29 — ผลตอบแทนคาดการณ์ 38.5%</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="ข้อมูลหุ้นและตัวชี้วัดสำคัญ" data-en="Stock data and key metrics" data-th-full="ข้อมูลหุ้นและตัวชี้วัดสำคัญ" data-en-full="Stock data and key metrics" title="ข้อมูลหุ้นและตัวชี้วัดสำคัญ">ข้อมูลหุ้นและตัวชี้วัดสำคัญ</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="บทสรุป" data-en="Summary" data-th-full="บทสรุป" data-en-full="Summary" title="บทสรุป">บทสรุป</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="ความเห็นของ Satya และ Keynote" data-en="Satya&#x27;s Comments and Keynote" data-th-full="ความเห็นของ Satya และ Keynote" data-en-full="Satya&#x27;s Comments and Keynote" title="ความเห็นของ Satya และ Keynote">ความเห็นของ Satya และ Keynote</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="Exposure ต่อ OpenAI/Frontier Labs" data-en="Exposure to OpenAI/Frontier Labs" data-th-full="Exposure ต่อ OpenAI/Frontier Labs" data-en-full="Exposure to OpenAI/Frontier Labs" title="Exposure ต่อ OpenAI/Frontier Labs">Exposure ต่อ OpenAI/Frontier Labs</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="การจัดสรร Compute/Capex" data-en="Allocation of Compute/Capex" data-th-full="การจัดสรร Compute/Capex" data-en-full="Allocation of Compute/Capex" title="การจัดสรร Compute/Capex">การจัดสรร Compute/Capex</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="การเพิ่มประสิทธิภาพ Compute" data-en="Compute Efficiency Gains" data-th-full="การเพิ่มประสิทธิภาพ Compute" data-en-full="Compute Efficiency Gains" title="การเพิ่มประสิทธิภาพ Compute">การเพิ่มประสิทธิภาพ Compute</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="แรงดึงของชุด M365 Copilot" data-en="M365 Copilot Suite Traction" data-th-full="แรงดึงของชุด M365 Copilot" data-en-full="M365 Copilot Suite Traction" title="แรงดึงของชุด M365 Copilot">แรงดึงของชุด M365 Copilot</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="การเติบโตและการปรับลดค่าใช้จ่าย AI ของลู…" data-en="Customer AI Spend Growth &amp; Optimization" data-th-full="การเติบโตและการปรับลดค่าใช้จ่าย AI ของลู…" data-en-full="Customer AI Spend Growth &amp; Optimization" title="การเติบโตและการปรับลดค่าใช้จ่าย AI ของลู…">การเติบโตและการปรับลดค่าใช้จ่าย AI ของลู…</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s9" data-sec="s9" aria-controls="rn-p-s9" aria-selected="false" data-th="การแข่งขันใน Knowledge Work" data-en="Competition in Knowledge Work" data-th-full="การแข่งขันใน Knowledge Work" data-en-full="Competition in Knowledge Work" title="การแข่งขันใน Knowledge Work">การแข่งขันใน Knowledge Work</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s10" data-sec="s10" aria-controls="rn-p-s10" aria-selected="false" data-th="เทรนด์การเติบโตของ Azure" data-en="Azure Growth Trends" data-th-full="เทรนด์การเติบโตของ Azure" data-en-full="Azure Growth Trends" title="เทรนด์การเติบโตของ Azure">เทรนด์การเติบโตของ Azure</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s11" data-sec="s11" aria-controls="rn-p-s11" aria-selected="false" data-th="การขยาย Use Case ของ AI" data-en="AI Use Case Expansion" data-th-full="การขยาย Use Case ของ AI" data-en-full="AI Use Case Expansion" title="การขยาย Use Case ของ AI">การขยาย Use Case ของ AI</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s12" data-sec="s12" aria-controls="rn-p-s12" aria-selected="false" data-th="SaaSpocalypse — จริงหรือเกินจริง?" data-en="SaaSpocalypse - Real or Exaggerated?" data-th-full="SaaSpocalypse — จริงหรือเกินจริง?" data-en-full="SaaSpocalypse - Real or Exaggerated?" title="SaaSpocalypse — จริงหรือเกินจริง?">SaaSpocalypse — จริงหรือเกินจริง?</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s13" data-sec="s13" aria-controls="rn-p-s13" aria-selected="false" data-th="ผลตอบแทนคาดการณ์" data-en="Forecast returns" data-th-full="ผลตอบแทนคาดการณ์" data-en-full="Forecast returns" title="ผลตอบแทนคาดการณ์">ผลตอบแทนคาดการณ์</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s14" data-sec="s14" aria-controls="rn-p-s14" aria-selected="false" data-th="ข้อมูลบริษัท" data-en="Company Description" data-th-full="ข้อมูลบริษัท" data-en-full="Company Description" title="ข้อมูลบริษัท">ข้อมูลบริษัท</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s15" data-sec="s15" aria-controls="rn-p-s15" aria-selected="false" data-th="วิธีประเมินมูลค่าและความเสี่ยง" data-en="Valuation Method and Risk Statement" data-th-full="วิธีประเมินมูลค่าและความเสี่ยง" data-en-full="Valuation Method and Risk Statement" title="วิธีประเมินมูลค่าและความเสี่ยง">วิธีประเมินมูลค่าและความเสี่ยง</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s16" data-sec="s16" aria-controls="rn-p-s16" aria-selected="false" data-th="Quantitative Research Review" data-en="Quantitative Research Review" data-th-full="Quantitative Research Review" data-en-full="Quantitative Research Review" title="Quantitative Research Review">Quantitative Research Review</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s17" data-sec="s17" aria-controls="rn-p-s17" aria-selected="false" data-th="Conflict of Interest" data-en="Conflict of Interest" data-th-full="Conflict of Interest" data-en-full="Conflict of Interest" title="Conflict of Interest">Conflict of Interest</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s18" data-sec="s18" aria-controls="rn-p-s18" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways (translator-added)" data-th-full="Key Takeaways" data-en-full="Key Takeaways (translator-added)" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span><span class="rn-th">ข้อมูลหุ้นและตัวชี้วัดสำคัญ</span><span class="rn-en">Stock data and key metrics</span></span></h2>
+
+<table><thead><tr><th>รายการ</th><th>ค่า</th></tr></thead><tbody><tr><td>เรตติ้ง 12 เดือน</td><td><strong>Buy</strong></td></tr><tr><td>ราคาเป้าหมาย 12 เดือน</td><td><strong>US$700.00</strong></td></tr><tr><td>ราคา (18 พ.ย. 2026)</td><td>US$508.29</td></tr><tr><td>RIC / BBG</td><td>MSFT.O / MSFT US</td></tr><tr><td>ช่วงราคา 52 สัปดาห์</td><td>US$555.80-352.83</td></tr><tr><td>มูลค่าตลาด</td><td>US$3,785b</td></tr><tr><td>จำนวนหุ้น</td><td>7,446m (COM)</td></tr><tr><td>Free float</td><td class="rn-numcell">90%</td></tr><tr><td>ปริมาณซื้อขายเฉลี่ยต่อวัน (&#x27;000)</td><td class="rn-numcell">22,906</td></tr><tr><td>มูลค่าซื้อขายเฉลี่ยต่อวัน (m)</td><td>US$11,824.2</td></tr><tr><td>ส่วนของผู้ถือหุ้นสามัญ (06/27E)</td><td>US$594b</td></tr><tr><td>P/BV (06/27E)</td><td class="rn-numcell">6.3x</td></tr><tr><td>Net debt ต่อ EBITDA (06/27E)</td><td>NM</td></tr></tbody></table>
+<p><strong>EPS (UBS, diluted) (USD) — ปีงบ 06/27E</strong></p>
+<table><thead><tr><th>งวด</th><th>UBS</th><th>Consensus</th></tr></thead><tbody><tr><td>Q1</td><td class="rn-numcell">4.92</td><td class="rn-numcell">4.89</td></tr><tr><td>Q2E</td><td class="rn-numcell">5.01</td><td class="rn-numcell">4.87</td></tr><tr><td>Q3E</td><td class="rn-numcell">5.06</td><td class="rn-numcell">4.95</td></tr><tr><td>Q4E</td><td class="rn-numcell">5.30</td><td class="rn-numcell">5.22</td></tr><tr><td>06/27E</td><td class="rn-numcell">20.30</td><td class="rn-numcell">20.05</td></tr><tr><td>06/28E</td><td class="rn-numcell">24.15</td><td class="rn-numcell">23.97</td></tr><tr><td>06/29E</td><td class="rn-numcell">28.27</td><td class="rn-numcell">29.42</td></tr></tbody></table>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span><span class="rn-th">บทสรุป</span><span class="rn-en">Summary</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ดีมานด์ทั้ง Azure และ M365/Copilot แข็งแรงจากการเช็คที่ Ignite</li><li>CFO มั่นใจ ROIC ของ capex ทั่วพอร์ต — ทุกหมวดเหนือ WACC</li><li>exposure ต่อ frontier lab ทำให้ Azure ผันผวนได้มากขึ้น</li><li>ลูกค้าคุมต้นทุน AI token เข้ม แต่ยังหักลบเป็นการใช้จ่าย AI ปี 2027 ที่แข็งแรง</li></ul></div>
+<p>เราส่งทีมสองคนไปงาน <strong>Ignite</strong> งานใหญ่ของ Microsoft ที่ซานฟรานซิสโก ที่นั่นเราจัดประชุมกลุ่มระหว่าง <strong>CFO</strong> กับนักลงทุน จัดเซสชันนักลงทุนกับพาร์ทเนอร์รายใหญ่สามราย แล้วก็เดินคุยกับลูกค้าและพาร์ทเนอร์บนฟลอร์งานด้วย ภาพรวมคือ <strong>สัญญาณดีมานด์ทั้ง Azure และ M365/Copilot แข็งแรง</strong> — ประเด็นเดียวที่ออกมาแบบปนๆ คือเรื่องเล่าจากลูกค้าที่ระวังค่าใช้จ่ายด้าน AI token มากๆ เราให้เรตติ้ง <strong>Buy</strong></p>
+<h3>🎙 ความเห็นของ CFO และ CEO</h3>
+<p>สิ่งที่เราได้จากการพบ CFO เป็นหลักคือ <strong>ความมั่นใจว่า Microsoft จะได้ ROIC สูงจากการใช้ capex ทั่วทั้งพอร์ต</strong> — ตั้งแต่การใช้ compute กับงานของตัวเอง (1P อย่าง Copilot) ซึ่ง ROI สูงสุด ไปจนถึง GPU as-a-service ที่น่าสนใจน้อยที่สุด แต่ก็ยังล็อกผลตอบแทนที่ดี สูงกว่า WACC ของ Microsoft อย่างชัดเจน ไม่มีความลังเลเลยทั้งเรื่องดีมานด์หรือซัพพลาย compute และไม่มีความลังเลเรื่อง ROIC — ในมุมผม นี่เปิดทางให้ capex ปี CY27 เติบโตได้อย่างแข็งแรง (ซึ่งเราสมมติไว้แล้ว) Microsoft บอกชัดว่า <strong>การมี exposure ต่อ frontier lab ที่สูงขึ้น/เติบโตขึ้น (ตอนนี้คือ OpenAI เป็นหลัก) ทำให้การเติบโตของ Azure ผันผวนได้มากขึ้น</strong> ส่วนข้อความจาก CEO เน้นที่โมเดล 1P ของ Microsoft การเพิ่มประสิทธิภาพ compute ให้มากขึ้น การยกระดับชุดผลิตภัณฑ์ security และการจำกัด exposure ด้าน compute ต่อพวก lab</p>
+<h3>🤝 สิ่งที่พาร์ทเนอร์เล่าให้เราฟัง</h3>
+<p>โทนจากพาร์ทเนอร์โดยรวมเป็นบวก ไม่ใช่แค่เรื่องการเติบโตของ Azure แต่ (ที่น่าแปลกใจ) กลับเป็นเรื่อง <strong>การเติบโตของจำนวน seat ของ Copilot</strong> และดีมานด์โซลูชัน cyber-security มากกว่า ซึ่งพาร์ทเนอร์หลายรายบอกว่าพุ่งขึ้นมาในช่วงไม่กี่เดือนหลัง การเช็คของเราไม่ได้ส่งสัญญาณว่าแผนใช้จ่ายด้าน AI ของบริษัทในปี 2027 จะชะลอลงเลย ถึงอย่างนั้น แม้แต่ Microsoft เองก็ยอมรับว่าลูกค้ากังวลว่าต้องบริหารค่าใช้จ่าย AI ให้ดีขึ้นเมื่อ AI ขยายสเกล พาร์ทเนอร์ชี้ว่าลูกค้าโฟกัสชัดมากกับการคุมต้นทุน AI โดยเฉพาะเมื่อโครงสร้างราคา software เปลี่ยนไปเป็นแบบคิดตามการใช้งาน (usage-based) <strong>ส่วนผสมของ &quot;อยากปล่อย AI app/agent มากๆ&quot; กับ &quot;โฟกัสคุมต้นทุนหนักๆ&quot; ยังคงหักลบออกมาเป็นการใช้จ่าย AI ที่คาดว่าจะแข็งแรงในปี 2027</strong></p>
+<h3>💰 Valuation</h3>
+<p>ที่ multiple ปี CY27e ราว <strong>23x GAAP EPS และ 23x non-GAAP EPS</strong> เรายังมองว่าหุ้นราคาสมเหตุสมผล เมื่อดูจากการเร่งตัวของการเติบโตทั้ง Azure และ M365 บวกกับการคุม EPS ได้แข็งแรง ราคาเป้าหมาย <strong>$700 ที่ไม่เปลี่ยนแปลง</strong> อิงจาก non-GAAP EPS ปี CY28 ที่ multiple <strong>27x</strong> — เป็นพรีเมียมเหนือกลุ่ม peer ที่สมควรได้</p>
+<p><strong>Highlights (US$m)</strong></p>
+<table><thead><tr><th>รายการ</th><th>06/24</th><th>06/25</th><th>06/26</th><th>06/27E</th><th>06/28E</th><th>06/29E</th><th>06/30E</th><th>06/31E</th></tr></thead><tbody><tr><td>Revenues</td><td class="rn-numcell">245,122</td><td class="rn-numcell">281,724</td><td class="rn-numcell">331,838</td><td class="rn-numcell">399,087</td><td class="rn-numcell">479,658</td><td class="rn-numcell">568,255</td><td class="rn-numcell">660,378</td><td class="rn-numcell">756,802</td></tr><tr><td>EBIT (UBS)</td><td class="rn-numcell">109,433</td><td class="rn-numcell">128,528</td><td class="rn-numcell">155,236</td><td class="rn-numcell">188,496</td><td class="rn-numcell">223,459</td><td class="rn-numcell">260,538</td><td class="rn-numcell">298,064</td><td class="rn-numcell">336,920</td></tr><tr><td>Net earnings (UBS)</td><td class="rn-numcell">89,782</td><td class="rn-numcell">105,591</td><td class="rn-numcell">128,785</td><td class="rn-numcell">150,900</td><td class="rn-numcell">178,861</td><td class="rn-numcell">208,498</td><td class="rn-numcell">238,492</td><td class="rn-numcell">269,550</td></tr><tr><td>EPS (UBS, diluted) (US$)</td><td class="rn-numcell">12.02</td><td class="rn-numcell">14.14</td><td class="rn-numcell">17.28</td><td class="rn-numcell">20.30</td><td class="rn-numcell">24.15</td><td class="rn-numcell">28.27</td><td class="rn-numcell">32.47</td><td class="rn-numcell">36.84</td></tr><tr><td>DPS (net) (US$)</td><td class="rn-numcell">2.98</td><td class="rn-numcell">3.28</td><td class="rn-numcell">3.61</td><td class="rn-numcell">3.97</td><td class="rn-numcell">4.37</td><td class="rn-numcell">4.80</td><td class="rn-numcell">5.28</td><td class="rn-numcell">5.81</td></tr><tr><td>Net (debt) / cash</td><td class="rn-numcell">23,913</td><td class="rn-numcell">51,414</td><td class="rn-numcell">36,549</td><td class="rn-numcell">28,007</td><td class="rn-numcell">37,362</td><td class="rn-numcell">54,016</td><td class="rn-numcell">80,827</td><td class="rn-numcell">127,909</td></tr></tbody></table>
+<p><strong>Profitability/valuation</strong></p>
+<table><thead><tr><th>รายการ</th><th>06/24</th><th>06/25</th><th>06/26</th><th>06/27E</th><th>06/28E</th><th>06/29E</th><th>06/30E</th><th>06/31E</th></tr></thead><tbody><tr><td>EBIT (UBS) margin %</td><td class="rn-numcell">44.6</td><td class="rn-numcell">45.6</td><td class="rn-numcell">46.8</td><td class="rn-numcell">47.2</td><td class="rn-numcell">46.6</td><td class="rn-numcell">45.8</td><td class="rn-numcell">45.1</td><td class="rn-numcell">44.5</td></tr><tr><td>ROIC (EBIT) %</td><td class="rn-numcell">60.4</td><td class="rn-numcell">50.7</td><td class="rn-numcell">48.0</td><td class="rn-numcell">42.0</td><td class="rn-numcell">36.0</td><td class="rn-numcell">31.8</td><td class="rn-numcell">28.7</td><td class="rn-numcell">26.3</td></tr><tr><td>EV/EBITDA (UBS core) x</td><td class="rn-numcell">20.8</td><td class="rn-numcell">18.9</td><td class="rn-numcell">16.7</td><td class="rn-numcell">15.3</td><td class="rn-numcell">12.2</td><td class="rn-numcell">10.0</td><td class="rn-numcell">8.4</td><td class="rn-numcell">7.1</td></tr><tr><td>P/E (UBS, diluted) x</td><td class="rn-numcell">31.5</td><td class="rn-numcell">30.0</td><td class="rn-numcell">26.6</td><td class="rn-numcell">25.0</td><td class="rn-numcell">21.0</td><td class="rn-numcell">18.0</td><td class="rn-numcell">15.7</td><td class="rn-numcell">13.8</td></tr><tr><td>Equity FCF (UBS) yield %</td><td class="rn-numcell">2.6</td><td class="rn-numcell">2.3</td><td class="rn-numcell">2.0</td><td class="rn-numcell">0.9</td><td class="rn-numcell">0.8</td><td class="rn-numcell">0.9</td><td class="rn-numcell">1.3</td><td class="rn-numcell">1.9</td></tr><tr><td>Dividend yield (net) %</td><td class="rn-numcell">0.8</td><td class="rn-numcell">0.8</td><td class="rn-numcell">0.8</td><td class="rn-numcell">0.8</td><td class="rn-numcell">0.9</td><td class="rn-numcell">0.9</td><td class="rn-numcell">1.0</td><td class="rn-numcell">1.1</td></tr></tbody></table>
+<p><em>ที่มา: งบการเงินบริษัท, LSEG Eikon, ประมาณการของ UBS ตัวเลขที่มีเครื่องหมาย (UBS) ผ่านการปรับโดยนักวิเคราะห์แล้ว Valuation อิงราคาหุ้นเฉลี่ยของแต่ละปี, (E): อิงราคาหุ้น US$ 508.29 ณ 18-Nov-2026 18:36:35 EST</em></p>
+<p><em>รายงานนี้จัดทำโดย UBS Securities LLC ส่วน ANALYST CERTIFICATION AND REQUIRED DISCLOSURES รวมถึงข้อมูล Quantitative Research Review ที่ UBS เผยแพร่ เริ่มที่หน้า 9 ของต้นฉบับ</em></p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">คงเรตติ้ง Buy — ราคายังสมเหตุสมผลเมื่อ Azure และ M365 เร่งตัว</p><ul class="rn-sum-list"><li>ประเด็นเดียวที่ปนๆ คือลูกค้าระวังค่า AI token</li><li>ไม่มีสัญญาณชะลองบ AI ขององค์กรในปี 2027</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$700</div><div class="rn-stat-c">ราคาเป้าหมาย 12 เดือน (ไม่เปลี่ยน)</div></div><div class="rn-stat"><div class="rn-stat-v">27x</div><div class="rn-stat-c">non-GAAP EPS ปี CY28 ที่ใช้ตั้งเป้า</div></div><div class="rn-stat"><div class="rn-stat-v">23x</div><div class="rn-stat-c">multiple GAAP/non-GAAP EPS ปี CY27e</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span><span class="rn-th">ความเห็นของ Satya และ Keynote</span><span class="rn-en">Satya&#x27;s Comments and Keynote</span></span></h2>
+
+<p>CEO ของ Microsoft จัดเซสชันถาม-ตอบกับนักลงทุนและนักวิเคราะห์เมื่อวันอังคาร นอกเหนือจาก keynote ของ Ignite ในเซสชันนักลงทุน CEO พูดถึงธีมที่คุ้นเคย — ต้องเป็น <strong>multi-model</strong>, ต้องจัดสรร compute ให้ลูกค้าหลายประเภทขึ้น ไม่ผูกติดกับ frontier lab สองรายมากเกินไป และต้องเพิ่มประสิทธิภาพ compute เพื่อจำกัด capex ส่วนประกาศผลิตภัณฑ์ใหม่ใน keynote ในมุมผม <strong>ไม่มีอะไรที่ใหม่พอจะขยับราคาหุ้น</strong> — โฟกัสอยู่ที่ชุด AI ของ Microsoft คือฟีเจอร์ Copilot รวมถึงเวอร์ชันเฉพาะฟังก์ชันใหม่ๆ เช่น Copilot for Sales และ Copilot for Finance (สำคัญเพราะพวก lab เองก็กำลังออกเครื่องมือ AI productivity เฉพาะงาน) เมื่อไม่มีประกาศผลิตภัณฑ์ใหญ่ สิ่งที่เราตั้งใจฟังคือ <strong>การเปลี่ยนจุดเน้นของ CEO</strong> และในมุมผมมีอยู่สองเรื่อง:</p>
+<ul>
+<li><strong>🧠 โมเดล 1P:</strong> โฟกัสมากขึ้นที่โมเดล <strong>MAI</strong> ของ Microsoft เองในฐานะทางเลือกที่ประหยัด token กว่าโมเดล frontier lab ที่แพงกว่า สำหรับ cyber-security, coding และ use case อื่นๆ Microsoft บอกว่าเป้าหมายคืออยากให้ทุกคนใช้โหมด <strong>Auto</strong> model selection ซึ่งเลือกโมเดลที่ price-performance ดีที่สุด แน่นอนว่า Microsoft อยากให้ลูกค้าเลือกโมเดล MAI และ OpenAI เพราะมาร์จิ้นดีกว่า แต่ก็ไม่ได้กันลูกค้าออกจากการใช้ frontier model รายอื่น ในด้านโมเดล 1P Microsoft ดูนำหน้าคู่แข่งอย่าง <strong>AWS</strong> อยู่ค่อนข้างมาก</li>
+<li><strong>🛡 Security/Trust:</strong> ผู้บริหาร Microsoft ทั้งชุดหันมาเน้นเรื่อง trust และ security มากขึ้น — ก็เป็นไปตามคาด เพราะ a) ลูกค้าโฟกัสที่ AI agent ด้าน security และการป้องกันการโจมตีที่ขับเคลื่อนด้วยโมเดล และ b) Microsoft มีรายได้ security ก้อนใหญ่มาก (<strong>$30+ billion</strong>) Microsoft ส่งสัญญาณว่าจะเปิดเผยขนาดธุรกิจ security แบบอัปเดต และบอกว่ากำลังเดินเกมด้าน AI security อย่างระมัดระวัง เพราะลูกค้าไม่ทนกับผลิตภัณฑ์รุ่นแรกที่อ่อน ผลิตภัณฑ์ security ใหม่ <strong>Perception</strong> เข้าสู่ GA และยังมีโอกาส upsell ลูกค้าไปยัง SKU <strong>E7</strong> ที่หนักด้าน security</li>
+</ul>
+<p>ส่วนประเด็นที่ไม่ชัดเจนนักจาก keynote และความเห็นของ CEO ผมขอยกสองเรื่อง: a) Microsoft เปิด GA <strong>HorizonDB</strong> ฐานข้อมูลใหม่ที่สเกลได้บนพื้นฐาน Postgres (เราได้ยิน feedback ช่วงแรกที่แข็งแรงจากลูกค้ารายใหญ่บางราย) และ b) Microsoft เปิดตัว <strong>Decision 1.1</strong> โมเดลขนาดเล็กที่เฉพาะทางมาก ฝังอยู่ใน software ทำการตัดสินใจแบบมีโครงสร้างได้เร็วด้วยต้นทุนต่ำกว่าการเรียก LLM มาก ตัวนี้แข่งตรงกับโมเดล decision ยอดนิยมอย่าง <strong>Jev</strong> และเราประทับใจที่ Microsoft ขยับเร็วขนาดนี้ในการออกผลิตภัณฑ์คู่แข่ง</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span><span class="rn-th">Exposure ต่อ OpenAI/Frontier Labs</span><span class="rn-en">Exposure to OpenAI/Frontier Labs</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>OpenAI ใช้จ่ายบน Azure ใน 1Q/Sept เท่ากับ 31% ของรายได้ Azure</li><li>exposure รวมต่อ lab สูงกว่า 31% มาก ผ่านลูกค้าองค์กรที่ซื้อผ่าน Foundry</li><li>CEO ไม่อยากสร้างเพื่อ lab แค่สองราย</li><li>CFO ยอมรับความผันผวนของ Azure ที่เพิ่มขึ้น</li></ul></div>
+<p>ในไตรมาส 1Q/Sept Microsoft บอกชัดว่าไตรมาส Sept ที่แข็งแรงของ OpenAI (คือแรงดึงของโมเดล <strong>Astra</strong>) แปลงเป็น upside ของ Azure ได้สองทาง ทางแรกผ่านการเติบโตแรงของ <strong>Azure Foundry</strong> เพราะบริษัทจำนวนมากซื้อโมเดล AI (ผ่าน API call) และผลิตภัณฑ์ผ่านพาร์ทเนอร์ hyperscaler ของตัวเอง นี่คือเหตุผลสำคัญที่เราอยู่ในช่วงหลายไตรมาสของการเร่งตัวแบบพิเศษของการเติบโตรายได้ hyperscaler และยอดเงินที่เพิ่มขึ้นต่อไตรมาส ทางที่สองคือผ่านส่วนแบ่งรายได้ OpenAI ที่จ่ายให้ Microsoft ทั้งสองกรณี อย่างที่ Microsoft พูด <em>&quot;เมื่อ OpenAI แข็งแรง มันดีต่อ Azure&quot;</em> สะท้อนในการเปิดเผยว่า <strong>OpenAI ใช้จ่าย $10 billion บน Azure ในไตรมาส 1Q/Sept เท่ากับ 31% ของรายได้ Azure</strong> แต่ exposure ของ Azure ต่อพวก lab สูงกว่านี้ เพราะ a) นี่เป็นแค่ OpenAI ส่วน Microsoft ก็มี exposure ต่อ lab อื่นด้วย และ b) ตัวเลข $10 billion นี้ไม่รวมกิจกรรมของบริษัทที่ทำสัญญากับ Azure (ผ่าน Foundry) เพื่อซื้อผลิตภัณฑ์ OpenAI เพราะในกรณีนี้ความสัมพันธ์ทางการค้าอยู่กับบริษัท ไม่ใช่กับ OpenAI <strong>exposure รวมของ Azure ต่อพวก lab สูงกว่า 31% มาก</strong> เราถามเรื่องนี้ทั้ง CEO และ CFO:</p>
+<ul>
+<li><strong>CEO:</strong> เรากดถาม CEO เรื่องความเห็นล่าสุดของเขาว่า <em>&quot;เราไม่อยากสร้างเพื่อ lab แค่สองราย&quot;</em> นี่คือการพูดถึงความต้องการกระจาย mix อย่างชัดเจน ด้วยหลายเหตุผล ทั้งเพื่อสร้างธุรกิจที่ยั่งยืน และเพื่อรับมือกับการที่พวก lab กำลัง integrate ลงมาในชั้น compute เอง</li>
+<li><strong>CFO:</strong> คำถามที่เราถาม CFO เน้นเรื่องการจัดการความผันผวน เพราะตอนนี้ผล Azure ในไตรมาสใดก็ตามอาจได้รับผลกระทบอย่างมีนัยจาก upside-downside ของผลประกอบการรายได้ของลูกค้า frontier lab CFO ไม่ได้แย้ง โดยบอกว่าการคาดการณ์ระดับราคาของ lab และจังหวะการเปิดตัวโมเดลใหม่ เพิ่มความผันผวนที่อาจเกิดกับการเติบโตของ Azure โดยเฉพาะเมื่อ Foundry มีสัดส่วนใน mix มากขึ้น ในมุมผม นี่น่าจะหมายถึง <strong>guidance Azure ที่ระมัดระวังขึ้นเล็กน้อย</strong> และเมื่อ/ถ้า Azure พลาดหรือชนะเป้า สัญชาตญาณแรกคือไปหาคำตอบที่ exposure และผลประกอบการของ lab</li>
+</ul>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">guidance Azure น่าจะระมัดระวังขึ้นเล็กน้อย</p><ul class="rn-sum-list"><li>เมื่อ Azure พลาดหรือชนะเป้า ให้มองหาคำตอบที่ exposure ต่อ lab ก่อน</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$10 billion</div><div class="rn-stat-c">OpenAI ใช้จ่ายบน Azure ใน 1Q/Sept</div></div><div class="rn-stat"><div class="rn-stat-v">31%</div><div class="rn-stat-c">สัดส่วนต่อรายได้ Azure</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span><span class="rn-th">การจัดสรร Compute/Capex</span><span class="rn-en">Allocation of Compute/Capex</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ลำดับ ROIC: 1P (M365/GitHub Copilot) &gt; Foundry &gt; GPU as a service</li><li>การทำลาย exclusivity กับ OpenAI เปิดทางจัดสรร compute ให้บริการ ROIC สูงกว่า</li><li>GPU-as-a-service ยังล็อก ROI เหนือ WACC</li></ul></div>
+<p>Microsoft เพิ่มรายละเอียดจากคำอธิบายก่อนหน้าเรื่องวิธีจัดสรรกำลัง compute โดยเรียงลำดับตาม ROIC เป็น <strong>1.</strong> ผลิตภัณฑ์ 1P อย่าง M365 Copilot, GitHub Copilot และอื่นๆ (รายได้ต่อวัตต์สูงมาก) <strong>2.</strong> Foundry — GPU คู่กับ IP ของโมเดล และ <strong>3.</strong> GPU as a service โดยสองหมวดหลังให้ผลตอบแทน &quot;ดี&quot; และสร้างรายได้ผ่าน Azure ส่วนหมวดแรกให้ผลตอบแทนแรงที่สุดและรายงานผ่าน M365 Microsoft ยอมทำลาย exclusivity กับ OpenAI เมื่อต้นปีนี้ ส่วนหนึ่งเพราะจะได้มีอิสระจัดสรร compute ให้บริการที่ ROIC สูงกว่ามากขึ้น ถ้า/เมื่อกำลังการผลิตใหม่เปิดใช้เร็วกว่าคาด หรือได้จากการเพิ่มประสิทธิภาพ Microsoft ก็จัดสรรไปยัง GPU-as-a-service หลักได้มากขึ้น ซึ่ง Microsoft ยังมั่นใจสูงว่าจะได้ผลตอบแทนดี (โดยพื้นฐานคือ ROI ที่ล็อกไว้แล้ว ผลตอบแทนสูงกว่า WACC ของ Microsoft อย่างชัดเจน) <strong>ความยืดหยุ่นในการจัดสรร compute ให้บริการที่มีโปรไฟล์ ROI ต่างกันเป็นข้อได้เปรียบจริงๆ และเป็นสิ่งที่ทำให้ Microsoft ต่างจาก neo-cloud แบบ &quot;pure&quot;</strong></p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ความยืดหยุ่นในการจัดสรร compute ทำให้ Microsoft ต่างจาก neo-cloud แบบ pure</p></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span><span class="rn-th">การเพิ่มประสิทธิภาพ Compute</span><span class="rn-en">Compute Efficiency Gains</span></span></h2>
+
+<p>กับนักลงทุน CEO บอกว่า <em>&quot;compute efficiencies are the entirety of the game&quot;</em> — ประสิทธิภาพ compute คือเกมทั้งหมด CFO ขยายความว่าการปรับปรุงประสิทธิภาพมีสองหมวด หมวดแรกอยู่ที่ compute และ storage หลัก — เมื่อราคาฮาร์ดแวร์หน่วยความจำไต่ขึ้น Microsoft ทุ่มหนักขึ้นในการหาทางลดต้นทุนเพื่อชดเชย งานนี้กลายเป็นเรื่องวิกฤติมากขึ้นเรื่อยๆ ความพยายามนี้ออกผลในไตรมาส 1Q/Sept โดยได้มากกว่าคาด ส่งผลเป็น <strong>upside ของ Azure ในงวดที่ไม่คาดคิด (ไม่มีเงินลงทุนผูกอยู่)</strong> และกำไรในอนาคตจากสมมติฐานรายได้ต่อ compute MW หมวดที่สองคือ AI infra ซึ่งไม่ใช่การบีบประสิทธิภาพหลังเปิดใช้แล้ว แต่เป็นการ ramp ให้เร็วขึ้น ดึงรายได้ Azure มาก่อนได้เป็นสัปดาห์หรือเป็นเดือน ยากที่จะคาดว่าเหลือให้ปรับปรุงอีกเท่าไร แต่โดยรวม <strong>นี่กำลังเพิ่มรายได้ต่อ MW ของ Microsoft</strong></p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span><span class="rn-th">แรงดึงของชุด M365 Copilot</span><span class="rn-en">M365 Copilot Suite Traction</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>GitHub Copilot ทำผลงานดีกว่าคาดหลังเปลี่ยนเป็น usage-based</li><li>Microsoft ดุดันกับทีมขายเรื่อง seat Copilot</li><li>Agent 365 ยังเทอะทะ อาจต้องรอ 6-18 เดือน</li><li>security คือสายธุรกิจที่โตเร็วที่สุดของพาร์ทเนอร์</li></ul></div>
+<p>แม้ CFO ในการประชุมของเราจะพูดตรงๆ ถึงผลงานที่ดีกว่าคาดของ <strong>GitHub Copilot</strong> หลังเปลี่ยนเป็นราคาแบบ usage-based ในเดือนมิถุนายน แต่เราไม่ได้ยินเรื่อง M365 Copilot มากนัก ถึงอย่างนั้น เราก็ยกเรื่องนี้ขึ้นคุยกับพาร์ทเนอร์แน่นอน และขอนำ feedback ดิบมาแชร์ด้านล่าง โดยรวม จากการเช็คเหล่านี้ชัดเจนว่า <strong>Microsoft ดุดันมากกับทีมขายและพาร์ทเนอร์เรื่องการขาย seat ของ Copilot และการผลักดันการใช้งาน</strong> และในมุมผม โทนเรื่อง Copilot ดีกว่าที่คาด</p>
+<ul>
+<li><strong>Partner 1:</strong> เทรนด์ดีมานด์เชิงบวกที่ใหญ่ที่สุดใน practice Microsoft ของเราอยู่ที่ Copilot, E7 และ security ที่มากขึ้นเรื่อยๆ ถ้าคุณอยากขายเข้าองค์กร คุณต้องมีการคุยเรื่อง security เรามี 9 สายธุรกิจ และ security โตเร็วที่สุดแบบทิ้งห่าง โดยโฟกัสเรื่อง AI security เพิ่มขึ้นชัดเจนเมื่อ 3-4 เดือนก่อน <strong>การเติบโตของ seat Copilot ตอนนี้เป็นสามหลักในฐานลูกค้าของเรา</strong> Microsoft มีเป้าที่ทะเยอทะยานมาก คุณเริ่มเห็นการใช้งานเพิ่มขึ้นมากในระดับองค์กร ความเร็วมันมหาศาล แม้แต่ตั้งแต่ต้นปีก็เปลี่ยนไปแล้ว E7 เป็นโฟกัสใหญ่ แน่นอนว่าสำหรับพาร์ทเนอร์มันมีแรงจูงใจใหญ่ แต่ยังเร็วเกินไปที่เราจะมีข้อมูลการใช้งานเต็มชุด</li>
+<li><strong>Partner 2:</strong> เราเห็นการเติบโตบ้างในการได้ seat Copilot Microsoft ขาย seat M365 Copilot ได้ค่อนข้างดี Copilot Cowork ยังอยู่ในช่วงเริ่มต้น</li>
+<li><strong>Partner 3:</strong> Copilot ตอนนี้กำลังโต แต่ขึ้นกับความพร้อมของบริษัท</li>
+<li><strong>Partner 4:</strong> feedback ที่ผมได้ยินเรื่อง <strong>Agent 365</strong> คือยังทำทุกอย่างที่ Microsoft โชว์บนเวทีไม่ได้ มันสร้างบน &#x27;Microsoft แบบเก่า&#x27; และเทอะทะ ทำได้ดีในการแสดงข้อมูล Copilot แต่ในแง่การเชื่อมต่อกับ agent อื่นที่รันใน DevOps หรือ cloud ของคุณ หรือการเห็นจริงๆ ว่าข้อมูลอะไรไหลผ่าน agent ของคุณ มันยังไม่ถึง พูดตรงๆ ผมไม่คิดว่าหลายบริษัทจะถึงจุดที่ต้องการโซลูชัน governance แบบครบวงจรแล้ว บางรายปล่อยเต็มรูปแบบแล้วและต้องการจริง แต่รายอื่นยังอยู่ในคณะกรรมการกำกับ AI อาจต้องรออีก 6-18 เดือนถึงจะเห็นการใช้งานที่กว้างขึ้น</li>
+<li><strong>Partner 5:</strong> เราโฟกัสที่ data security และ governance ผมคิดว่าองค์กรตระหนักเรื่อง data governance มากขึ้นแล้วเมื่อมี AI ผมมองว่ามันเป็นปัญหาเรื่องคนมากกว่า — การติดตามความเป็นเจ้าของและการจัดการข้อมูล — มากกว่าเป็นปัญหาเทคโนโลยี Microsoft เป็น practice ที่ใหญ่ที่สุดของเรา แต่เราเห็นความสนใจจากลูกค้าใน <strong>CrowdStrike</strong> เยอะมาก แต่เราทำกับ <strong>Purview</strong> มากที่สุดสำหรับ data classification และ runtime data protection Purview กลายเป็นคำร่มที่ถ้ามองตั้งแต่ต้นจนจบ ผมมั่นใจว่ามันดูเทอะทะได้ แต่ก็เป็นโซลูชันที่ได้ผล ส่วน Agent 365 ผมคิดว่ายังเร็วมาก ยังไม่ mature</li>
+<li><strong>Customer 2:</strong> AI ด้าน productivity คือโฟกัสของเรา เรามี Copilot เวอร์ชันฟรีให้พนักงานทุกคน มีแค่ไม่กี่คนที่มี seat แบบจ่ายเงิน เรายังประเมินอยู่ว่าจะใช้เครื่องมือไหนเป็นหลัก ตอนนี้พนักงานเข้าไปใน <strong>Lovable</strong> แล้วสร้าง app ทันที แต่เราไม่รู้เลยว่ามันเชื่อมกับฐานข้อมูลไหน มันไม่มี identity ด้วย เราต้องการ governance และ sandboxing สำหรับ agent เหล่านี้ ผมคิดว่าถ้าต้องเลือกตอนนี้ Copilot น่าจะนำ แต่ผมก็ไม่แน่ใจ ส่วนหนึ่งของการขายของ Microsoft ตอนนี้คือ AI ของพวกเขามาพร้อม security ครบ ทีมเราเห็นด้วยบางส่วน แต่ CEO ของเราอยากให้แน่ใจว่าเราใช้ &#x27;ของเจ๋งๆ&#x27; เพื่อให้พนักงานแฮปปี้ เราก็ไม่อยากใส่ไข่ทั้งหมดไว้ในตะกร้าใบเดียว นั่นคือเหตุผลที่เราเป็น multi cloud</li>
+<li><strong>Customer 3:</strong> ผมเพิ่งได้ license Copilot แบบจ่ายเงินหลังจากใช้เวอร์ชันฟรีมา มันทำได้น่าทึ่งมาก มีแค่บางส่วนของพนักงาน 10k คนที่จะได้ เรากำลังปล่อยใช้ แต่แล้วมันแพงเกินจะให้ทุกคน นักพัฒนาของเราใช้ coding harness ของ frontier lab</li>
+</ul>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">โทนเรื่อง Copilot ดีกว่าที่คาด</p><ul class="rn-sum-list"><li>พาร์ทเนอร์รายหนึ่งเห็นการเติบโตของ seat แบบสามหลัก</li></ul></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">08</span><span><span class="rn-th">การเติบโตและการปรับลดค่าใช้จ่าย AI ของลูกค้า</span><span class="rn-en">Customer AI Spend Growth &amp; Optimization</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ผู้บริหาร IT ที่กำลังวางงบปี 2027 ไม่ส่งสัญญาณชะลอ</li><li>การเปลี่ยน Copilot เป็น usage ทำให้เกิดการถอยการใช้งาน</li><li>สัดส่วนโปรเจกต์ AI ที่ถึง production ขึ้นจาก 20-30% เป็น 85%</li><li>ลูกค้าบางรายตั้งเพดาน token ต่อคนต่อเดือน</li></ul></div>
+<p>Microsoft ยอมรับว่าสัญญาณดีมานด์โดยรวมแข็งแรงมาก และการเช็คของเรา (หลายกรณีเป็นผู้บริหาร IT ที่อยู่กลางการวางงบปี 2027) ไม่ได้ส่งสัญญาณว่าการใช้จ่าย AI ของบริษัทจะชะลอ ถึงอย่างนั้น Microsoft ก็กำลังตอบรับความกังวลของลูกค้าบางรายว่าต้องบริหารค่าใช้จ่าย AI ให้ดีขึ้นเมื่อ AI ขยายสเกล โดยตอนนี้ Microsoft ให้เครื่องมือลูกค้าอย่าง <strong>Agent365 และบริการ FinOps</strong> โฟกัสที่เพิ่มขึ้นเรื่องการคุมต้นทุน AI เห็นได้ชัดจากการเช็คด้านล่าง ในมุมผม <strong>ส่วนผสมของความอยากปล่อย AI app/agent มากๆ กับโฟกัสคุมต้นทุนหนักๆ ยังหักลบออกมาเป็นการใช้จ่าย AI ที่คาดว่าจะแข็งแรงในปี 2027</strong></p>
+<ul>
+<li><strong>Partner 1:</strong> คุณมี license Copilot แล้วก็มี token อยู่ข้างบน นั่นเป็นความท้าทายใหญ่ของหลายองค์กร เพราะการใช้ token เพิ่มขึ้น เราเห็นลูกค้ามากขึ้นเรื่อยๆ ที่ต้องจัดการและควบคุมมัน ไม่งั้นมันบ้าคลั่งได้ ตอนนี้ลูกค้าตั้งงบเรื่องนี้ยาก เรื่องการใช้จ่าย AI ในปี 2027 ผมไม่รู้สึกว่ามันเริ่มชะลอ ผมคิดว่า AI อยู่ในหัวของห้องประชุมบอร์ดทุกที่ ผมจะแปลกใจมากถ้าเห็นการชะลอ บางกรณีลูกค้าลำบากในการเริ่ม แต่พวกเขาอยากเริ่มจริงๆ <strong>ลูกค้าวางแผนลดคนเพื่อเปิดทางให้การใช้จ่าย AI</strong> เรายังไม่เห็นการตัด seat เพราะเรื่องนั้น</li>
+<li><strong>Partner 2:</strong> ความอยากใช้จ่ายใน apps software โดยรวมยังไม่ชะลอ ผมยังไม่เคยเจอ CIO คนไหนที่มีงบมากกว่าโปรเจกต์ที่ต้องทำ ทุกคนมอง AI เพื่อเร่งเรื่องนั้น แต่จะได้พลังนั้น คุณต้องปรับปรุง data estate ให้ทันสมัย <strong>Databricks</strong> คือรายที่เราเห็นแรงดึงมากที่สุดตรงนั้น เงินจริงๆ อยู่ที่รายได้แบบ consumption หรือ usage-based ซึ่งเห็นได้ยากกว่า การใช้งานไม่ได้ ramp เร็วขนาดนั้นเพราะมีการคุมต้นทุนแน่นหน่อย ต้นทุนพุ่งทะลุหลังคา และคุณวัดมันได้ไม่ดีพอหรือมองไม่เห็นผลตอบแทน</li>
+<li><strong>Partner 3:</strong> Microsoft เปลี่ยนจาก seat เป็น usage สำหรับ Copilot ในเดือนกรกฎาคม และผมคิดว่านั่นทำให้ระดับ CFO กังวลมากขึ้น เพราะถ้าลูกค้าไม่รู้วิธีใช้อย่างมีประสิทธิภาพ พวกเขาก็จะจ่ายมากขึ้น จริงๆ แล้ว<strong>มีการถอยการใช้งานเป็นผลตามมา</strong> เพราะมองไม่เห็นต้นทุนมากเกินไป สำหรับ Copilot Cowork ตอนแรกมันฟรี ผู้ใช้เริ่มสร้าง แล้ว 6 เดือนต่อมาจะเริ่มเก็บเงิน คุณก็ได้บิล consumption นี้ เรื่องการใช้จ่าย AI โดยรวม ข้อสังเกตหลักของผมคือ 18 เดือนผ่านไปแล้วที่ลูกค้าจำนวนมากทดลองและทำ pilot ด้าน AI ตอนต้นช่วงนั้นมีแค่ 20-30% ของโปรเจกต์ที่ไปถึง production <strong>ตอนนี้เป็น 85%</strong> การปล่อย AI agent กำลังเกิดขึ้น และลูกค้าเลือกเหลือแต่ use case ที่ ROI สูงสุดแล้ว ผมเดาว่า 20% ของ power user ของ Copilot ตอนนี้อยู่บน Cowork แล้ว จริงๆ แม้แต่ในบริษัทเรา เราจงใจชะลอการปล่อย Cowork เพราะต้องคุมต้นทุน เรากังวลว่าการใช้จ่ายจะคุมไม่อยู่ <strong>เราตั้งเพดานการใช้ token ต่อเดือนให้พนักงาน $20 สำหรับ knowledge worker และ $200 สำหรับ power user</strong> เราต้องจ่ายสำหรับทั้งหมดนี้ เราเลยเริ่มลดโปรแกรมเมอร์ ย้ายคนเหล่านั้นไปทำอย่างอื่น</li>
+<li><strong>Customer 2:</strong> ปัญหาของ Copilot ตอนนี้อีกอย่างคือมันกำลังย้ายไปเป็น consumption ต้นทุนบานปลาย ตอนนี้คุณมี <strong>Autopilot</strong> ที่ดูดทรัพยากรไปเยอะมาก โดยพื้นฐานมันคือพนักงานใหม่ที่ไม่ต้องมีประกันสุขภาพแต่เผาเงินเร็ว Autopilot รันบน cloud และคุณแนบมันกับ virtual PC ได้ ซึ่งทำให้ต้นทุนพุ่ง ปัญหาต่อมาคือ ฉันต้องมี agent CrowdStrike อีกตัวบน endpoint นั้นไหม? ต้นทุนก็อาจขึ้นอีก แล้วมันต้องมี identity ต้องถูกปฏิบัติเหมือนพนักงาน แล้วฉันต้องรันมันผ่าน <strong>Netskope หรือ Zscaler</strong> เพราะไม่อยากให้มันวิ่งไปเข้าเว็บที่ไม่ควรเข้า ต้นทุนเลยใหญ่มากอย่างรวดเร็ว ทีม security ของเราโดยธรรมชาติไม่ชอบความเสี่ยงและอยากบล็อกทุกอย่าง แต่ตอนนี้ CEO และ CFO บอก CISO ของเราว่าเพราะพวกเขาถ่วงการปล่อย AI มันทำให้ธุรกิจเสียรายได้และกำไรมากขึ้น โดยพื้นฐานคือพวกเขากำลังขัดขวางธุรกิจ นั่นสร้างแรงกดดันให้ต้องเร็วขึ้น</li>
+</ul>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">อยากปล่อย AI มาก + คุมต้นทุนหนัก = ยังเป็นการใช้จ่าย AI ที่แข็งแรง</p></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">85%</div><div class="rn-stat-c">โปรเจกต์ AI ที่ถึง production (จาก 20-30%)</div></div><div class="rn-stat"><div class="rn-stat-v">$20 / $200</div><div class="rn-stat-c">เพดาน token ต่อเดือน knowledge worker / power user</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s9" role="tabpanel" aria-labelledby="rn-t-s9" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">09</span><span><span class="rn-th">การแข่งขันใน Knowledge Work</span><span class="rn-en">Competition in Knowledge Work</span></span></h2>
+
+<p>นักลงทุนรู้ดีว่าพวก frontier lab แสดงความต้องการขยายเข้าสู่ &quot;knowledge work&quot; จากการเช็คเหล่านี้ชัดเจนว่า <strong>Microsoft ไม่ใช่ผู้เล่นรายเดียวในตลาดปลายทางที่สำคัญนี้</strong></p>
+<ul>
+<li><strong>Partner 1:</strong> สำหรับลูกค้าส่วนใหญ่ที่เราคุยด้วย frontier lab ดีที่สุดในตลาด และพวกเขาใช้มันบนแพลตฟอร์มของ Microsoft แต่สุดท้ายแล้ว LLM เหล่านี้กำลังกลายเป็นสินค้าโภคภัณฑ์ (commodity) เราเห็น <strong>โมเดล open source ขึ้นมาอย่างรุนแรง</strong> มี agent เต็มไปหมด สุดท้ายคุณไม่ได้ต้องการ LLM ที่ดีที่สุดเสมอไป ผมยังไม่เห็นลูกค้าหลายรายที่มีทั้ง license frontier lab และ Copilot เริ่มรวบรวมให้เหลือรายเดียว มุมมองส่วนตัวผมคือ OpenAI, Google, Microsoft ผู้เล่นเหล่านี้จะอยู่ร่วมกันไปในอนาคตอันใกล้เสมอ ผมเลยไม่เห็นปัญหาต่อความเป็นพาร์ทเนอร์ของเรากับ Microsoft</li>
+<li><strong>Partner 2:</strong> ความท้าทายของ Copilot คือผลิตภัณฑ์ของ frontier lab ได้ mindshare และความสนใจไปเยอะ ไม่กี่เดือนก่อน พวก lab ทำเงินจาก M365 ได้ดีกว่า Microsoft เสียอีก สิ่งที่ผมเห็นจาก Microsoft เมื่อวานอาจเปลี่ยนสิ่งนั้น <strong>ถ้า Microsoft ทำตามสัญญาเรื่องต้นทุนที่ต่ำกว่าเครื่องมืออื่นได้ ซึ่งผมคิดว่าจะทำได้ ลูกค้าจะบังคับให้งานเริ่มที่นั่น</strong> อุปมาหนึ่งคือ ถ้าคุณเริ่มด้วย Lyft และคุณรักมัน คุณก็ใช้ต่อ แล้ววันหนึ่งองค์กรของคุณบอกว่าเราจะใช้ Uber ซึ่งจะส่งใบเสร็จอัตโนมัติและขออนุมัติค่าใช้จ่ายให้ เดาสิว่าการใช้ Lyft ของคุณจะเป็นยังไง Cowork ยังเร็วอยู่ เรากำลังทำงานกับลูกค้าสองสามรายที่ใช้มันมากขึ้นเยอะ คุยกับใครก็ได้ในองค์กรใหญ่ ทุกคนมีเครื่องมือโปรดและต่อต้าน แต่มากขึ้นเรื่อยๆ Microsoft กำลังรวมทุกอย่างเข้าด้วยกันในรูปแบบ Copilot, Workspaces, Autopilot, Work IQ และตอนนี้พวกเขากำลังเล่น <strong>ไพ่ trust</strong> ได้อย่างมีประสิทธิภาพ</li>
+<li><strong>Customer 1:</strong> เรามี OpenAI ChatGPT ทั่วทั้งบริษัท และ Codex แต่ละทีมสร้าง agent ของตัวเองใน ChatGPT ได้ เรายังไม่ได้ใช้ Foundry ทุกฟังก์ชันกำลังหลอมรวมเป็นหนึ่ง เช่น Copilot ตอนนี้มี Code และ Coworker และ ChatGPT ก็ใช้ Codex ที่ฝังอยู่ข้างในได้ คุณเห็นเดโมที่ Copilot เรียก ChatGPT Enterprise อยู่หลังบ้าน ผมคิดว่า <strong>Microsoft จะใส่ทุกอย่างไว้ใน Copilot มากขึ้นเรื่อยๆ</strong> ซึ่งผมคิดว่าจะทำให้เราต้องซื้อ license มากขึ้น บริษัท software ทุกรายอย่าง Microsoft ให้ของฟรีคุณก่อน แล้วตอนต่อสัญญา มันก็มีค่าใช้จ่าย</li>
+</ul>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s10" role="tabpanel" aria-labelledby="rn-t-s10" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">10</span><span><span class="rn-th">เทรนด์การเติบโตของ Azure</span><span class="rn-en">Azure Growth Trends</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ดีมานด์ Azure ฟังดูแข็งแรง การย้ายระบบยังเกิดขึ้น</li><li>AWS ยังโตเร็วที่สุดในลูกค้าบางราย</li><li>ลูกค้าใช้ 45 billion token ต่อวันด้วยต้นทุนไม่ถึง 1 เซนต์ต่อ transcript</li></ul></div>
+<p>พาร์ทเนอร์และลูกค้าที่เราคุยด้วยมาที่ Ignite เพื่อสำรวจ Copilot และชุด AI อื่นๆ ของ Microsoft มากกว่าจะมาสำรวจฟังก์ชันใหม่ของ Azure ถึงอย่างนั้น เราก็ถามพาร์ทเนอร์หลายรายเรื่องเทรนด์ดีมานด์ Azure และสรุปได้ว่า <strong>ฟังดูแข็งแรง</strong></p>
+<ul>
+<li><strong>Partner 1:</strong> ดีมานด์ Azure รู้สึกดีมาก เติบโตแข็งแรงมาก ไม่มีอะไรเฉพาะเจาะจงจะชี้ การย้ายระบบยังเกิดขึ้นอยู่ หลายอุตสาหกรรมยังไม่ได้ก้าวหน้าด้านเทคมาก ยังมี lift-and-shift เกิดขึ้น เป็นบริการรายวันสำหรับเรา แน่นอนว่า <strong>ดีมานด์ AI โดยทั่วไปขับการใช้บริการที่ไม่ใช่ AI ด้วย</strong></li>
+<li><strong>Customer 1:</strong> เรายังย้ายไป Azure มากขึ้น การใช้จ่ายของเราจึงจะขึ้น เราอยู่บนเส้นทางนี้มาหลายปีและยังมีอีกที่ต้องย้าย ปัญหาคือการมีงบ เพราะตอนที่เราย้ายฐานข้อมูลบางตัวเมื่อไม่กี่ปีก่อน Microsoft เริ่ม throttle IO หลังมันโตเกินขนาดหนึ่ง เราเลยต้องย้ายมันกลับ on prem จนกว่าจะมีงบ</li>
+<li><strong>Customer 3:</strong> เราใช้ hyperscaler ทั้งสามราย: AWS สำหรับ app, Azure สำหรับ VM และ Google สำหรับข้อมูล <strong>AWS โตเร็วที่สุด</strong> ผู้บริหารอยากดัน compute ของ Azure ไป AWS มากขึ้น แต่ผมไม่คิดว่าจะได้ผล Citrix บน AWS ไม่ได้ประสิทธิภาพเท่า ผมอยากให้เราเปลี่ยนจาก Citrix ไป Azure Virtual Desktop</li>
+<li><strong>Customer 4:</strong> เราสร้างเอนจินวิเคราะห์ call transcript ของเราเองบน <strong>Foundry IQ</strong> เราคุมต้นทุนเชิงรุกมาก จนเหลือ <strong>ไม่ถึง 1 เซนต์ต่อ transcript</strong> ทั่วทั้ง transcript สเกลมหาศาล ต้นทุนสุทธิบน Azure จึงไม่ได้มีนัยสำคัญขนาดนั้น การจะทำแบบนี้ เราใช้โมเดลเล็กอย่าง GPT Luna และ open source บางตัว บางครั้งก็ fine-tune บน Azure บริษัทเราใช้ <strong>45 billion token ต่อวัน</strong> ในบางกรณีที่ใช้โมเดล open source เราประหยัดต้นทุนได้ 90%</li>
+</ul>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ดีมานด์ AI ขับการใช้บริการที่ไม่ใช่ AI ด้วย</p></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">90%</div><div class="rn-stat-c">ต้นทุนที่ประหยัดได้เมื่อใช้โมเดล open source</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s11" role="tabpanel" aria-labelledby="rn-t-s11" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">11</span><span><span class="rn-th">การขยาย Use Case ของ AI</span><span class="rn-en">AI Use Case Expansion</span></span></h2>
+
+<p>Microsoft แสดงมุมมองที่ในความเห็นผมนักลงทุนส่วนใหญ่มีอยู่แล้ว คือการขยาย AI เกินกว่า use case ด้าน coding มีศักยภาพจริงมาก แต่น่าจะใช้เวลามากกว่า — <strong>ระยะเวลาของการ ramp การใช้งานจะยาวกว่า</strong></p>
+<ul>
+<li><strong>Partner 3:</strong> use case AI coding ค่อนข้างนิ่งแล้วในแง่ผู้ชนะ ตอนนี้เป็น <strong>การแข่งม้า 5 ตัว</strong> คือ Microsoft GitHub Copilot, frontier lab สองราย, Cursor/SpaceX และ Cognition ลูกค้าโฟกัสที่หนึ่งหรือสองราย ลูกค้าใช้ coding agent เหล่านี้มากขึ้นเรื่อยๆ ในการปรับปรุง app บน mainframe ให้ทันสมัย use case ของ AI จะไปไหนต่อ? Physical AI บนพื้นโรงงาน รวมถึง agent สำหรับฟังก์ชันการเงิน กฎหมาย และ HR <strong>ความเสี่ยงด้าน AI ที่ใหญ่ที่สุดที่ผมเห็นคือความเร็วที่องค์กรปรับตัวและนำเทค AI นี้ไปใช้นอกเหนือจาก coding จะช้าเกินไป</strong></li>
+</ul>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s12" role="tabpanel" aria-labelledby="rn-t-s12" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">12</span><span><span class="rn-th">SaaSpocalypse — จริงหรือเกินจริง?</span><span class="rn-en">SaaSpocalypse - Real or Exaggerated?</span></span></h2>
+
+<p>การเช็คอุตสาหกรรมของเราไม่ได้วาดภาพที่ระวังเกินไปต่อการใช้จ่าย apps software โดยรวม แต่พาร์ทเนอร์รายใหญ่ของ Microsoft รายหนึ่งแสดงมุมมองว่าลูกค้าจำนวนมากในภาคบริการทางการเงินกำลังสร้างทางเลือกแบบ custom ขึ้นมาแทน app เดิม ไม่ค่อยใช่กับ app ERP หลังบ้านอย่าง SAP หรือ Workday แต่เป็นฟังก์ชันเฉพาะโดเมนในบริการประกันภัยมากกว่า</p>
+<ul>
+<li><strong>Partner 2:</strong> SaaSpocalypse จริงไหม? <strong>ผมคิดว่าจริง</strong> มีโอกาสมากขึ้นที่จะแทน software เดิมด้วย software ที่สร้างเอง องค์กรสนใจแทนที่ software ผมคิดว่ามันเป็นแนวคิดมาทั้งปี ตอนนี้เราเห็นลูกค้าบางรายลงทุนอย่างมีนัยตรงนั้นแล้ว มันอยู่ในแพลตฟอร์มหลักที่หนักด้านโดเมนมากกว่า พวกเขาไม่ได้พยายามแทน Salesforce หรือ SAP Copilotforce อาจให้เหตุผลน้อยลงอีกที่จะทำแบบนั้น ผมไม่เห็น Salesforce หายไปเร็วๆ นี้ มันใหญ่เกินไป กว้างเกินไป แต่ในโลกของผมก็ไม่มี vendor apps software รายไหนที่ทำได้เกินเป้า practice ของเราจริงๆ</li>
+</ul>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s13" role="tabpanel" aria-labelledby="rn-t-s13" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">13</span><span><span class="rn-th">ผลตอบแทนคาดการณ์</span><span class="rn-en">Forecast returns</span></span></h2>
+
+<table><thead><tr><th>รายการ</th><th>ค่า</th></tr></thead><tbody><tr><td>ราคาหุ้นคาดว่าจะขึ้น</td><td class="rn-numcell">37.7%</td></tr><tr><td>อัตราผลตอบแทนเงินปันผลคาดการณ์</td><td class="rn-numcell">0.8%</td></tr><tr><td>ผลตอบแทนหุ้นคาดการณ์</td><td class="rn-numcell">38.5%</td></tr><tr><td>สมมติฐานผลตอบแทนตลาด</td><td class="rn-numcell">9.8%</td></tr><tr><td>ผลตอบแทนส่วนเกินคาดการณ์</td><td class="rn-numcell">28.7%</td></tr></tbody></table>
+
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">38.5%</div><div class="rn-stat-c">ผลตอบแทนหุ้นคาดการณ์</div></div><div class="rn-stat"><div class="rn-stat-v">28.7%</div><div class="rn-stat-c">ผลตอบแทนส่วนเกินคาดการณ์</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s14" role="tabpanel" aria-labelledby="rn-t-s14" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">14</span><span><span class="rn-th">ข้อมูลบริษัท</span><span class="rn-en">Company Description</span></span></h2>
+
+<p>ก่อตั้งในปี 1975 <strong>Microsoft คือบริษัท software ที่ใหญ่ที่สุดในโลก</strong> สร้างรายได้ต่อปีกว่า $200bn ในปีงบ 2023 ดำเนินงานในกว่า 190 ประเทศ บริษัทเป็นผู้นำตลาดใน software หลายหมวด โดยมีโซลูชันหลักคือโครงสร้างพื้นฐาน cloud computing (Azure), แอป productivity (Office และ Office 365), ระบบปฏิบัติการ (Windows), แอปธุรกิจ (Dynamics), บริการอินเทอร์เน็ต (LinkedIn, Bing), software ฐานข้อมูล (SQL Server), เกม (Xbox), อุปกรณ์ (Surface) และผลิตภัณฑ์และบริการอื่นๆ ที่ตอบตลาดเทคโนโลยีทั้งองค์กรและผู้บริโภค</p>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s15" role="tabpanel" aria-labelledby="rn-t-s15" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">15</span><span><span class="rn-th">วิธีประเมินมูลค่าและความเสี่ยง</span><span class="rn-en">Valuation Method and Risk Statement</span></span></h2>
+
+<p>เราประเมินมูลค่า Microsoft ด้วย <strong>P/E multiple แบบเทียบเคียงบนประมาณการ CY28</strong> ความเสี่ยงหลักของ Microsoft ได้แก่ สภาพแวดล้อมการใช้จ่าย IT, ความเร็วของการถดถอยของธุรกิจเดิมเทียบกับการเติบโตของธุรกิจใหม่ที่เน้น Cloud, เงินลงทุน capex ที่ต้องใช้สร้าง datacenter ของ Cloud, แรงกดดันการแข่งขันจากผู้นำ Cloud-native อย่าง Amazon และ Google และความเสี่ยงด้านกฎหมายและกำกับดูแลเมื่อพิจารณาสถานะครองตลาดของ Microsoft ในระบบปฏิบัติการ PC และแอป productivity Microsoft อยู่ในอุตสาหกรรมเทคโนโลยีที่เปลี่ยนแปลงและมีนวัตกรรมเร็ว โอกาสทางการตลาดของบริษัทอาจเปลี่ยนอย่างรวดเร็วหากความชอบด้านเทคโนโลยีและดีมานด์เปลี่ยนไปในทิศทางที่ไม่คาดคิด</p>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s16" role="tabpanel" aria-labelledby="rn-t-s16" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">16</span><span><span class="rn-th">Quantitative Research Review</span><span class="rn-en">Quantitative Research Review</span></span></h2>
+
+<p>UBS Global Research เผยแพร่การประเมินเชิงปริมาณจากคำตอบของนักวิเคราะห์ต่อคำถามบางข้อเกี่ยวกับโอกาสเกิดของปัจจัยระยะสั้นหลายตัว ในผลิตภัณฑ์ชื่อ &#x27;Quantitative Research Review&#x27; มุมมองของเดือนนี้อยู่ด้านล่าง มุมมองในการประเมินนี้ต่อหุ้นใดหุ้นหนึ่งสะท้อนเฉพาะปัจจัยระยะสั้นเหล่านั้น ซึ่งเป็นกรอบเวลาต่างจากกรอบ 12 เดือนของเรตติ้งหุ้นในรายงานนี้ สำหรับคำตอบก่อนหน้า โปรดอ้างอิง (i) รายงาน UBS Global Research ฉบับก่อนๆ และ (ii) กรณีที่ไม่มีรายงานวิจัยที่เกี่ยวข้องเผยแพร่ในเดือนนั้น ให้ดู Quantitative Research Review ที่ https://neo.ubs.com/quantitative หรือติดต่อตัวแทนขาย UBS ของคุณเพื่อเข้าถึงรายงาน หรือทีม Quantitative Research ที่ ubs-quant-answers@ubs.com นอกจากนี้ยังมีรายงานรวมที่มีคำตอบทั้งหมด ซึ่งก็ให้ติดต่อตัวแทนขาย UBS ของคุณเพื่อรายละเอียดและราคา หรือทีม Quantitative Research ที่อีเมลข้างต้น</p>
+<p><strong>Microsoft Corp.</strong></p>
+<table><thead><tr><th>คำถาม</th><th>คำตอบ</th></tr></thead><tbody><tr><td>1. โครงสร้างอุตสาหกรรมที่บริษัทเผชิญมีแนวโน้มดีขึ้นหรือแย่ลงในหกเดือนข้างหน้า? ให้คะแนน 1-5 (1 = แย่ลง, 3 = ไม่เปลี่ยน, 5 = ดีขึ้น, N/A = ไม่มีมุมมอง)</td><td class="rn-numcell"><strong>5</strong></td></tr><tr><td>2. สภาพแวดล้อมด้านกฎระเบียบ/รัฐบาลที่บริษัทเผชิญมีแนวโน้มดีขึ้นหรือแย่ลงในหกเดือนข้างหน้า? ให้คะแนน 1-5 (1 = เข้มงวดขึ้น, 3 = ไม่เปลี่ยน, 5 = ดีขึ้น, N/A = ไม่มีมุมมอง)</td><td>N/A</td></tr><tr><td>3. ในช่วง 3-6 เดือนที่ผ่านมา โดยกว้างๆ สถานการณ์ของหุ้นนี้ดีขึ้น/ไม่เปลี่ยน/แย่ลง? ให้คะแนน 1-5 (1 = แย่ลงมาก, 3 = ไม่ค่อยเปลี่ยน, 5 = ดีขึ้นมาก, N/A = ไม่มีมุมมอง)</td><td class="rn-numcell"><strong>5</strong></td></tr><tr><td>4. เทียบกับประมาณการ EPS ของ CONSENSUS ปัจจุบัน การอัปเดต EPS ครั้งถัดไปของบริษัทมีแนวโน้มนำไปสู่: (1 = เซอร์ไพรส์ลบ, 3 = ตรงกับ consensus, 5 = เซอร์ไพรส์บวก, N/A = ไม่มีมุมมอง)</td><td class="rn-numcell"><strong>4</strong></td></tr><tr><td>5. อะไรขับความแตกต่าง?</td><td>—</td></tr><tr><td>6. เทียบกับประมาณการกำไรของ &quot;คุณ&quot; เอง มีความเสี่ยงค่อนข้างมากกว่าในผลประกอบการครั้งถัดไปแบบใด: (1 = เบ้ลง, 3 = ขึ้นลงเท่ากัน, 5 = เบ้ขึ้น, N/A = ไม่มีมุมมอง)</td><td class="rn-numcell"><strong>4</strong></td></tr><tr><td>7. อะไรขับความแตกต่าง?</td><td>—</td></tr><tr><td>8. มี catalyst ที่กำลังจะมาถึงของบริษัทในสามเดือนข้างหน้าไหม?</td><td><strong>No Catalyst</strong></td></tr><tr><td>9. มีวันที่จริงหรือวันที่โดยประมาณของ catalyst ไหม?</td><td>—</td></tr><tr><td>10. วันที่ catalyst เป็นวันที่จริงหรือโดยประมาณ?</td><td>—</td></tr><tr><td>11. catalyst คืออะไร?</td><td>—</td></tr></tbody></table>
+<blockquote>📝 น่าสังเกตว่าคำตอบข้อ 8 คือ <strong>&quot;No Catalyst&quot;</strong> ในสามเดือนข้างหน้า — อ่านคู่กับมุมมอง Buy 12 เดือนแล้ว หมายความว่าเราคาดว่าเรื่องจะค่อยๆ เล่นตัวผ่านผลประกอบการ มากกว่าจะมีเหตุการณ์เดียวมาจุดชนวน</blockquote>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s17" role="tabpanel" aria-labelledby="rn-t-s17" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">17</span><span>Conflict of Interest และประวัติราคาเป้าหมาย</span></h2>
+
+<p><strong>Company Disclosures</strong> — Microsoft Corp. (MSFT.O) · เรตติ้ง 12 เดือน <strong>Buy</strong> · ราคา US$508.29 · 18 Nov 2026 · รหัส disclosure: 2, 4, 5, 6a, 6b, 6c, 7, 8, 13, 16, 28</p>
+<ul>
+<li><strong>2.</strong> UBS ทำหน้าที่ผู้จัดการ/ผู้ร่วมจัดการในการจัดจำหน่ายหรือเสนอขายหลักทรัพย์ของบริษัทนี้หรือบริษัทในเครือภายใน 12 เดือนที่ผ่านมา</li>
+<li><strong>4.</strong> ภายใน 12 เดือนที่ผ่านมา UBS ได้รับค่าตอบแทนจากบริการวาณิชธนกิจจากบริษัทนี้หรือบริษัทในเครือ</li>
+<li><strong>5.</strong> UBS คาดว่าจะได้รับ หรือตั้งใจจะแสวงหาค่าตอบแทนจากบริการวาณิชธนกิจจากบริษัทนี้ภายในสามเดือนข้างหน้า</li>
+<li><strong>6a.</strong> บริษัทนี้เป็นหรือเคยเป็นลูกค้าของ UBS Securities LLC ภายใน 12 เดือนที่ผ่านมา และได้รับบริการด้านหลักทรัพย์ที่ไม่ใช่วาณิชธนกิจ</li>
+<li><strong>6b.</strong> บริษัทนี้เป็นหรือเคยเป็นลูกค้าของ UBS Securities LLC ภายใน 12 เดือนที่ผ่านมา และได้รับบริการที่ไม่ใช่ด้านหลักทรัพย์</li>
+<li><strong>6c.</strong> บริษัทนี้เป็นหรือเคยเป็นลูกค้าของ UBS Securities LLC และ/หรือบริษัทในเครือภายใน 12 เดือนที่ผ่านมา และได้รับบริการวาณิชธนกิจ</li>
+<li><strong>7.</strong> ภายใน 12 เดือนที่ผ่านมา UBS ได้รับค่าตอบแทนจากผลิตภัณฑ์และบริการอื่นนอกเหนือจากวาณิชธนกิจจากบริษัทนี้</li>
+<li><strong>8.</strong> นักวิเคราะห์หุ้นที่ครอบคลุมบริษัทนี้ สมาชิกในทีม หรือคนในครอบครัว <strong>ถือหุ้นสามัญของบริษัทนี้ในสถานะ long</strong></li>
+<li><strong>13.</strong> UBS เป็นเจ้าของผลประโยชน์ 1% หรือมากกว่าของหุ้นสามัญประเภทหนึ่งของบริษัทนี้ ณ สิ้นเดือนที่แล้ว (หรือสิ้นเดือนก่อนหน้า หากรายงานนี้ลงวันที่ไม่ถึง 10 วันหลังสิ้นเดือนล่าสุด)</li>
+<li><strong>16.</strong> UBS Securities LLC เป็น market maker ในหลักทรัพย์และ/หรือ ADR ของบริษัทนี้</li>
+<li><strong>28.</strong> UBS ถือ long position 0.5% หรือมากกว่าของหุ้นจดทะเบียนของบริษัทนี้</li>
+</ul>
+<div class="figure"><img src="data:image/png;base64,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" alt="figure 1"><div class="figure-caption">รูปที่ 1: ชาร์ต-กราฟ — ราคาหุ้น Microsoft Corp. (US$) เส้นสีดำ เทียบกับราคาเป้าหมาย UBS (เส้นขั้นบันไดสีฟ้า) ช่วง ส.ค. 2023 – ต.ค. 2026 พร้อมแถบเรตติ้ง Buy ตลอดช่วง · ป้ายในภาพ: Price Target (US$) = ราคาเป้าหมาย (ดอลลาร์) · Stock Price (US$) = ราคาหุ้น (ดอลลาร์) · Buy = ซื้อ · Date = วันที่ · Rating = เรตติ้ง</div></div>
+<p><strong>ประวัติเรตติ้งและราคาเป้าหมาย</strong></p>
+<table><thead><tr><th>วันที่</th><th>ราคาหุ้น (US$)</th><th>ราคาเป้าหมาย (US$)</th><th>เรตติ้ง</th></tr></thead><tbody><tr><td>2023-08-18</td><td class="rn-numcell">316.48</td><td class="rn-numcell">400.00</td><td>Buy</td></tr><tr><td>2024-01-31</td><td class="rn-numcell">397.58</td><td class="rn-numcell">480.00</td><td>Buy</td></tr><tr><td>2024-04-26</td><td class="rn-numcell">406.32</td><td class="rn-numcell">520.00</td><td>Buy</td></tr><tr><td>2024-07-31</td><td class="rn-numcell">418.35</td><td class="rn-numcell">510.00</td><td>Buy</td></tr><tr><td>2024-10-31</td><td class="rn-numcell">406.35</td><td class="rn-numcell">500.00</td><td>Buy</td></tr><tr><td>2024-12-18</td><td class="rn-numcell">437.39</td><td class="rn-numcell">525.00</td><td>Buy</td></tr><tr><td>2025-01-30</td><td class="rn-numcell">414.99</td><td class="rn-numcell">510.00</td><td>Buy</td></tr><tr><td>2025-04-14</td><td class="rn-numcell">387.81</td><td class="rn-numcell">480.00</td><td>Buy</td></tr><tr><td>2025-05-01</td><td class="rn-numcell">425.40</td><td class="rn-numcell">500.00</td><td>Buy</td></tr><tr><td>2025-07-22</td><td class="rn-numcell">505.27</td><td class="rn-numcell">600.00</td><td>Buy</td></tr><tr><td>2025-07-31</td><td class="rn-numcell">533.50</td><td class="rn-numcell">650.00</td><td>Buy</td></tr><tr><td>2026-01-22</td><td class="rn-numcell">451.14</td><td class="rn-numcell">600.00</td><td>Buy</td></tr><tr><td>2026-03-24</td><td class="rn-numcell">372.74</td><td class="rn-numcell">510.00</td><td>Buy</td></tr><tr><td>2026-07-26</td><td class="rn-numcell">381.70</td><td class="rn-numcell">480.00</td><td>Buy</td></tr><tr><td>2026-07-30</td><td class="rn-numcell">451.10</td><td class="rn-numcell">525.00</td><td>Buy</td></tr><tr><td>2026-10-14</td><td class="rn-numcell">533.69</td><td class="rn-numcell">675.00</td><td>Buy</td></tr><tr><td>2026-10-29</td><td class="rn-numcell">530.14</td><td class="rn-numcell">700.00</td><td>Buy</td></tr></tbody></table>
+<p><em>ที่มา: UBS Global Research; LSEG Eikon ณ 18-Nov-2026 ราคาทั้งหมดเป็นราคาปิดตลาดท้องถิ่น เรตติ้ง ณ วันที่แสดง</em></p>
+<blockquote>⚖️ <em>Required Disclosures / Disclaimer ของ UBS (boilerplate ตามกฎหมาย) — ไม่แปลโดยตั้งใจ · ดูต้นฉบับใน PDF (ชาร์ตราคาเป้าหมายแสดงไว้ด้านบนแล้ว)</em></blockquote>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec" id="rn-p-s18" role="tabpanel" aria-labelledby="rn-t-s18" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>☁️ ดีมานด์ยังแรงทั้งสองขา</strong> — Azure และ M365/Copilot ส่งสัญญาณแข็งแรงจาก Ignite ไม่มีใครเห็นการชะลองบ AI ปี 2027 UBS คงเรตติ้ง <strong>Buy</strong> และราคาเป้าหมาย <strong>$700</strong> (27x non-GAAP EPS CY28) เทียบราคา US$508.29 — ผลตอบแทนคาดการณ์ 38.5%</li>
+<li><strong>💸 ประเด็นเดียวที่ต้องจับตาคือ &quot;การคุมต้นทุน token&quot;</strong> — การเปลี่ยน Copilot เป็น usage-based ทำให้ CFO ฝั่งลูกค้ากังวล มีการถอยการใช้งาน และบางบริษัทตั้งเพดาน $20/$200 ต่อคนต่อเดือน แต่ภาพรวมยังหักลบเป็นการใช้จ่าย AI ที่แข็งแรง</li>
+<li><strong>🔗 Azure ผูกกับ frontier lab มากกว่าที่ตัวเลข 31% บอก</strong> — OpenAI จ่าย $10 billion บน Azure ใน 1Q/Sept แต่ exposure จริงสูงกว่านั้นมากผ่าน Foundry; CFO ยอมรับว่าความผันผวนของ Azure จะสูงขึ้น → guidance น่าจะระมัดระวังขึ้น</li>
+<li><strong>⚡ ความยืดหยุ่นในการจัดสรร compute คือ moat</strong> — เรียง ROIC: 1P (Copilot) &gt; Foundry &gt; GPU-as-a-service; ทุกหมวดยังเหนือ WACC ทำให้ Microsoft ต่างจาก neo-cloud และเปิดทางให้ capex CY27 โตต่อ</li>
+<li><strong>🔧 ประสิทธิภาพ compute = upside ที่ไม่ต้องลงทุน</strong> — การลดต้นทุนชดเชยราคา memory ที่สูงขึ้นสร้าง upside Azure ใน 1Q/Sept และเพิ่มรายได้ต่อ MW</li>
+<li><strong>📎 Copilot ดีกว่าคาด</strong> — พาร์ทเนอร์รายหนึ่งเห็นการเติบโตของ seat แบบสามหลัก Microsoft ดันทีมขายดุดัน แต่ Agent 365 ยังเทอะทะ อาจต้องรอ 6-18 เดือน</li>
+<li><strong>🛡 Security คือเครื่องยนต์ใหม่</strong> — รายได้ security $30+ billion, สายธุรกิจที่โตเร็วที่สุดของพาร์ทเนอร์, ผลิตภัณฑ์ Perception GA และ upsell ไป E7</li>
+<li><strong>⚔️ การแข่งขันใน knowledge work เป็นของจริง</strong> — lab มี mindshare, LLM กลายเป็น commodity และ open source มาแรง แต่ Microsoft กำลังเล่นไพ่ trust และต้นทุนต่ำ ส่วน AWS ยังโตเร็วที่สุดในบางลูกค้า</li>
+<li><strong>📅 ไม่มี catalyst ใน 3 เดือน</strong> — QRR ให้คะแนนโครงสร้างอุตสาหกรรม 5, เทรนด์ 3-6 เดือน 5, EPS เทียบ consensus 4 แต่ &quot;No Catalyst&quot; — เรื่องนี้น่าจะค่อยๆ เล่นผ่านผลประกอบการ</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>UBS Global Research — <em>Microsoft Corp.: Key Takes from Ignite/CFO Meeting</em> (18 November 2026), Karl Keirstead / Jack Fyda — <code>18-11-26_MSFT.pdf</code></li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+Institute<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+
+
+</body></html>
