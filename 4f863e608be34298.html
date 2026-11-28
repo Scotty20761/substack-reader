@@ -1,0 +1,813 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>TomorrowX | ถาม-ตอบกับ Arm — OpenAI, ซัพพลายเชน, จาก IP สู่ซิลิคอน, AGI CPU, การแทนที่ x86, อัตราส่วน CPU:GPU และ SoftBank</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">P Equity Research</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+<div class="rn-lang" id="rn-lang" role="group" aria-label="Language"><div class="rn-sheen" aria-hidden="true"></div><div class="rn-lpill" aria-hidden="true"></div><button class="rn-lopt" type="button" data-lang-opt="th" aria-pressed="true">ไทย</button><button class="rn-lopt" type="button" data-lang-opt="en" aria-pressed="false">EN</button></div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/ARM?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$ARM</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/MSFT?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$MSFT</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GOOGL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GOOGL</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMD?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMD</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/META?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$META</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NVDA?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NVDA</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/INTC?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$INTC</span>
+<span class="rn-deck">30 นาทีคุยตรงกับ CMO และ VP &amp; Chief of Staff ของซีอีโอ Arm — ตั้งแต่ AGI CPU, x86 ที่กำลังถูกแทนที่ ไปจนถึงตู้ rack ที่มีแต่ CPU ล้วน ๆ ซึ่งความต้องการกำลังพุ่งทะลุเพดาน</span>
+</div>
+<h1>💪 TomorrowX | ถาม-ตอบกับ Arm</h1>
+<div class="rn-byline"><b>P Equity Research</b><span class="rn-sep">·</span>2026-11-26<span class="rn-sep">·</span><span class="rn-th">อ่าน 14 นาที</span><span class="rn-en">14 min read</span></div>
+</div>
+<p class="rn-notice rn-en">Headings, summaries, figure captions and key numbers are shown in English. Body paragraphs remain in Thai.</p>
+<div class="rn-lede"><div class="figure"><img src="data:image/png;base64,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" alt="figure 1"><div class="figure-caption">รูปที่ 1: โลโก้ — โลโก้บริษัท Arm เป็นตัวอักษรตัวเล็กสีฟ้าอมเขียวบนพื้นขาว (ป้ายในภาพ: arm = ชื่อแบรนด์ Arm)</div></div></div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🖥 ดีมานด์ CPU rack แบบ standalone พุ่งทะลุเพดาน — agent ที่รันเป็นชั่วโมงต้องการ CPU core เฉพาะตัว data center จึงเติม CPU rack ล้วน ๆ เพิ่มนอกเหนือจาก head node ใน GPU rack นี่คือสัญญาณที่ตรงที่สุดในเซสชันนี้ว่า agentic AI ขยายตลาด CPU จริง</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="เกริ่นนำ — เซสชันปิดกับผู้บริหาร Arm" data-en="Intro — Private Session with Arm Leaders…" data-th-full="เกริ่นนำ — เซสชันปิดกับผู้บริหาร Arm" data-en-full="Intro — Private Session with Arm Leadership" title="เกริ่นนำ — เซสชันปิดกับผู้บริหาร Arm">เกริ่นนำ — เซสชันปิดกับผู้บริหาร Arm</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="โปรเจกต์ CPU กับ OpenAI" data-en="OpenAI Custom CPU Project" data-th-full="โปรเจกต์ CPU กับ OpenAI" data-en-full="OpenAI Custom CPU Project" title="โปรเจกต์ CPU กับ OpenAI">โปรเจกต์ CPU กับ OpenAI</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="ข้อจำกัดด้านซัพพลายเชน" data-en="Supply Chain Constraints" data-th-full="ข้อจำกัดด้านซัพพลายเชน" data-en-full="Supply Chain Constraints" title="ข้อจำกัดด้านซัพพลายเชน">ข้อจำกัดด้านซัพพลายเชน</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="วิวัฒนาการเชิงกลยุทธ์ — จาก IP สู่ซิลิคอน" data-en="Strategic Evolution — From IP to Silicon" data-th-full="วิวัฒนาการเชิงกลยุทธ์ — จาก IP สู่ซิลิคอน" data-en-full="Strategic Evolution — From IP to Silicon" title="วิวัฒนาการเชิงกลยุทธ์ — จาก IP สู่ซิลิคอน">วิวัฒนาการเชิงกลยุทธ์ — จาก IP สู่ซิลิคอน</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="โรดแมปซิลิคอนในอนาคต" data-en="Future Silicon Roadmap" data-th-full="โรดแมปซิลิคอนในอนาคต" data-en-full="Future Silicon Roadmap" title="โรดแมปซิลิคอนในอนาคต">โรดแมปซิลิคอนในอนาคต</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="AGI CPU — กรณีใช้งานและโรดแมป" data-en="AGI CPU — Use Cases &amp; Roadmap" data-th-full="AGI CPU — กรณีใช้งานและโรดแมป" data-en-full="AGI CPU — Use Cases &amp; Roadmap" title="AGI CPU — กรณีใช้งานและโรดแมป">AGI CPU — กรณีใช้งานและโรดแมป</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="การแทนที่ x86 และการพอร์ตซอฟต์แวร์" data-en="x86 Displacement &amp; Software Porting" data-th-full="การแทนที่ x86 และการพอร์ตซอฟต์แวร์" data-en-full="x86 Displacement &amp; Software Porting" title="การแทนที่ x86 และการพอร์ตซอฟต์แวร์">การแทนที่ x86 และการพอร์ตซอฟต์แวร์</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="อัตราส่วน CPU ต่อ GPU" data-en="CPU-to-GPU Ratios &amp; TAM Expansion" data-th-full="อัตราส่วน CPU ต่อ GPU" data-en-full="CPU-to-GPU Ratios &amp; TAM Expansion" title="อัตราส่วน CPU ต่อ GPU">อัตราส่วน CPU ต่อ GPU</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s9" data-sec="s9" aria-controls="rn-p-s9" aria-selected="false" data-th="SoftBank และโอกาสในญี่ปุ่น" data-en="SoftBank Relationship &amp; Japan Opportunity" data-th-full="SoftBank และโอกาสในญี่ปุ่น" data-en-full="SoftBank Relationship &amp; Japan Opportunity" title="SoftBank และโอกาสในญี่ปุ่น">SoftBank และโอกาสในญี่ปุ่น</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s10" data-sec="s10" aria-controls="rn-p-s10" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span><span class="rn-th">เกริ่นนำ — เซสชันปิดกับผู้บริหาร Arm</span><span class="rn-en">Intro — Private Session with Arm Leadership</span></span></h2>
+
+<p>ผมได้เข้าร่วมเซสชันถาม-ตอบแบบปิดกับ <strong>Arm</strong> ที่งาน <strong>TomorrowX</strong> — เป็นการคุยตรงยาว <strong>30 นาที</strong> กับ <strong>CMO</strong> และ <strong>VP &amp; Chief of Staff ของซีอีโอ</strong> ครอบคลุมหลายหัวข้อ ได้แก่:</p>
+<ul>
+<li>ความร่วมมือกับ OpenAI</li>
+<li>ข้อจำกัดด้านซัพพลายเชน</li>
+<li>วิวัฒนาการเชิงกลยุทธ์ (จาก IP สู่ซิลิคอน)</li>
+<li>โรดแมปซิลิคอนในอนาคต</li>
+<li>กรณีใช้งานและโรดแมปของ AGI CPU</li>
+<li>การแทนที่ x86 และการพอร์ตซอฟต์แวร์</li>
+<li>อัตราส่วน CPU ต่อ GPU และการขยายตัวของ TAM</li>
+<li>ความสัมพันธ์กับ SoftBank และโอกาสในญี่ปุ่น</li>
+</ul>
+<blockquote>⚠️ เนื้อหาอาจคลาดเคลื่อนได้บ้าง เพราะแปลงจากเสียงเป็นข้อความ</blockquote>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span><span class="rn-th">โปรเจกต์ CPU กับ OpenAI</span><span class="rn-en">OpenAI Custom CPU Project</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Arm ไม่แสดงความเห็นเรื่องผลิตภัณฑ์ที่ยังไม่ประกาศ</li><li>โฟกัสตอนนี้อยู่ที่ AGI CPU — OpenAI เป็นลูกค้าที่ทำงานด้วยใกล้ชิด</li><li>ลูกค้า CPU มีครบทุกกลุ่ม: foundational model, on-prem server แบบดั้งเดิม และคลาวด์</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> มีความคืบหน้าอะไรบ้างกับโปรเจกต์ custom CPU ที่ Arm ทำร่วมกับ OpenAI?</p>
+<p><strong>💬 Arm:</strong> เอ่อ… ผมคงต้องบอกว่าเราแสดงความเห็นเรื่องผลิตภัณฑ์ที่ยังไม่ได้ประกาศไม่ได้ อืม คงต้องจบไว้แค่นั้นจริง ๆ น่าเสียดาย สิ่งที่ผมพูดได้คือตอนนี้โฟกัสของเราอยู่ที่ <strong>AGI CPU</strong> — OpenAI เป็นลูกค้าของเรา เราทำงานใกล้ชิดกับเขา และทำงานใกล้ชิดกับ — พาร์ทเนอร์ด้าน rack อีกจำนวนมากด้วย เรามีลูกค้า CPU ครบทุกกลุ่ม ตั้งแต่บริษัท foundational model ไปจนถึงบริษัทดั้งเดิมที่รันเซิร์ฟเวอร์ on-prem และรวมถึงกลุ่มคลาวด์บางรายด้วย เรื่องผลิตภัณฑ์ที่ยังไม่ประกาศ ขอจบไว้แค่นี้</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">คำถามเรื่อง custom CPU กับ OpenAI ได้คำตอบแค่ &quot;ยังพูดไม่ได้&quot;</p><ul class="rn-sum-list"><li>Arm ทำงานร่วมกับพาร์ทเนอร์ด้าน rack จำนวนมากด้วย</li></ul></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span><span class="rn-th">ข้อจำกัดด้านซัพพลายเชน</span><span class="rn-en">Supply Chain Constraints</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ไม่ใช่ &quot;ปัญหา&quot; แต่มีข้อจำกัดแน่นอน — ตามที่ Lip-Bu พูดบนเวที</li><li>คอขวดไม่ได้อยู่แค่เวเฟอร์หรือหน่วยความจำ แต่ลามทั้งห่วงโซ่ถึงซับสเตรตและวัสดุซับสเตรต</li><li>ซัพพลายเออร์เริ่มลงทุนเพิ่มกำลังการผลิตมา 6-8 เดือน กำลังการผลิตใหม่เข้าช่วงปลายปี 27-28</li><li>Arm เพิ่มซัพพลาย CPU สำหรับปีหน้าแล้ว แต่จะขายได้มากกว่านี้ถ้ามีของ</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> คุณไม่เห็นปัญหาซัพพลายเชนในการจัดหาของเลยหรือ หรือว่ามีแค่ฝั่ง CPU?</p>
+<p><strong>💬 Arm:</strong> ผมจะไม่เรียกว่า &quot;ปัญหา&quot; แต่มีข้อจำกัดไหม? มีแน่นอน ผมคิดว่า <strong>Lip-Bu</strong> ก็พูดไว้บนเวทีแล้วใช่ไหม — ถ้ามีซัพพลายมากกว่านี้ทั้งระบบ และผมไม่คิดว่ามันจำกัดอยู่แค่กำลังการผลิตเวเฟอร์หรือหน่วยความจำอีกต่อไปแล้ว มันกระจายไป<strong>ทั้งห่วงโซ่</strong> — ซับสเตรต วัสดุซับสเตรตที่ป้อนเข้ามาในส่วนนั้น ผู้เล่นทั้งหมดนี้ตึงตัวมาก สิ่งที่พวกเขาทำคือ ผมคิดว่าเขาเริ่มลงทุนเพิ่มกำลังการผลิตมาตลอด <strong>6-8 เดือนที่ผ่านมา</strong> และผมคิดว่าเราจะเริ่มเห็นกำลังการผลิตนั้นทยอยเข้ามาราว<strong>ปลายปี 27 ถึงปี 28</strong> ในการประชุมผลประกอบการครั้งล่าสุด เราพูดถึงการที่เราเพิ่มซัพพลายสำหรับ CPU ของเราในปีหน้าแล้ว เราทำได้มากกว่านั้นไหม? ถ้าหาซัพพลายเพิ่มได้ เราจะทำได้มากกว่านี้ไหม? ฝั่งซัพพลายเชน — ได้แน่นอน แต่เราค่อนข้างหวังว่า<strong>ตั้งแต่ปี 28 เป็นต้นไป</strong>จะเป็นจุดเปลี่ยนในเรื่องนี้</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ซัพพลายตึงทั้งระบบ และ Arm มองปี 28 เป็นต้นไปเป็นจุดเปลี่ยน</p><ul class="rn-sum-list"><li>การเพิ่มซัพพลาย CPU ปีหน้าถูกพูดถึงในการประชุมผลประกอบการครั้งล่าสุด</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">6-8 เดือน</div><div class="rn-stat-c">ช่วงที่ซัพพลายเออร์เริ่มลงทุนเพิ่มกำลังการผลิต</div></div><div class="rn-stat"><div class="rn-stat-v">ปี 28</div><div class="rn-stat-c">จุดเปลี่ยนที่ Arm หวังว่าซัพพลายจะคลายตัว</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span><span class="rn-th">วิวัฒนาการเชิงกลยุทธ์ — จาก IP สู่ซิลิคอน</span><span class="rn-en">Strategic Evolution — From IP to Silicon</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>คนส่วนใหญ่ยังมอง Arm เป็นธุรกิจ licensing ล้วน ๆ</li><li>Arm มี 3 ตลาด: data center/cloud, edge และ physical AI</li><li>ตอนนี้มี 2 ธุรกิจ — licensing และธุรกิจชิป ซึ่งเริ่มจาก Arm AGI CPU</li><li>Arm อยากให้มองตัวเองเป็น foundational compute platform สำหรับ AI</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> ถ้าพวกคุณส่งสารได้หนึ่งข้อ ให้ถึงคนจำนวนมากอย่างได้ผลกว่านี้ สารนั้นคืออะไร? อะไรคือสิ่งที่อยากบอกผู้คนตอนนี้ — เรื่องที่สำคัญที่สุด</p>
+<p><strong>💬 Arm:</strong> ผมคิดว่าถ้ามองในระดับสูงที่สุด คนส่วนใหญ่น่าจะยังมอง Arm เป็น<strong>ธุรกิจ licensing ล้วน ๆ</strong> และไม่ได้คิดถึง Arm จริง ๆ ในแง่ของสิ่งที่เราสามารถทำได้ในเชิงพื้นฐานเพื่อ<strong>เปลี่ยน compute ecosystem</strong> เรามีธุรกิจ 3 ส่วน: <strong>data center/cloud, edge และ physical AI</strong> และแน่นอนว่าแต่ละส่วนเป็นธุรกิจที่ต่างกันมาก แต่ถ้ามองตำแหน่งของ Arm ว่าเรามาจากไหน — จากมือถือ — แล้วตอนนี้กำลังมุ่งไปไหนในมุมของคลาวด์ และตลาดเกิดใหม่อย่าง physical ผมว่าโดยพื้นฐานแล้ว เรากำลังเปลี่ยนวิธีที่คนมอง Arm ในมุมของ compute ecosystem ดังนั้นผมคิดว่ามันคือเศรษฐศาสตร์ของวิธีที่คุณเคยมอง Arm ในอดีต เทียบกับทิศทางที่เรากำลังไปในอนาคต แน่นอนว่าเราประกาศผลิตภัณฑ์แรกไปแล้ว คือ <strong>Arm AGI CPU</strong> — และจะมีตามมาอีก อย่างที่มีคนพูดไว้ เราจะไม่พูดถึงผลิตภัณฑ์ที่ยังไม่ประกาศ แต่ผมคิดว่าคุณพอจะเห็น<strong>ทิศทางการเดินทาง</strong>ของ Arm และ footprint ของเราได้ สรุปสิ่งเดียวคือ ให้มอง Arm ในบริบทของธุรกิจ 3 ส่วนนั้นกับ compute ecosystem และว่ามันจะเปลี่ยนไปอย่างพื้นฐานแค่ไหนเมื่อมี Arm เข้าไปเกี่ยวข้อง นั่นคือวิธีคิดในระดับสูงมาก ๆ</p>
+<p><strong>🙋 คำถาม:</strong> โอเค ขอทวนกลับนะ — ก็คือ Arm กำลังวิวัฒน์ไปเป็นอะไรบางอย่างที่ต่างจากเดิม?</p>
+<p><strong>💬 Arm:</strong> ใช่ และผมคิดว่านั่นคือหนึ่งใน — ใช่ ผมคิดว่าเรา — ให้มองเราเป็น<strong>แพลตฟอร์มประมวลผลพื้นฐาน (foundational compute platform) สำหรับ AI</strong> ซึ่งหมายความว่าตอนนี้เรามี 2 ธุรกิจแล้วชัด ๆ — <strong>licensing</strong> และ<strong>ธุรกิจชิป</strong>ที่เพิ่งเกิด และส่วนนั้นจะเปลี่ยนไปอย่างมหาศาลเมื่อเรา scale ต่อไปเรื่อย ๆ — scale ไปกับคลาวด์และอื่น ๆ</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">สารหลักของ Arm: เราไม่ใช่แค่บริษัท licensing อีกต่อไป</p><ul class="rn-sum-list"><li>ธุรกิจชิปจะเปลี่ยนภาพไปอย่างมากเมื่อ scale ไปกับคลาวด์</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">3</div><div class="rn-stat-c">ตลาดหลัก: data center/cloud, edge, physical AI</div></div><div class="rn-stat"><div class="rn-stat-v">2</div><div class="rn-stat-c">ธุรกิจ: licensing และชิป</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span><span class="rn-th">โรดแมปซิลิคอนในอนาคต</span><span class="rn-en">Future Silicon Roadmap</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>data center CPU เป็นตลาดที่มีดีมานด์และไม่ชนกับพาร์ทเนอร์ IP มากนัก</li><li>โอกาสถัดไปจะเลือกจากพื้นที่ที่ลูกค้าขอและ IP ในบ้านมีบทบาทได้</li><li>Arm มีพอร์ตโฟลิโอ CPU, GPU ประหยัดพลังงาน และ NPU ขนาดเล็ก</li><li>มองไปที่ physical AI (ยานยนต์อัตโนมัติ หุ่นยนต์) และอุปกรณ์ personal AI ในบ้าน</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> การก้าวเข้าสู่ CPU silicon สมเหตุสมผลมาก — คุณมี IP อยู่แล้ว มี CSS มีลูกค้าอย่าง Meta ที่บอกว่า &quot;เฮ้ เราไม่จำเป็นต้องทำ CPU เองตรงนี้ ทำไมพวกคุณไม่รับไปทำเลยล่ะ?&quot; แล้วถัดจาก CPU silicon ไป ซิลิคอนประเภทอื่นที่อาจออกมาจาก Arm ตามลำดับธรรมชาติคืออะไร? ผมรู้ว่าคุณไม่เปิดเผยผลิตภัณฑ์ใด ๆ แต่เราจะคิดเชิงทิศทางเรื่องก้าวต่อไปได้อย่างไร?</p>
+<p><strong>💬 Arm:</strong> ผมคิดว่าหนึ่งในวิธีที่เรามอง — ผมคิดว่าคุณก็พูดไว้ได้ตรงแล้ว — คือตลาด <strong>data center CPU</strong> มีความต้องการจากฝั่งลูกค้า และมีโอกาสที่ไม่ได้ชนกับพาร์ทเนอร์ IP ของเราในพื้นที่นั้นมากนักใช่ไหม ดังนั้นเวลาเราประเมินโอกาสอื่นแบบเดียวกัน เราจะดูพื้นที่ที่มีโอกาสแบบนั้น — มีดีมานด์ และลูกค้ากำลังขอให้เราทำ อีกมุมหนึ่งที่ผมจะคิดคือ อย่างที่บอก เรามี <strong>install base มหาศาล</strong>จากธุรกิจ IP — ตลาดเหล่านั้นจะวิวัฒน์ไปทางไหนเมื่อ AI workload เข้าไปถึง? ถ้าคิดถึงโลกกายภาพ โลกของ <strong>physical AI</strong> อย่างระบบขับขี่อัตโนมัติ หุ่นยนต์ — workload เหล่านั้นกำลังไปไหน จะเรียกร้องจากฮาร์ดแวร์มากขึ้นตรงไหน — มีแอปพลิเคชันที่ Arm ทำได้ไหม? โดยอิงจาก IP ที่เรามีในบ้านใช่ไหม เรามีพอร์ตโฟลิโอ <strong>CPU</strong> มีพอร์ตโฟลิโอ <strong>GPU ประหยัดพลังงาน</strong> เรามีแม้แต่ <strong>NPU ขนาดเล็ก</strong> และ ecosystem ของ IP ทั้งหมด ดังนั้นถ้าดูตลาดเหล่านั้น ทั้งฝั่ง physical และฝั่ง edge — แล้วอุปกรณ์ <strong>personal AI</strong> จะหน้าตาเป็นอย่างไร? มันจะไม่ใช่ rabbit pin ที่เราติดอยู่ใช่ไหม แล้วมันจะเป็นอะไร? มันน่าจะเป็นอะไรสักอย่างในบ้าน แบบนั้น ซึ่งจะต้องใช้ workload ที่มีดีมานด์และเราน่าจะรองรับได้ เราจึงมองจากมุมนั้น — <strong>ตรงไหนมีโอกาส ตรงไหนมีดีมานด์จากลูกค้า และตรงไหนที่ IP ของเรามีบทบาทได้</strong></p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ก้าวต่อไปของซิลิคอน Arm จะตามดีมานด์ลูกค้าและ install base ของ IP</p><ul class="rn-sum-list"><li>อุปกรณ์ personal AI &quot;จะไม่ใช่ rabbit pin&quot; แต่น่าจะเป็นอะไรสักอย่างในบ้าน</li></ul></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span><span class="rn-th">AGI CPU — กรณีใช้งานและโรดแมป</span><span class="rn-en">AGI CPU — Use Cases &amp; Roadmap</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>กรณีที่ 1: general purpose — แทนที่ x86 และฐานข้อมูลอเนกประสงค์</li><li>กรณีที่ 2: head node ของ accelerator — Cobalt 200 GA กับ Microsoft และ head node กับ TPU variants</li><li>กรณีที่ 3: agentic racks ที่รัน agent พร้อมกันจำนวนมาก</li><li>โรดแมปเน้น concurrent threads, ประสิทธิภาพพลังงาน และ confidential compute</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> สำหรับ data center CPU — AGI CPU เป็นจุดเริ่มต้นที่ดีใช่ไหม แต่ในพื้นที่นี้ แม้แต่การใช้งานใน data center ก็ชัดว่าชิปแบบเดียวรองรับทุก workload ไม่ได้ จะมี CPU หลากหลายแบบทยอยออกมา แล้ว AGI วางตำแหน่งตัวเองในพื้นที่นี้อย่างไรตอนนี้ และคุณเห็นมันไปทางไหนในอนาคต? จะไปทาง low power — แอปพลิเคชันที่ TCO ดีกว่า หรือไปทาง high core count เทียบเท่า <strong>AMD Venice</strong> หรือจะโฟกัสที่ confidentiality — พื้นที่ CPU แบบเข้ารหัส? เพราะ TPU — <strong>Google TPU</strong> — ใช้ชิปของ AMD เฉพาะฝั่งการเข้ารหัส แล้วในเชิงทิศทางคุณเห็นมันไปทางไหน?</p>
+<p><strong>💬 Arm:</strong> ถ้าคิดถึง <strong>Arm AGI CPU</strong> ผมว่ามี <strong>3 กรณีใช้งาน</strong>จริง ๆ ที่มันลงตัว หนึ่งคือ <strong>general purpose</strong> — แทนที่ <strong>x86</strong> และฐานข้อมูลอเนกประสงค์ต่าง ๆ อย่างที่สองคือเป็น <strong>head node</strong> ให้ accelerator จำนวนมาก คุณจะเห็นทั้ง custom ASIC ที่ใช้ Arm — เราประกาศ <strong>Cobalt</strong> ไปเมื่อวานกับทีม <strong>Microsoft</strong> คือ <strong>Cobalt 200 GA</strong> และอื่น ๆ — และเราประกาศ head node ของเรากับ <strong>TPU variants</strong> เมื่อสัปดาห์ก่อน ทั้งหมดนี้เป็นตัวอย่างที่ดีว่าคุณจะเห็นได้ทั้ง custom ASIC ที่ใช้ Arm หรือ Arm AGI CPU ที่ทำหน้าที่เป็น head node และอย่างที่สามคือ <strong>agentic racks</strong> ที่รัน agent พร้อมกันจำนวนมาก เวลามองระบบ agentic ระดับ rack สิ่งที่ต้องคิดคือ<strong>สเกลระดับ rack</strong> และเมื่อคิดถึงสเกลระดับ rack มันคือทั้ง<strong>ประสิทธิภาพพลังงาน</strong>และ<strong>จำนวน thread ที่รันพร้อมกันได้มากขึ้น</strong> สำหรับเรา เวลาคิดถึงโรดแมป CPU เจเนอเรชันถัดไป เราไม่ได้คิดแค่เรื่อง concurrent threads — การรัน agent ได้มาก ๆ หรือให้ได้มากที่สุดใน rack เดียวด้วย power footprint ที่ลดลง — แต่เรายังคิดด้วยว่า อย่างที่ทุกคนรู้ ดูสิ่งที่เกิดขึ้นทุกวันเรื่องความปลอดภัย — <strong>confidential compute</strong> จะเป็นข้อกำหนดที่สำคัญขึ้นเรื่อย ๆ รวมถึงความสามารถด้านความปลอดภัยที่ดีโดยทั่วไป ดังนั้นคุณนึกภาพได้เลยว่าโรดแมปในอนาคตของเราจะรวมความสามารถเหล่านั้นหลาย ๆ แบบ และอีกมาก นั่นคือวิธีคิดเรื่องนี้ เรากำลังตอบโจทย์<strong>ทั้ง 3 ตลาด</strong> มันจะไม่ใช่การเลือกอย่างใดอย่างหนึ่ง — เรามองว่ามันจะได้รับการเสริมให้ยอดเยี่ยมจริง ๆ ในทั้ง 3 กรณีใช้งาน</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Arm ตอบโจทย์ทั้ง 3 ตลาด ไม่ใช่การเลือกอย่างใดอย่างหนึ่ง</p><ul class="rn-sum-list"><li>สเกลระดับ rack = ประสิทธิภาพพลังงาน + จำนวน thread ที่รันพร้อมกัน</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">3</div><div class="rn-stat-c">กรณีใช้งานของ Arm AGI CPU</div></div><div class="rn-stat"><div class="rn-stat-v">Cobalt 200 GA</div><div class="rn-stat-c">ประกาศร่วมกับทีม Microsoft</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span><span class="rn-th">การแทนที่ x86 และการพอร์ตซอฟต์แวร์</span><span class="rn-en">x86 Displacement &amp; Software Porting</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>workload legacy ขององค์กรน่าจะไม่ถูกพอร์ตมา Arm</li><li>แอปพลิเคชัน cloud-native / AI-native กำลังย้ายมา Arm อย่างรวดเร็ว</li><li>Meta แสดงให้เห็นว่าการพอร์ตงานองค์กรจาก x86 มา Arm ไม่ยากเกินไป</li><li>agentic workload เป็นพื้นที่ใหม่ที่ Arm คิดว่าได้ TCO ดีกว่า</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> ขอถามต่อสั้น ๆ — คุณเห็นภัยคุกคามจากฐานลูกค้าในเรื่อง x86 เทียบกับ ARM ไหม มีใครบอกไหมว่า &quot;ไม่ได้ เราใช้ ARM กับแอปพลิเคชันนี้ไม่ได้&quot; หรือตอนนี้มันแทนกันได้หมดแล้ว?</p>
+<p><strong>💬 Arm:</strong> ผมคิดว่ามี workload องค์กรกลุ่มหนึ่งที่เป็น <strong>legacy</strong> — ของที่เขามีในสภาพแวดล้อมมาหลายปีมาก — ซึ่งลูกค้ากลุ่มนั้นน่าจะ… น่าจะไม่พอร์ตซอฟต์แวร์นั้นมาที่ Arm แล้วก็มีแอปพลิเคชัน <strong>cloud-native</strong> — แอปพลิเคชันสำหรับอนาคตที่เป็น cloud-native, AI-native มากกว่า — ซึ่งกำลังย้ายอย่างรวดเร็ว จะเป็นการเริ่มต้นบน Arm ตั้งแต่แรก หรือเคยอยู่บน x86 แล้วต้องพอร์ตมา Arm ก็ตาม ผมจึงคิดว่ามันคือ <strong>long tail ของแอปพลิเคชัน legacy</strong> ที่น่าจะต้องใช้แรงงานมาก แต่อาจไม่ได้เพิ่มมูลค่าอะไรมากนัก นั่นคือสิ่งที่เราได้ยิน และน่าจะเป็นสิ่งที่เรากำลังเห็นอยู่</p>
+<p><strong>💬 Arm:</strong> ใช่ สิ่งเดียวที่ผมจะเสริมคือ <strong>Meta</strong> เป็นกรณีใช้งานที่ดีสำหรับเราเรื่อง AGI CPU — เขาแสดงให้เห็นว่าการพอร์ตงานองค์กรทั้งหมดจาก x86 มา Arm<strong>ไม่ได้ยากเกินไป</strong> ผมคิดว่านั่นเปิดทางให้ลูกค้าอีกหลายรายที่เคยคิดว่า &quot;ฉันไม่อยากเสียเวลา&quot; กลายเป็น &quot;จริง ๆ แล้วมันไม่ได้หนักขนาดนั้นสำหรับฉัน และถ้า TCO benefit ของฉันคือ X และต้นทุนนี้เป็นแค่ส่วนหนึ่งของ X ทำไมฉันจะไม่ทำล่ะ?&quot; แล้วในฝั่ง <strong>agentic workload</strong> นั่นเป็นของใหม่ทั้งหมด เป็น green space, white space หรือจะเรียกอะไรก็ตาม สำหรับส่วนนั้น มันคือ — เราคิดว่าเราได้ <strong>TCO ที่ดีกว่าบน ARM</strong> ได้เลย และมีข้อได้เปรียบสำหรับหลายคนที่อาจเคยรัน cloud workload บน ARM อยู่แล้ว ซึ่งก็ถูก optimize ไว้ระดับหนึ่งแล้ว เราจึงเห็น<strong>แรงหนุนส่ง (tailwinds)</strong> มากมายสำหรับเรื่องนั้น ผมไม่ค่อยเห็นการไหลจาก x86 มา ARM แล้วไหลกลับในทางกลับกัน</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">legacy long tail อยู่บน x86 ต่อ แต่ workload ใหม่ไหลมาที่ Arm</p><ul class="rn-sum-list"><li>ต้นทุนการพอร์ตเป็นแค่ส่วนหนึ่งของ TCO benefit</li></ul></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">08</span><span><span class="rn-th">อัตราส่วน CPU ต่อ GPU และการขยายตัวของ TAM</span><span class="rn-en">CPU-to-GPU Ratios &amp; TAM Expansion</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>TAM อยู่ที่ $60 พันล้านดอลลาร์ก่อนงาน ARM Everywhere ในเดือนมีนาคม</li><li>เพิ่มเป็น $100 พันล้านดอลลาร์เมื่อเปิดตัว Arm AGI CPU</li><li>ซีอีโอรายอื่นพูดถึง $220-$240 พันล้านดอลลาร์ และ Arm บอกว่ายังต่ำกว่าที่เชื่อ</li><li>ดีมานด์ CPU rack แบบ standalone พุ่งทะลุเพดานจาก agent ที่ต้องการ CPU core เฉพาะ</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> ใช่ ผมรู้ว่าช่วงหลายเดือนที่ผ่านมามีการพูดถึงอัตราส่วน <strong>CPU ต่อ GPU</strong> ที่กำลังพลิกจาก 1 ต่อ 4, 1 ต่อ 8 ไปใกล้ <strong>1 ต่อ 1</strong> แล้วในระยะหลายปีข้างหน้า คุณเห็นว่ามันจะเป็นอย่างนั้นไหม หรือเห็นกรณีใช้งานบางอย่างที่อัตราส่วนพลิกไปเป็นประโยชน์กับ CPU มากกว่า?</p>
+<p><strong>💬 Arm:</strong> ผมคิดว่าขึ้นอยู่กับหลายอย่าง ถ้าย้อนไปดูก่อนงาน <strong>ARM Everywhere</strong> ซึ่งจัดใน — ในเดือนมีนาคม — TAM อยู่ที่ <strong>$60 พันล้านดอลลาร์</strong> พอเราประกาศผลิตภัณฑ์ Arm AGI CPU เราเพิ่ม TAM เป็น <strong>$100 พันล้านดอลลาร์</strong> แล้วผมคิดว่าคุณก็เห็นคนอื่น ซีอีโอรายอื่น เพิ่ม TAM ของเขาไปที่ราว <strong>$220 พันล้านดอลลาร์, $240 พันล้านดอลลาร์</strong> ผมไม่รู้ว่าตัวเลขล่าสุดเป็นเท่าไร สิ่งที่มันบอกคือ อัตราส่วนกำลังค่อย ๆ ขยับเข้าใกล้ 1 ต่อ 1 ผมไม่รู้ว่าอัตราส่วนที่แน่นอนจะเป็นเท่าไร น่าจะเร็วเกินไปที่จะบอก และผมคิดว่า agentic workload พวกนี้ใหม่เกินไปมากที่เราจะตั้งสมมติฐานได้จริงว่าอัตราส่วนจะเป็นเท่าไร หรือจะมี CPU มากกว่า GPU หรืออะไรก็ตาม เราคงต้องดูว่ามันจะออกมาอย่างไร แต่พูดตรง ๆ ผมคิดว่า<strong>ตัวเลข TAM นั้นยังต่ำกว่าที่เราเชื่อว่ามันจะเพิ่มขึ้นตามเวลาด้วยซ้ำ</strong></p>
+<p><strong>💬 Arm:</strong> ผมคิดว่าอีกมุมหนึ่งในการมองคือ ตอนที่การถกเถียงเรื่องอัตราส่วนนี้เกิดขึ้นเมื่อปีหรือสองปีก่อน data center ทั้งหมดที่กำลังสร้างคือแบบที่อยากยัด GPU ให้ได้มากที่สุด คำถามจึงเป็น &quot;ต้องใช้ CPU กี่ตัวสำหรับ GPU เหล่านั้น?&quot; แต่สิ่งที่เราเห็นและได้ยินจากคนที่กำลังเติมของเข้า data center วันนี้คือ เขากำลังดูว่า &quot;โอเค ฉันต้องใช้ GPU rack กี่ตู้?&quot; — แล้วก็มี head node สำหรับมัน หรือมันอยู่ข้างใน GPU ถ้าคุณใช้ของ <strong>NVIDIA</strong> แบบ bare ribbon <em>(ถอดเสียงมาแบบนี้ — น่าจะหมายถึง Vera Rubin)</em> แล้วจริง ๆ ยังมี <strong>CPU rack แบบ standalone</strong> อีกจำนวนมากที่คนกำลังจะติดตั้ง เพียงเพราะ agentic workload เหล่านี้ต้องการ CPU มากขึ้น ดังนั้นเวลาคนวางแผน data center ว่าจะเติมอะไรลงไป <strong>ดีมานด์ของ CPU rack แบบ standalone พุ่งขึ้นจริง ๆ</strong> ก็เลยมีอัตราส่วนแบบ &quot;อยู่ข้างใน GPU&quot; ถ้าจะเรียกอย่างนั้น — ที่ GPU กับ CPU ผูกติดกัน — แล้วก็มีสภาพแวดล้อม CPU แบบ standalone ซึ่งเป็นตัวที่ดัน TAM ทั้งหมดนั้นขึ้นไป ในแง่หนึ่ง ผมจึงไม่คิดว่าเรื่องอัตราส่วนนั้น<strong>ยังเป็นภาพแทนที่แม่นยำ</strong>ของทุกอย่างที่เข้าไปใน data center อีกต่อไป — ผมมีคำถาม</p>
+<p><strong>🙋 คำถาม:</strong> ทุกคนเริ่มตระหนักว่า agent กำลังรันจากระดับวินาทีไปเป็น — ระดับชั่วโมง งานที่ยาวขึ้นกำลังมา คุณเห็น CPU มี footprint ที่ใหญ่ขึ้นใน data center rack ตามเวลาไหม เมื่อเรามี agent แบบ long horizon ทำงานกันมากขึ้น?</p>
+<p><strong>💬 Arm:</strong> แน่นอน คือ — สิ่งที่เรากำลังเห็นคือดีมานด์ของ <strong>CPU rack แบบ standalone</strong> เพื่อจุดประสงค์นั้นพอดี<strong>พุ่งทะลุเพดาน</strong> ผมคิดว่า Instinct และ Muse — agent ทั้งหมดนี้ต้องการ <strong>CPU core เฉพาะของตัวเอง</strong> ดังนั้นสำหรับคำถามของ Vic — มีดีมานด์ CPU core ซึ่งกำลังดันดีมานด์ CPU rack แบบ standalone ให้มากขึ้น ตัว data center เองก็กำลังมองว่า &quot;ฉันมีพื้นที่และพลังงานจำกัด จะเติมอะไรลงไปดี?&quot; เรากำลังเห็นดีมานด์ของ CPU rack แบบ standalone มากขึ้น แม้ในพื้นที่ที่มี GPU หนาแน่นก็ตาม</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">อัตราส่วนกำลังเข้าใกล้ 1 ต่อ 1 แต่ภาพจริงคือ CPU rack แบบ standalone</p><ul class="rn-sum-list"><li>อัตราส่วนแบบเดิมไม่ใช่ภาพแทนที่แม่นยำของทุกอย่างที่เข้าไปใน data center อีกต่อไป</li><li>data center ที่มีพื้นที่และพลังงานจำกัดเลือกเติม CPU rack มากขึ้น</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">$60B</div><div class="rn-stat-c">TAM ก่อนงาน ARM Everywhere (มีนาคม)</div></div><div class="rn-stat"><div class="rn-stat-v">$100B</div><div class="rn-stat-c">TAM หลังเปิดตัว Arm AGI CPU</div></div><div class="rn-stat"><div class="rn-stat-v">$220-$240B</div><div class="rn-stat-c">TAM ที่ซีอีโอรายอื่นพูดถึง</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s9" role="tabpanel" aria-labelledby="rn-t-s9" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">09</span><span><span class="rn-th">SoftBank และโอกาสในญี่ปุ่น</span><span class="rn-en">SoftBank Relationship &amp; Japan Opportunity</span></span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>SoftBank เป็นผู้ถือหุ้นรายใหญ่ที่สุด — เรื่องหุ้นที่วางเป็นหลักประกันยกให้เป็นเรื่องของ SoftBank</li><li>รายได้จาก SoftBank ทรงตัวในผลประกอบการล่าสุด และ Arm บอกว่าไม่ได้พึ่งพามาก</li><li>Rene มีตำแหน่งทางการที่ SoftBank Group International</li><li>ญี่ปุ่น: ไซต์ SoftBank, โรงงานที่ซื้อมา และความร่วมมือกับ SoftBank KK</li></ul></div>
+<p><strong>🙋 คำถาม:</strong> ช่วยเล่าถึงความสัมพันธ์กับ <strong>SoftBank</strong> โดยเฉพาะ เพราะหนึ่ง เขาเป็นลูกค้า แต่ก็เป็นผู้ถือหุ้นรายใหญ่มาก และมันก็ออกจะ — เป็นความสัมพันธ์ที่แปลกนิดหน่อย เพราะเขายังเอาหุ้นของคุณไป<strong>วางเป็นหลักประกัน</strong>เพื่อหาเงินทุนให้โปรเจกต์อื่น ๆ ด้วย เลยอยากรู้ภาพรวม — ใช่ คือภาพรวมของการพึ่งพารายได้บางประเภท รวมถึงในมุมความสัมพันธ์ระหว่างผู้ถือหุ้นด้วย</p>
+<p><strong>💬 Arm:</strong> SoftBank เป็นผู้ถือหุ้นรายใหญ่ที่สุดของเรา เราจึงประชุมผู้ถือหุ้นกับ <strong>Masa</strong> อยู่ตลอด ซึ่งก็ดีมาก ส่วนวิธีที่ SoftBank ทำเรื่องการหาเงินทุนทั้งหมดของเขา ผมขอยกให้เป็นเรื่องของ SoftBank ในระดับหนึ่งนะ Masa มี<strong>ความเชื่อมั่นที่แข็งแรงมาก</strong>ใน Arm และนั่นคือเหตุผลที่เขาใช้หุ้น Arm แบบนั้น</p>
+<p><strong>💬 Arm:</strong> SoftBank เป็นลูกค้าของ Arm ที่เราเปิดเผยว่ามีรายได้สูงมาก ผมคิดว่าคุณอาจเห็นในผลประกอบการล่าสุดว่ามันค่อนข้าง<strong>ทรงตัว</strong>แล้ว ผมจะบอกว่าไม่มี — เรา<strong>ไม่ได้พึ่งพา SoftBank ในฐานะลูกค้าอย่างมาก</strong> เขาเป็นลูกค้า เราทำงานกับเขาในบางโปรเจกต์ แต่เขาไม่ใช่ — เราไม่ได้มีลูกค้ารายเดียว และไม่ได้คิดเป็นสัดส่วนที่ใหญ่ ผมคิดว่าเราผูกพันกับ SoftBank อย่างใกล้ชิดในหลายแง่ <strong>Rene</strong> มีตำแหน่งทางการที่ <strong>SoftBank Group International</strong> SoftBank กำลังลงทุนทั่วทั้งกระดานใน data center ด้านพลังงาน และร่วมมือข้าม ecosystem ดังนั้นความสัมพันธ์จึงใกล้ชิด ผมขอยกเรื่องการหาเงินทุนของ SoftBank ให้เป็นเรื่องของ SoftBank เขาเป็นลูกค้าที่ยอดเยี่ยมและพาร์ทเนอร์ที่ยอดเยี่ยมของเรา แต่ผมจะบอกว่าเราไม่ได้พึ่งพาเขาอย่างมาก</p>
+<p><strong>🙋 คำถาม:</strong> โอเค ขอถามต่อ เพื่อให้บริบท — ผมเขียนเรื่อง<strong>ญี่ปุ่น</strong>เป็นหลัก เลยอยากถามนิดหน่อยเกี่ยวกับชุดโอกาสที่คุณเห็นในญี่ปุ่น โดยเฉพาะกับการพัฒนาอย่างรวดเร็ว ซึ่งแน่นอนว่าล่าช้าไป อีกครั้ง SoftBank ก็มีส่วนเกี่ยวข้องที่นั่นด้วย เลยน่าสนใจที่จะเข้าใจว่าคุณมองอะไรเป็นโอกาส? คุณใช้ประโยชน์จากความสัมพันธ์กับ Masa ได้ไหม? คุณเห็นภาพการเติบโตตรงนั้นอย่างไร?</p>
+<p><strong>💬 Arm:</strong> แน่นอน หนึ่งในจุดแข็งของ Masa คือมีความสัมพันธ์ครอบคลุมทุกวง โดยเฉพาะในแวดวงเทค ญี่ปุ่นมีโอกาสมากมาย รัฐบาลญี่ปุ่นตั้ง coalition เมื่อปีที่แล้วที่ลงทุนในไซต์ <strong>SoftBank Portsmouth</strong> ผมจึงว่ามีการผสมข้ามสายพันธุ์ (cross-pollination) เกิดขึ้นบ้าง — คนญี่ปุ่นลงทุนในสหรัฐฯ และ SoftBank ก็พยายามนำบางส่วนกลับไปญี่ปุ่น SoftBank มีไซต์บางแห่งในญี่ปุ่นที่กำลังก่อสร้างอยู่ ผมคิดว่ามี Shark Factory <em>(ถอดเสียงมาแบบนี้ — น่าจะหมายถึงโรงงานของ Sharp)</em> ที่ประกาศว่าเขาซื้อมาแล้วกำลังดำเนินการอยู่ และเรายังร่วมมือกับ <strong>SoftBank KK</strong> ซึ่งเป็นบริษัทโทรคมนาคมที่นั่น ผมคิดว่าเขาเป็นหนึ่งใน<strong>ผู้ให้บริการโทรคมนาคม 3 อันดับแรก</strong>ของที่นั่น ถ้าผมจำไม่ผิด พวกเขามีปฏิบัติการทั้งหมดที่นั่นซึ่งเรามีโอกาสได้ทำงานด้วยใช่ไหม เขามี data center ที่รันอยู่สำหรับธุรกิจโทรคมนาคม และกำลังดูว่าจะทำอะไรกับมันได้บ้าง ดังนั้นจึงมีโอกาสมากมายที่เราจะร่วมมือกันที่นั่น</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ใกล้ชิดกับ SoftBank แต่ไม่พึ่งพา และใช้เครือข่าย Masa เปิดโอกาสในญี่ปุ่น</p><ul class="rn-sum-list"><li>coalition ของรัฐบาลญี่ปุ่นลงทุนในไซต์ SoftBank Portsmouth</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">Top 3</div><div class="rn-stat-c">SoftBank KK ในกลุ่มผู้ให้บริการโทรคมนาคมของญี่ปุ่น</div></div></aside>
+</section>
+<section class="rn-sec" id="rn-p-s10" role="tabpanel" aria-labelledby="rn-t-s10" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🖥 ดีมานด์ CPU rack แบบ standalone พุ่งทะลุเพดาน</strong> — agent ที่รันเป็นชั่วโมงต้องการ CPU core เฉพาะตัว data center จึงเติม CPU rack ล้วน ๆ เพิ่มนอกเหนือจาก head node ใน GPU rack นี่คือสัญญาณที่ตรงที่สุดในเซสชันนี้ว่า agentic AI ขยายตลาด CPU จริง</li>
+<li><strong>📈 TAM ของ data center CPU ขยับต่อเนื่อง</strong> — จาก <strong>$60 พันล้านดอลลาร์</strong> (ก่อนงาน ARM Everywhere เดือนมีนาคม) เป็น <strong>$100 พันล้านดอลลาร์</strong> เมื่อเปิดตัว AGI CPU ขณะที่ซีอีโอรายอื่นพูดถึง <strong>$220-$240 พันล้านดอลลาร์</strong> และ Arm บอกว่าตัวเลขนี้ยัง &quot;ต่ำกว่า&quot; ที่เขาเชื่อ</li>
+<li><strong>🔄 Arm ไม่ใช่แค่ธุรกิจ licensing อีกต่อไป</strong> — สารหลักที่ผู้บริหารอยากให้ตลาดเข้าใจคือ Arm มี 2 ธุรกิจ (licensing + ชิป) ภายใต้ 3 ตลาด (data center/cloud, edge, physical AI) และธุรกิจชิปจะเปลี่ยนภาพไปมากเมื่อ scale</li>
+<li><strong>🧠 AGI CPU เล็ง 3 กรณีใช้งานพร้อมกัน</strong> — general purpose แทน x86, head node ของ accelerator (Cobalt 200 GA กับ Microsoft, head node กับ TPU variants) และ agentic racks — โรดแมปข้างหน้าเน้น concurrent threads, power efficiency และ confidential compute</li>
+<li><strong>⛓ ซัพพลายตึงทั้งห่วงโซ่จนถึงปี 28</strong> — คอขวดไม่ได้อยู่แค่เวเฟอร์/หน่วยความจำแต่ลามถึงซับสเตรตและวัสดุซับสเตรต กำลังการผลิตใหม่เข้ามาช่วงปลายปี 27-28 Arm เพิ่มซัพพลาย CPU ปีหน้าแล้วแต่ยังขายได้มากกว่านี้ถ้ามีของ</li>
+<li><strong>🔁 Meta พิสูจน์ว่าการพอร์ตจาก x86 ไม่ยากอย่างที่คิด</strong> — ทำให้ลูกค้ารายอื่นคำนวณว่าต้นทุนพอร์ตเป็นแค่ส่วนหนึ่งของ TCO benefit ส่วน legacy long tail อาจไม่ย้าย แต่ workload ใหม่แบบ agentic เป็นพื้นที่ว่างที่ Arm ได้เปรียบเรื่อง TCO</li>
+<li><strong>🏦 SoftBank: ใกล้ชิดแต่ไม่พึ่งพา</strong> — รายได้จาก SoftBank &quot;ทรงตัว&quot; แล้ว Arm ย้ำว่าไม่ได้พึ่งพาเป็นสัดส่วนใหญ่ และเลี่ยงตอบเรื่องการนำหุ้น Arm ไปวางเป็นหลักประกัน โดยบอกว่าเป็นเรื่องของ SoftBank</li>
+<li><strong>🇯🇵 ญี่ปุ่นเป็นโอกาสผ่านเครือข่าย Masa</strong> — ไซต์ SoftBank ในญี่ปุ่น โรงงานที่ซื้อมา และความร่วมมือกับ SoftBank KK (ผู้ให้บริการโทรคมนาคม 3 อันดับแรก) ที่มี data center อยู่แล้ว ส่วนเรื่อง custom CPU กับ OpenAI ผู้บริหารปฏิเสธที่จะให้ความเห็น</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>[TomorrowX | ARM Q&amp;A — P Equity Research (26 พ.ย. 2026)](https://pequityresearch.substack.com/p/tomorrowx-arm-q-and-a) — PDF ต้นฉบับ: <code>drive-1f2lShm3VA_lmm7k.pdf</code></li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+P Equity Research<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+
+
+</body></html>

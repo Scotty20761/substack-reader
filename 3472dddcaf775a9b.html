@@ -1,0 +1,807 @@
+<!doctype html><html lang="th" data-lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0f1d"><title>TomorrowX | ถาม-ตอบกับ Cerebras — Andrew Feldman ว่าด้วย RSI, 3D DRAM, XPU, คูเมือง, orbital compute และการสร้าง 700 MW</title><style>
+:root{
+--canvas:#0a0f1d;--surface:#111827;--surface-alt:#0f1626;--surface-raised:#151d2e;
+--border:#1f2a3f;--border-soft:#1a2338;--border-dashed:#24314b;
+/* D14 — the 2026-08-30 re-export warmed the text palette and collapsed four text
+   tokens onto two values. The four NAMES are kept: each call site still says which
+   role it plays, so a future re-split needs no call-site archaeology. */
+--text-strong:#f3f6fb;--text:#e5e7eb;--text-body:#cbd5e1;--text-list:#e5e7eb;
+--text-muted:#cbd5e1;--text-dim:#8f9cb3;--text-dimmer:#7f8ca3;--text-faint:#6b7a94;
+--marker:#4b5b78;--separator:#31405c;
+--accent:#60a5fa;--accent-hover:#93c5fd;--accent-wash:rgba(96,165,250,.09);
+--accent-line:rgba(96,165,250,.28);--warn:#f0b429;--pos:#34d399;--neg:#f87171;--code:#7dd3a8;
+/* D2 — the design face first, the Thai stack appended: per-glyph fallback gives
+   Latin/numerals real mono and Thai a real face inside one mixed label. */
+--mono:'IBM Plex Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,'Sarabun','IBM Plex Sans Thai',monospace;
+--body:'Sarabun','IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+/* D17 — the other two vars liquid-segmented.js reads (README §Type: "The article
+   defines them at :root"). They are that module's own FALLBACKS: segTab()'s default
+   idle is var(--ink-3). Every segmented-control colour on this page is explicitly
+   toned per README §2/§6 (#f3f6fb / #8f9cb3) via the article's own role-named
+   tokens, so these two are never reached — defined because the README says the
+   article defines them, and so a future call site that does lean on the module's
+   defaults lands on the design's values rather than on nothing. */
+--ink:#e9edf5;--ink-3:#8f9cb3;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--canvas);color:var(--text);
+margin:0;padding:env(safe-area-inset-top) 24px 120px;font-size:18px;line-height:1.85}
+body>*{max-width:1000px;margin-left:auto;margin-right:auto}
+/* D16 — ONE 1000px column, measured in the prototype at 1800px: h1 l=400 w=1000,
+   section l=400 w=1000, h2/prose l=400 w=796. Every direct child is the SAME
+   column (body>* above) so all left edges align; prose gets its 796 measure
+   LEFT-ALIGNED inside it — grid column 1 when the rail exists, the .rn-col cap
+   below when it does not. The previous 796 caps on title/lede/notice/foot made
+   each block centre itself at a different width, which is exactly the ragged
+   left edge the user reported. 796 = 1000 − 168 (rail) − 36 (gap), as D3 says. */
+.rn-col{max-width:796px}
+/* §7 / §9 — the standalone Takeaways / References views span the full column */
+.rn-col.rn-wide{max-width:none}
+::selection{background:rgba(96,165,250,.28)}
+/* 🔒 Rail clearance is THIS page's job. the hub bottombar turns into a fixed 228px
+   left rail (z-index 9000) at desktop widths, and it deliberately skips its own
+   body-padding stylesheet on `data-il-bare` pages — which every article is —
+   because "BARE pages reserve their own room and set their own measure"
+   (hub-bottombar, line 593). The legacy 880px column cleared it only by accident of
+   being narrow: centred at 1440 it started at x=280. A 1000px shell starts at
+   x=220 and the rail eats its first 8px, so the reservation has to be explicit.
+   --il-rail-w is the rail's own live variable (set at hub-bottombar, line 208), so
+   this tracks collapsed (48px) vs expanded (228px) instead of hard-coding either;
+   symmetric, per that file's note that symmetry is what keeps a centred column
+   centred. */
+@media (min-width:1200px){
+body{padding-left:calc(var(--il-rail-w,228px) + 18px);
+padding-right:calc(var(--il-rail-w,228px) + 18px)}
+}
+@media (min-width:1200px) and (prefers-reduced-motion:no-preference){
+body{transition:padding-left .34s cubic-bezier(.45,.05,.2,1),
+padding-right .34s cubic-bezier(.45,.05,.2,1)}
+}
+
+/* header */
+.rn-head{display:flex;justify-content:space-between;align-items:center;gap:24px;
+padding:26px 0 22px;border-bottom:1px solid var(--border)}
+.rn-brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.rn-wordmark{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;
+text-transform:uppercase;color:var(--text)}
+.rn-kicker{font-family:var(--body);font-size:11px;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dimmer);white-space:nowrap}
+/* §2 language toggle — a TWO-OPTION GLASS SEGMENTED CONTROL, the same component
+   family as the tab bar, not a plain button (2026-08-30 re-export; D17). Derived
+   from liquid-segmented.js: segShell({fit:true,pad:4,gap:2}) + ';flex:none', with
+   segPill({pad:4,gap:2}) and segTab(active,{tone:#f3f6fb,idle:#8f9cb3,padY:7}).
+   🔒 It gets the UNMODIFIED glass skin — no opaque bed (README §6): it is not
+   pinned over running text, so blur(3px) saturate(170%) is the whole recipe. */
+.rn-lang{position:relative;flex:none;display:flex;flex-direction:row;gap:2px;padding:4px;
+width:fit-content;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+border:none;border-radius:999px;
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13));
+backdrop-filter:blur(3px) saturate(170%);-webkit-backdrop-filter:blur(3px) saturate(170%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-lang::-webkit-scrollbar{display:none}
+.rn-lpill{position:absolute;top:4px;left:4px;z-index:1;border-radius:999px;
+height:calc(100% - 8px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D1 extended — padX comes from the README (tabWidths(…,{padX:14})) but the WIDTH
+   is measured, not computed: the formula weights every codepoint > 0x2000 at 1.9
+   units, a guess aimed at emoji that is wrong for 'ไทย'. Natural width + a measured
+   pill cannot drift from the label at whatever face the reader's machine resolved. */
+.rn-lopt{position:relative;z-index:2;flex:0 0 auto;display:flex;align-items:center;
+justify-content:center;gap:7px;padding:7px 14px;font-family:var(--mono);font-size:10px;
+font-weight:800;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-lopt[aria-pressed="true"]{color:var(--text-strong)}
+.rn-lopt:active{transform:scale(.94)}
+/* §Hover — "Neither segmented control has a hover state" (re-export). The feedback
+   is the .3s label-colour transition plus the scale(.94) press spring. */
+.rn-lopt:focus-visible,.rn-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* title block */
+.rn-title{padding-top:52px}
+/* §3 ticker row — UNBOXED since the 2026-08-30 re-export (D17): no chip fill,
+   border, padding or radius, and the logo slot is a 17x17 CIRCLE that clips its
+   contents. The row gap grew to `8px 18px` to carry the separation the removed
+   chip border used to provide. --accent-wash / --accent-line keep their names
+   (D14's rule) even though nothing paints with them now. */
+.rn-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:22px}
+.rn-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12px;
+font-weight:600;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+.rn-chip i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+border-radius:50%;overflow:hidden;background-color:var(--surface-raised);
+background-image:repeating-linear-gradient(135deg,rgba(96,165,250,.16) 0 1px,transparent 1px 5px);
+border:1px solid rgba(96,165,250,.3);margin-right:7px;vertical-align:-3px;
+font-size:9px;font-weight:700;font-style:normal;letter-spacing:0;color:#93c5fd}
+/* A real mark fills the circle: the striped placeholder ground is dropped. The logo itself is
+   an INLINE `background:#fff url(...) center/cover` on the <i> (D21), which also paints on
+   pages whose <style> predates this rule. */
+.rn-chip i.has-logo{background-image:none;background-color:#fff}
+.rn-deck{font-family:var(--body);font-size:12px;color:var(--text-dimmer);padding:4px 2px}
+h1{font-size:clamp(30px,6.4vw,46px);line-height:1.16;font-weight:700;color:var(--text-strong);
+letter-spacing:-.01em;text-wrap:pretty;margin:0}
+.rn-byline{margin:28px 0 0;padding:14px 0;border-top:1px solid var(--border);
+border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;
+letter-spacing:.06em;color:var(--text-dimmer)}
+.rn-byline b{color:var(--text-body);font-weight:600}
+.rn-sep{color:var(--separator);margin:0 8px}
+.rn-notice{border:1px dashed var(--border-dashed);border-radius:6px;padding:12px 16px;
+font-family:var(--body);font-size:12px;line-height:1.6;color:var(--text-dimmer);margin:28px auto 0}
+
+/* tab bar — styles re-derived from design/liquid-segmented.js, which the 2026-08-30
+   re-export made the SoT for the whole segmented-control family (segShell/segPill/
+   segTab/SEG_SHEEN/dragScroll/scrollToIndex). design/Tabbar.js is now a thin wrapper
+   that adds only stickyWrap(). Both bars on this page derive from the same block. */
+.rn-tabanchor{height:0}
+/* `auto` on the inline axis, not 0 — a class beats the `body>*` centring rule, so a
+   `margin:32px 0 8px` shorthand here silently left-aligns the whole tab bar. */
+/* 🔒 `top` carries the notch. On a phone with a display cutout, a bare `top:10px`
+   pins the capsule 10px from the VIEWPORT top — which is underneath the status bar /
+   notch, so the bar reads as sitting on top of the cutout. env(safe-area-inset-top)
+   is 0 everywhere else, so this costs nothing on a flat screen. (Measured 2026-08-31:
+   the template had no `safe-area-inset-top` anywhere at all.) */
+.rn-tabwrap{position:sticky;top:calc(10px + env(safe-area-inset-top));z-index:30;
+display:flex;justify-content:center;
+width:100%;margin:32px auto 8px;pointer-events:none}
+/* Below 1200px the hub swaps its left rail for a fixed 42px hamburger at
+   top:14/right:12, z-index 9300. TWO of our elements live in that exact corner and
+   both were measured unreachable before this rule:
+     · the tab capsule, pinned at top:10 — ran to x=372 at 390px vs the button's
+       x=336-378, so its rightmost tab could not be tapped
+     · the language toggle, at top:26 x=331-372 — fully covered at BOTH 820 and 390
+       (elementFromPoint returned the hamburger, not the button)
+   One reserve for both: 42 + 12 + 8 of breathing room, plus the notch inset. */
+@media (max-width:1199px){
+:root{--hub-fab-clear:calc(62px + env(safe-area-inset-right))}
+/* 🔒 D20 — the capsule pins at the TOP, and the hamburger moves down to meet it.
+   D19(a) put the bar BELOW the button (top:66) because a full-width bar cannot be
+   squeezed beside a 42px corner button. That reasoning was sound but it optimised the
+   wrong element: the user's directive of 2026-08-31 is that the tab bar is the topmost
+   chrome and the hamburger yields to it. So the base `top:calc(10px + notch)` now
+   stands at EVERY width, and #il-mb-btn drops to clear the capsule — owned by the
+   hub's shared bottom-bar script, scoped with :has(.rn-tabwrap) so a dashboard with no
+   tab bar keeps its button in the corner. The two halves must move together; changing
+   this rule without the hub one puts the button back on top of the bar.
+   🔒 That script's FILENAME is deliberately not written here: the widget injector's
+   idempotency guard is a bare `in html` substring test, so merely naming the file in
+   emitted CSS makes an article look already-injected and it silently ships with NO
+   shared nav at all. Measured, by causing it, 2026-08-31. */
+/* `.rn-head` keeps the asymmetric reserve: it is `space-between`, so only its
+   right-hand item (the language toggle) sits under that corner button. */
+.rn-head{padding-right:var(--hub-fab-clear)}
+}
+.rn-tabs{position:relative;display:flex;flex-direction:row;gap:4px;padding:5px;
+width:fit-content;max-width:100%;flex:0 1 auto;pointer-events:auto;
+overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
+-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+border:none;border-radius:999px;
+/* §6 OPAQUE BED — pinned bar only (2026-08-30 re-export; D17). This bar floats
+   over running text, so a third background layer sits BENEATH the two glass
+   gradients and the blur is stronger. Without it the tab labels read on top of
+   paragraph text. The language toggle deliberately does NOT get this. */
+background:linear-gradient(225deg,rgba(255,255,255,.06),rgba(255,255,255,.02) 48%,rgba(255,255,255,.007)),
+linear-gradient(0deg,rgba(210,214,220,.13),rgba(210,214,220,.13)),
+linear-gradient(0deg,rgba(13,19,33,.93),rgba(13,19,33,.93));
+backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+box-shadow:inset 0 0 0 .5px rgba(255,255,255,.135),inset 0 0 0 1px rgba(255,255,255,.095),
+inset 0 0 0 1.5px rgba(255,255,255,.06),inset -1.3px 2px 0 -1.1px rgba(255,255,255,.5),
+inset 1.5px -1.5px 0 -1.1px rgba(255,255,255,.32),inset -0.3px -1px 3px 0 rgba(0,0,0,.18),
+inset 0 2.5px 3px -2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.17),0 4px 12px rgba(0,0,0,.13)}
+.rn-tabs::-webkit-scrollbar{display:none}
+.rn-tabs.is-drag{cursor:grabbing}
+.rn-sheen{position:absolute;inset:-58% -30% auto -6%;height:80%;pointer-events:none;
+background:radial-gradient(66% 100% at 100% 0%,rgba(255,255,255,.09),transparent 70%)}
+.rn-pill{position:absolute;top:5px;left:5px;z-index:1;border-radius:999px;
+height:calc(100% - 10px);width:0;pointer-events:none;
+transition:transform .44s cubic-bezier(.7,0,.2,1),width .44s cubic-bezier(.7,0,.2,1);
+background:linear-gradient(225deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 2px 1px 0 -1px rgba(255,255,255,.3),
+inset -1.5px -1px 0 -1px rgba(255,255,255,.26),inset -1px 2px 3px -1px rgba(0,0,0,.4),
+0 3px 6px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.4)}
+/* D2 — body face, no uppercase: these labels are Thai. */
+/* D15 — `display:block;text-align:center`, NOT flex-centred. The button holds one
+   bare text node, and `text-overflow:ellipsis` applies to BLOCK containers only: on
+   a flex container it is inert, so a label over max-width was clipped symmetrically
+   — losing the section number off the front AND the key term off the back, with no
+   ellipsis to signal it. One nowrap line centres identically either way. */
+.rn-tab{position:relative;z-index:2;flex:0 0 auto;scroll-snap-align:center;
+display:block;text-align:center;padding:8px 18px;
+max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font-family:var(--body);font-size:11.5px;font-weight:700;letter-spacing:.04em;
+border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--text-dim);
+transition:color .3s ease,transform .34s cubic-bezier(.34,1.6,.5,1)}
+.rn-tab[aria-selected="true"]{color:var(--text-strong)}
+.rn-tab:active{transform:scale(.94)}
+
+/* sections */
+.rn-sec{display:none;scroll-margin-top:24px}
+.rn-sec.is-on{display:block}
+/* §5 body section — the design's two-column grid, restored once an article supplies
+   stats. Column 1 is 1000 − 168 − 36 = 796px, i.e. the SAME measure a rail-less
+   article gets from .rn-sec's 796px cap, so line length does not change between
+   articles that have stats and articles that do not. */
+.rn-sec.has-rail{max-width:1000px}
+.rn-sec.has-rail.is-on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,168px);
+column-gap:36px;align-items:start}
+.rn-rail{position:sticky;top:32px;display:flex;flex-direction:column;gap:18px;
+padding-top:74px}
+.rn-stat-v{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--text-strong);
+font-variant-numeric:tabular-nums;line-height:1.25}
+.rn-stat-c{font-size:12.5px;line-height:1.5;color:var(--text-dimmer);margin-top:3px}
+
+/* §4 Key points — sits directly under the H2 */
+.rn-keypoints{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:22px 0 0}
+.rn-keypoints .rn-label{font-size:10px}
+/* §4 Section summary — the one block with an accent edge */
+.rn-summary{background:var(--surface-alt);border:1px solid var(--border);
+border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;
+margin:38px 0 0}
+.rn-summary .rn-label{font-size:10px}
+.rn-sum-lead{font-size:16.5px;line-height:1.8;font-weight:700;color:var(--text-strong);
+margin:0}
+.rn-sum-list{gap:7px;margin:12px 0 0}
+.rn-sum-list>li{font-size:15px;color:var(--text-muted)}
+/* §4 Further reading — dimmer than everything around it, label included */
+.rn-further{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:15.5px;line-height:1.7;color:var(--text-muted)}
+.rn-further .rn-label{font-size:10.5px;color:var(--text-dimmer)}
+.rn-kp-list{margin:0}
+/* D14 — H2 is ACCENT, not text-strong, since the 2026-08-30 re-export ("accent:
+   H2 headings, section numbers, …"). Heading and its number now share one colour. */
+h2{display:flex;align-items:baseline;gap:14px;margin:56px 0 0;font-size:29px;
+line-height:1.38;font-weight:700;color:var(--accent);letter-spacing:-.005em;
+text-wrap:pretty}
+.rn-num{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.08em;
+color:var(--accent);flex:none}
+h3{font-size:20px;line-height:1.45;font-weight:700;color:var(--text-strong);margin:34px 0 0}
+h4{font-size:17px;font-weight:700;color:var(--text-body);margin:26px 0 0}
+p{margin:20px 0 0;color:var(--text-body);text-wrap:pretty}
+/* D14 — run-in lead-ins are --text (#e5e7eb), the token table's own role for them.
+   Brighter than the --text-body prose around it, so the run-in still reads as one. */
+strong{color:var(--text);font-weight:700}
+em{color:var(--warn);font-style:normal;font-weight:700}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(96,165,250,.35)}
+a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-raised);
+border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--code)}
+hr{border:none;border-top:1px solid var(--border);margin:38px 0}
+
+/* lists — the design's "Key points" vocabulary (em-dash rows, no bullets) */
+ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:8px}
+ul>li{position:relative;padding-left:24px;font-size:15.5px;line-height:1.85;color:var(--text-body)}
+ul>li::before{content:"—";position:absolute;left:0;color:var(--marker)}
+ol{list-style:none;counter-reset:rn;padding:0;margin:22px 0 0;
+display:flex;flex-direction:column;gap:10px}
+ol>li{counter-increment:rn;position:relative;padding-left:30px;font-size:16px;
+line-height:1.85;color:var(--text-body)}
+ol>li::before{content:counter(rn,decimal-leading-zero);position:absolute;left:0;top:3px;
+font-family:var(--mono);font-size:12px;color:var(--accent)}
+li>ul,li>ol{margin:8px 0 0}
+
+/* D7 — a body blockquote takes the "Further reading" aside skin, NOT the Section-summary
+   skin it used before the real summary block existed. Two different things must not look
+   identical: the accent edge now means "this is the section's summary", and a pull quote
+   or an author's note is not that. */
+blockquote{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:18px 22px;margin:28px 0 0;font-size:16.5px;line-height:1.8;
+color:var(--text-list)}
+
+/* D8 — table chrome per §11; numeric cell colouring is authored data we don't have */
+table{border-collapse:collapse;width:100%;background:var(--surface);font-size:15px;
+margin:0;color:var(--text-list)}
+.rn-sec>table,.rn-takeaways>table{margin:32px 0 0;border:1px solid var(--border);
+border-radius:8px;overflow:hidden;display:table}
+/* A table wider than a phone column scrolls sideways inside itself instead of widening
+   the page. Body tables are children of .rn-col (not .rn-sec). Kept identical to
+   scripts/fix_article_table_scroll.py SCROLL_RULE, which applies it to existing pages. */
+@media (max-width:700px){.rn-col>table,.rn-takeaways>table{display:block;max-width:100%;overflow-x:auto}}
+th{padding:12px 16px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.06em;
+text-transform:uppercase;color:var(--text-dim);text-align:left}
+td{padding:12px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-list);
+vertical-align:top}
+tr:last-child td{border-bottom:none}
+/* §11 numeric cells. Only cells that ARE numbers get this — a prose cell keeps the body
+   face and its left alignment (see _style_table_cells for why alignment is per-cell). */
+td.rn-numcell{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;
+white-space:nowrap;color:var(--text-strong)}
+td.rn-numcell.rn-pos{color:var(--pos)}
+td.rn-numcell.rn-neg{color:var(--neg)}
+td.rn-flat{color:var(--text-dimmer)}
+
+/* figures */
+.figure{margin:34px 0 0}
+.figure img{display:block;width:100%;height:auto;border:1px solid var(--border);
+border-radius:8px;background:var(--surface)}
+.figure-caption{font-family:var(--body);font-size:12.5px;line-height:1.6;
+color:var(--text-dimmer);margin-top:12px}
+
+/* takeaways · references · footer */
+.rn-label{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.12em;
+text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+/* §4 Abstract — the one block above the tab bar, so it is a reader's only orientation
+   before choosing a section. Its label is AMBER, not the accent blue every other label
+   uses; that is the design's own distinction (§4) and worth keeping. */
+/* margin uses AUTO on the inline axis — `40px 0 0` was Trap 4 again (class beats
+   body>*'s element selector, so `0` killed the auto-centring and this card hugged
+   the left padding edge on any viewport with centring slack; invisible at 1440
+   where there is none). Same fix on .rn-foot and .rn-notice. (D16) */
+.rn-abstract{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+padding:26px 28px;margin:40px auto 0;font-size:17px;line-height:1.8;color:var(--text-body)}
+.rn-abstract .rn-label{color:var(--warn);letter-spacing:.16em}
+.rn-takeaways{border:1px solid var(--border);border-radius:8px;background:var(--surface-alt);
+padding:28px 30px;margin:64px 0 0}
+.rn-takeaways ol{margin:0}
+.rn-takeaways ol>li{font-size:16.5px;color:var(--text-list)}
+.rn-refs{margin:64px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.rn-refs .rn-label{color:var(--text-dimmer)}
+.rn-refs ul>li{font-size:15px;line-height:1.7;color:var(--text-muted)}
+.rn-refs ul>li::before{content:"·";font-family:var(--mono);font-size:12.5px;color:var(--marker)}
+.rn-foot{margin:56px auto 0;padding-top:22px;border-top:1px solid var(--border);
+font-family:var(--body);font-size:11.5px;line-height:1.8;letter-spacing:.02em;
+color:var(--text-faint)}
+
+/* language toggle — both strings ship; CSS picks one */
+[data-lang="th"] .rn-en{display:none}
+[data-lang="en"] .rn-th{display:none}
+
+/* §Responsive — ONE breakpoint, 700px. The grid collapses to `display:block` and the
+   sticky stat rail becomes a static wrapping row BELOW the prose.
+   🔒 700, not 900: the 2026-08-30 re-export moved it and says why — it is
+   `attachSearch`'s `breakpoint` default in liquid-segmented.js, so the bar and the
+   layout change at the same width. The prototype's own stylesheet carries the note
+   "700px = the breakpoint from liquid-segmented.js (SoT); do not diverge locally."
+   Everything in this block moves with it: the README states one breakpoint, so a
+   second one for our own mobile ergonomics would be exactly the local divergence
+   that note forbids. Cost, stated rather than hidden: between 701 and 900px the
+   two-column grid survives on a viewport that can only give the prose column
+   ~470-630px, and h2 stays at 29px. */
+@media (max-width:700px){
+body{padding:env(safe-area-inset-top) 18px 120px}
+.rn-title{padding-top:36px}
+h2{font-size:24px;gap:10px}
+.rn-takeaways{padding:22px 20px}
+.rn-sec.has-rail.is-on{display:block}
+.rn-rail{position:static;flex-direction:row;flex-wrap:wrap;gap:18px 36px;
+margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+}
+/* Tabs hide sections from find-in-page and from print, so print the whole article.
+   (The design states print is out of scope; this keeps a PDF/⌘P honest.) */
+@media print{
+.rn-tabwrap,.rn-lang{display:none}
+.rn-sec{display:block !important}
+}
+@media (prefers-reduced-motion:reduce){
+.rn-pill,.rn-tab{transition:none}
+}
+</style></head><body>
+<header class="rn-head"><div class="rn-brand">
+<span class="rn-wordmark">P Equity Research</span>
+<span class="rn-kicker"><span>Research Note</span></span>
+</div>
+</header>
+<div class="rn-title">
+<div class="rn-chips">
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/CBRS?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$CBRS</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/NVDA?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$NVDA</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMD?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMD</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AVGO?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AVGO</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/TSM?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$TSM</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/AMZN?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$AMZN</span>
+<span class="rn-chip"><i class="has-logo" aria-hidden="true" style="background:#fff url('https://img.logo.dev/ticker/GOOGL?token=pk_c7SlZSX-QcuYmj_QHeo8Aw&amp;size=64&amp;format=webp&amp;retina=true&amp;fallback=monogram') center/cover no-repeat"></i>$GOOGL</span>
+<span class="rn-deck">30 นาทีคุยตรงกับ Andrew Feldman ซีอีโอ Cerebras — ตั้งแต่ AI ออกแบบชิป ไปจนถึงคำถามว่าจะหาเงินมาสร้าง 700 MW ได้อย่างไร</span>
+</div>
+<h1>🧠 TomorrowX | ถาม-ตอบกับ Cerebras</h1>
+<div class="rn-byline"><b>P Equity Research</b><span class="rn-sep">·</span>2026-11-23<span class="rn-sep">·</span><span class="rn-th">อ่าน 16 นาที</span><span class="rn-en">16 min read</span></div>
+</div>
+<div class="rn-lede"><div class="figure"><img src="data:image/png;base64,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AHjjJFJ3qbST+29ohOv+q9J2C58b5Jqq+GkPM70XYU8I+zw+yLVE355vq8xcVYXvlrDupPAP/mtrS84k35blVSkVftU8OsM8v7h2C9uztXL2WPDGlU7+RPVpQ9oTIndkzZP+AAU6Nb85M2uY7+TBIMo4CNCxJEnSb4gKv4iiKAgCz/MlJSXnzp07fPjwnj17du7cuUNn9+7dhw4dOnPmDPwvfA2+7PP5jK4p69SiADHEeA6NB1LUgYqXlpYGKr5r167t27cbdd+/fz/Ml5cvX2ZZ1qh7xT+/OYan2hFQrkb/gTYsKiqCtvrpp5+MngMteeTIkatXr8J/wRcCHSb6RTV6qXHLoOsKOjRNX7p06cSJE3CLd+ps27YNfkJvP3r06Pnz571e7429PRIjcnDiRK5d99RAy3AcZ9xxaEDjpgPw7MDvx48fLywspCjKaEDoIcaTUufGikhgtCR0JOhX0DgwsEA/hCcF2s0Yc/bt2wetShAEtB58x2j2yHU8454a1w+Uyri/xcXFZ8+ehVFx7969xv01nmu44/CMwLMDHcAYGI2iGhcxLhih0kaOQLErdnJjTjx9+jTMgEYnh1ECGgH6OXwCUwZMHMb4BtU3/txQrmaVqpLVNbXwJD/gGdIV7mEyEHzMKLtSdL7qJlHoken6BmVYco3QxRA/MVctvVJpPsrVC9SIdMoMawZNIYHmy07j1y0Kvs/IXTlLjXSSJmVaWfPqdqnZDbnRGdKRHbU7nWY8/B6PB4ZU6Hyff/75+PHjc3JynnzyybS0tL///e+///3vb7311v/7S37961/D5/fff3+TJk3at2/fp0+f999/f9OmTQcPHoQntk68PRslhCkERhl42JYtWzZp0qROnTo988wzjRs3horfdddd/+///b8bK3777bf/+c9/TkxMfPzxx91u97hx45YuXQqTOgxk8KDGulqxARoT7jvMK1999dWgQYNeeuklaMO//vWv0FYVW++///u///a3vzVv3hza+YMPPti6deupU6eipniMOw7D6IULF6Co0F1nzJjRr1+/l19+uWXLlgkJCXBbb7vttv97A9D/77zzzn/9619Q8hdeeOG111776KOPNm/eDHMqPDhR7u3xINegDS9evAhz9tdffz127NjMzMzWrVsnJSX95S9/qbQB4b7ffffd0MKtWrVyOp0jRoz44osv4JGB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" alt="figure 1"><div class="figure-caption">รูปที่ 1: โลโก้ — โลโก้บริษัท Cerebras เป็นวงโค้งสีส้มซ้อนกันหลายชั้นทางซ้าย ตามด้วยตัวอักษรสีดำ (ป้ายในภาพ: cerebras = ชื่อแบรนด์ Cerebras)</div></div></div>
+<div class="rn-abstract"><div class="rn-label"><span class="rn-th">บทสรุป</span><span class="rn-en">Abstract</span></div>🧠 AI ทำลายคูเมืองซอฟต์แวร์ระดับล่าง — Feldman มองว่าถ้าย้ายจาก NVIDIA ไป AMD ได้ใน 3 วันจริง มูลค่าของคอมไพเลอร์และซอฟต์แวร์ระดับล่างจะหายไป สิ่งที่เหลือคือสถาปัตยกรรมชิป — นี่คือข้อโต้แย้งหลักที่ทำให้ wafer-scale ของ Cerebras น่าสนใจขึ้น</div>
+<div class="rn-tabanchor" aria-hidden="true"></div>
+<div class="rn-tabwrap" data-il-topnav><div class="rn-tabs" role="tablist" aria-label="Sections">
+<div class="rn-sheen" aria-hidden="true"></div>
+<div class="rn-pill" aria-hidden="true"></div>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s1" data-sec="s1" aria-controls="rn-p-s1" aria-selected="true" data-th="เกริ่นนำ — เซสชันปิดกับ Andrew Feldman" data-en="เกริ่นนำ — เซสชันปิดกับ Andrew Feldman" data-th-full="เกริ่นนำ — เซสชันปิดกับ Andrew Feldman" data-en-full="เกริ่นนำ — เซสชันปิดกับ Andrew Feldman" title="เกริ่นนำ — เซสชันปิดกับ Andrew Feldman">เกริ่นนำ — เซสชันปิดกับ Andrew Feldman</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s2" data-sec="s2" aria-controls="rn-p-s2" aria-selected="false" data-th="RSI และ AI ในการออกแบบชิป" data-en="RSI และ AI ในการออกแบบชิป" data-th-full="RSI และ AI ในการออกแบบชิป" data-en-full="RSI และ AI ในการออกแบบชิป" title="RSI และ AI ในการออกแบบชิป">RSI และ AI ในการออกแบบชิป</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s3" data-sec="s3" aria-controls="rn-p-s3" aria-selected="false" data-th="ระยะเวลาออกแบบชิป" data-en="ระยะเวลาออกแบบชิป" data-th-full="ระยะเวลาออกแบบชิป" data-en-full="ระยะเวลาออกแบบชิป" title="ระยะเวลาออกแบบชิป">ระยะเวลาออกแบบชิป</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s4" data-sec="s4" aria-controls="rn-p-s4" aria-selected="false" data-th="3D DRAM, hybrid bonding" data-en="3D DRAM, hybrid bonding" data-th-full="3D DRAM, hybrid bonding" data-en-full="3D DRAM, hybrid bonding" title="3D DRAM, hybrid bonding">3D DRAM, hybrid bonding</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s5" data-sec="s5" aria-controls="rn-p-s5" aria-selected="false" data-th="XPU, เศรษฐศาสตร์ของ token" data-en="XPU, เศรษฐศาสตร์ของ token" data-th-full="XPU, เศรษฐศาสตร์ของ token" data-en-full="XPU, เศรษฐศาสตร์ของ token" title="XPU, เศรษฐศาสตร์ของ token">XPU, เศรษฐศาสตร์ของ token</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s6" data-sec="s6" aria-controls="rn-p-s6" aria-selected="false" data-th="คูเมืองที่ยั่งยืน" data-en="คูเมืองที่ยั่งยืน" data-th-full="คูเมืองที่ยั่งยืน" data-en-full="คูเมืองที่ยั่งยืน" title="คูเมืองที่ยั่งยืน">คูเมืองที่ยั่งยืน</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s7" data-sec="s7" aria-controls="rn-p-s7" aria-selected="false" data-th="Orbital compute" data-en="Orbital compute" data-th-full="Orbital compute" data-en-full="Orbital compute" title="Orbital compute">Orbital compute</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s8" data-sec="s8" aria-controls="rn-p-s8" aria-selected="false" data-th="การสร้าง 700 MW กระแสเงินสด และการระดมทุน" data-en="การสร้าง 700 MW กระแสเงินสด และการระดมทุน" data-th-full="การสร้าง 700 MW กระแสเงินสด และการระดมทุน" data-en-full="การสร้าง 700 MW กระแสเงินสด และการระดมทุน" title="การสร้าง 700 MW กระแสเงินสด และการระดมทุน">การสร้าง 700 MW กระแสเงินสด และการระดมทุน</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-s9" data-sec="s9" aria-controls="rn-p-s9" aria-selected="false" data-th="Key Takeaways" data-en="Key Takeaways" data-th-full="Key Takeaways" data-en-full="Key Takeaways" title="Key Takeaways">Key Takeaways</button>
+<button class="rn-tab" type="button" role="tab" id="rn-t-refs" data-sec="refs" aria-controls="rn-p-refs" aria-selected="false" data-th="แหล่งอ้างอิง" data-en="References &amp; sources" data-th-full="แหล่งอ้างอิง" data-en-full="References &amp; sources" title="แหล่งอ้างอิง">แหล่งอ้างอิง</button>
+</div></div>
+<section class="rn-sec is-on has-rail" id="rn-p-s1" role="tabpanel" aria-labelledby="rn-t-s1">
+<div class="rn-col">
+<h2><span class="rn-num">01</span><span>เกริ่นนำ — เซสชันปิดกับ Andrew Feldman</span></h2>
+
+<p>ผมได้เข้าร่วมเซสชันถาม-ตอบแบบปิดกับ <strong>Cerebras</strong> ที่งาน <strong>TomorrowX</strong> — เป็นบทสนทนา 30 นาทีที่คุยตรงกับ <strong>Andrew Feldman</strong> ครอบคลุมหลายหัวข้อ ได้แก่:</p>
+<ul>
+<li><strong>Recursive Self-Improvement (RSI) และ AI ในการออกแบบชิป</strong></li>
+<li><strong>ซอฟต์แวร์ที่กลายเป็นสินค้าโภคภัณฑ์ vs. สถาปัตยกรรมฮาร์ดแวร์</strong></li>
+<li><strong>ระยะเวลาออกแบบชิป และชิปเจเนอเรชันแรก</strong></li>
+<li><strong>3D DRAM, hybrid bonding และ IP ของชิประดับ wafer-scale</strong></li>
+<li><strong>XPU, เศรษฐศาสตร์ของ token และกลยุทธ์การเข้าตลาด</strong></li>
+<li><strong>คูเมืองที่ยั่งยืน และ orbital compute (การประมวลผลในวงโคจร)</strong></li>
+<li><strong>การสร้าง 700 MW กระแสเงินสด และการระดมทุน</strong></li>
+</ul>
+<blockquote>⚠️ เนื้อหาอาจคลาดเคลื่อนได้บ้าง เพราะแปลงจากเสียงเป็นข้อความ</blockquote>
+<hr>
+
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s2" role="tabpanel" aria-labelledby="rn-t-s2" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">02</span><span>RSI และ AI ในการออกแบบชิป</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Cerebras ใช้ recursive improvement มาหลายปีแล้วผ่าน ML และอัลกอริทึม placement/optimization ที่ปรับปรุงตัวเอง</li><li>AI ช่วยได้มากที่สุดในซอฟต์แวร์ระดับล่าง — ถ้าย้ายจาก NVIDIA ไป AMD ได้ใน 3 วัน มูลค่าคอมไพเลอร์ก็หายไป</li><li>เมื่ออุปสรรคด้านซอฟต์แวร์หายไป สิ่งที่เหลือคือสถาปัตยกรรมชิป และสถาปัตยกรรมใหม่จะทยอยออกมาในทศวรรษหน้า</li><li>ชิปเจเนอเรชันแรกมักไม่ดี — คาดว่าใน 90 วันคนจะพูดถึง Cilantro (Gen 2) แทน Jalapeño</li></ul></div>
+<p><strong>ผู้ถาม:</strong> ช่วยพูดถึง RSI หน่อยได้ไหมครับ ว่าพวกคุณใช้ recursive self-improvement ภายในเพื่อออกแบบชิปหรือเปล่า? อย่าง OpenAI ก็โด่งดังจากการใช้ RSI ออกแบบ <strong>Jalapeño</strong> ภายใน 9 เดือน ผมสงสัยว่าจากมุมของ Cerebras ถ้าพวกคุณใช้ RSI สถาปัตยกรรมระดับเวเฟอร์ให้ความได้เปรียบด้าน IP ไหม? ในแง่ที่พวกคุณมี IP เฉพาะของตัวเอง ซึ่งแล็บหรือผู้ผลิตชิปคู่แข่งอาจเข้าถึงได้ไม่ง่าย เพราะพวกคุณสั่งสมความเชี่ยวชาญและคูเมืองของตัวเองมาตลอด 10 ปีที่ผ่านมา?</p>
+<p><strong>Andrew:</strong> &quot;recursive improvement เป็นสิ่งที่เราใช้มาหลายปีแล้ว คุณไม่จำเป็นต้องใช้ AI ด้วยซ้ำ ใช้ ML ก็ได้ อัลกอริทึม placement ภายในเครื่องมือต่าง ๆ ส่วนใหญ่ที่เราใช้ก็เป็นแบบ recursive และปรับปรุงตัวเองได้ อัลกอริทึม optimization ที่เราเขียนเองก็ปรับปรุงตัวเองได้ทั้งหมด ที่ที่ AI ในการออกแบบชิปช่วยได้มหาศาลคือ <strong>ซอฟต์แวร์ระดับล่าง (low-level software)</strong> นี่คือข้อหนึ่งนะ และผมคิดว่าคุณต้องให้ความสำคัญจริงจังกับบล็อกโพสต์ของ <strong>Anthropic</strong> ที่เล่าว่าพวกเขาย้ายจาก <strong>NVIDIA</strong> ไป <strong>AMD</strong> ได้ใน 3 วัน จะฟังหูไว้หูก็ได้ จะบอกว่าโม้ก็ได้ ต่อให้ลดทอนลงมาแล้วมันก็ยังเป็นเรื่องใหญ่อยู่ดี ความหมายของมันคือ — ซึ่งผมพูดไว้ตั้งแต่ 2 ปีก่อนและทุกคนหาว่าผมบ้า — คืออะไรหลายอย่างจะหายไป แรงเสียดทานเป็นศูนย์ ถ้าคุณย้ายจากชิปหนึ่งไปอีกชิปหนึ่งได้แบบนั้น มูลค่าของซอฟต์แวร์ระดับล่างก็หายไป มูลค่าของคอมไพเลอร์ก็หายไป ถ้าคอมไพเลอร์กับซอฟต์แวร์ระดับล่างไม่มีมูลค่าแล้ว อะไรเหลืออยู่? <strong>สถาปัตยกรรมชิป</strong> แล้วจำไว้ว่าสิ่งที่จำกัดสถาปัตยกรรมใหม่ ๆ ที่สร้างสรรค์ไม่ให้เข้าสู่ตลาดได้มาตลอด ก็คือซอฟต์แวร์ — คนเขียนโปรแกรมลงบนระบบนั้นไม่ได้ ถ้าอุปสรรคนี้หายไป สิ่งที่เหลือคือสถาปัตยกรรมฮาร์ดแวร์ใหม่ ๆ ที่น่าสนใจและน่าตื่นเต้นมากมาย ซึ่งเราไม่เคยไล่ตามได้เพราะชักจูงโลกซอฟต์แวร์ให้มาเขียนโปรแกรมให้ไม่ได้ นั่นคือสิ่งที่จะทยอยเกิดขึ้นในทศวรรษหน้า ผมคิดว่า — จำไว้นะว่า Jalapeño สร้างบนฐานของ <strong>Broadcom</strong> และจำไว้ด้วยว่าเวลาคุณคิดถึงสตาร์ทอัพต่าง ๆ ชิปเจเนอเรชันแรกของคุณมักจะห่วย มันห่วยจริง ๆ TPU ก็ไม่ได้ดีนัก ชิปเทรนนิ่งก็ไม่ได้ดีนัก มีประวัติยาวเหยียดว่าเจเนอเรชันแรกไม่ค่อยดี&quot;</p>
+<p>&quot;ไม่ใช่เพราะคุณไม่ใช่ทีมที่ดี ของเรา — เรามีทีมที่ดีที่สุดทีมหนึ่งในอุตสาหกรรม — ชิปเจเนอเรชันแรกของเราก็ไม่ได้ดีนัก มันเป็นเพราะการทำ 80% แรกให้เสร็จนั้นยากมาก ๆ และใช้งานเยอะมาก คุณต้องสร้าง DB harness ต้องสร้างโมเดลจำลอง ต้องทำทุกอย่าง แล้วทั้งหมดนั้นคุณยกไปใช้กับตัวถัดไปได้ทันที และเริ่มต้นด้วยของที่ทำเสร็จแล้วทั้งหมด เพราะฉะนั้นสิ่งที่จะเกิดขึ้น — คุณจะได้ยินเร็ว ๆ นี้ — ผมเดาว่าใน 90 วันข้างหน้าจะไม่มีใครพูดถึง Jalapeño แล้ว สิ่งที่พวกเขาอยากให้คุณพูดถึงคือ <strong>Cilantro</strong> — เจเนอเรชันที่ 2 และนั่นไม่ได้แปลว่าเป็นทีมที่แย่ มันแค่บอกว่ามันใช้เวลานานกว่า นั่นคือส่วน 28 (ตามที่ถอดเสียงได้)&quot;</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Feldman มองว่า AI จะทำให้ซอฟต์แวร์ระดับล่างหมดมูลค่า และเปิดทางให้สถาปัตยกรรมฮาร์ดแวร์ใหม่ ๆ</p><ul class="rn-sum-list"><li>Jalapeño สร้างบนฐานของ Broadcom</li><li>การทำ 80% แรกของชิปตัวแรกยากที่สุด แต่ยกไปใช้กับตัวถัดไปได้ทั้งหมด</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">3 วัน</div><div class="rn-stat-c">Anthropic ย้ายจาก NVIDIA ไป AMD ตามบล็อกโพสต์</div></div><div class="rn-stat"><div class="rn-stat-v">9 เดือน</div><div class="rn-stat-c">เวลาที่ OpenAI ใช้สร้าง Jalapeño</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s3" role="tabpanel" aria-labelledby="rn-t-s3" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">03</span><span>ระยะเวลาออกแบบชิป — ส่วนไหนบีบได้ ส่วนไหนบีบไม่ได้</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>ยังไม่เห็นข้อมูลว่า Jalapeño เร็วกว่า Nvidia 3 เท่า — ข้อมูลที่เผยแพร่กับ SemiAnalysis แสดงว่าพอ ๆ กัน</li><li>ส่วนของ TSMC (~120 วัน) และ OSAT (5-6 สัปดาห์) บีบไม่ได้ รวมราว 180-200 วัน</li><li>สิ่งที่บีบได้คือเวลาออกแบบ — ประโยชน์มหาศาลใน simulation, DV และ formal verification</li><li>ยังไม่เห็นการก้าวกระโดดใน RTL เพราะ Cerebras มีทีม RTL ระดับโลกอยู่แล้ว</li></ul></div>
+<p><strong>ผู้ถาม:</strong> ผมว่าที่น่าสนใจในสิ่งที่ <strong>Sam Altman</strong> พูดคือ พวกเขาแทบจะปล่อยให้ AI ออกแบบชิปเอง แล้ววิศวกรฮาร์ดแวร์ก็แค่ทำต้นแบบตามคำสั่งที่ AI คิดขึ้น จนในที่สุดก็ได้ชิปที่เร็วสุด ๆ เร็วกว่า Nvidia 3 เท่า ภายใน 9 เดือน ผมไม่รู้ว่าเรื่องนี้จริงแค่ไหน แต่รู้สึกว่าถ้าใช้ AI ออกแบบชิปได้ ก็อาจบีบระยะเวลาให้เหลือไม่ถึงปีได้</p>
+<p><strong>Andrew:</strong> &quot;ผมไม่— ผมยังไม่เห็นข้อมูลที่บอกว่ามันเร็วกว่า 3 เท่านะ ข้อมูลเดียวที่พวกเขาเผยแพร่ เผยแพร่ร่วมกับ <strong>SemiAnalysis</strong> และมันไม่ได้เร็วกว่า — พอ ๆ กันมากกว่า และผมคิดว่านั่นคือข้อมูลเดียวที่พวกเขาปล่อยออกมา แต่มันคงไม่กระทบประเด็นหลัก ประเด็นคือ &#x27;เราสร้างชิปใน 9 เดือน เราใช้ AI อย่างหนัก&#x27; ผมคิดว่าพวกเขาไม่ได้ทำ backend design เอง Broadcom ทำ ผมคิดว่าคุณบีบส่วนของ <strong>TSMC</strong> ไม่ได้ ส่วนนั้นบีบไม่ได้เลย ราว 120 วันบวกลบ ส่วนของ OSAT ก็คงบีบไม่ได้ ประมาณ 5 หรือ 6 สัปดาห์ในการผลิต ตอนนี้คุณก็อยู่ที่ราว 180 ถึง 200 วันบวกลบแล้ว และสิ่งที่เครื่อง pick-and-place ที่ <strong>Flextronics</strong>, <strong>Celestica</strong> หรือ <strong>Sanmina</strong> ทำได้ ก็คงบีบเกินระดับหนึ่งไม่ได้ เพราะฉะนั้นสิ่งที่คุณบีบได้คือเวลาออกแบบ และที่ที่เราเห็นประโยชน์มหาศาลคือ simulation, DV (design verification), formal verification และการสร้าง test สำหรับ DV — เราเห็นประโยชน์มหาศาลในการออกแบบชิปตรงนั้น&quot;</p>
+<p>&quot;แต่เรายังไม่เห็นการออกแบบที่ก้าวกระโดดใน <strong>RTL</strong> ทำไม? เพราะเรามีทีม RTL ระดับโลก และ— และเราก็ไม่อยากไปยุ่งกับมัน&quot;</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">AI บีบได้แค่ช่วงออกแบบ ไม่ใช่ช่วงผลิตของ TSMC, OSAT หรือ EMS</p><ul class="rn-sum-list"><li>backend design ของ Jalapeño ทำโดย Broadcom</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">120 วัน</div><div class="rn-stat-c">ส่วนของ TSMC ที่บีบไม่ได้</div></div><div class="rn-stat"><div class="rn-stat-v">180-200 วัน</div><div class="rn-stat-c">ขั้นต่ำรวมการผลิตและ OSAT</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s4" role="tabpanel" aria-labelledby="rn-t-s4" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">04</span><span>3D DRAM, hybrid bonding และ IP ของ wafer-scale</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>TSMC ไม่เคยยอมให้เวเฟอร์ DRAM เข้าโรงงาน แต่ตกลงที่จะ bond เวเฟอร์ให้ Cerebras เอง</li><li>DRAM สำเร็จรูปที่ bond แล้วให้ประสิทธิภาพดีขึ้นเพียงเล็กน้อย ไม่มีใครได้ประสิทธิภาพแบบ SRAM จาก DRAM</li><li>Cerebras มุ่งออกแบบหน่วยความจำ custom กับ TSMC ให้ได้ราวครึ่งหนึ่งของประสิทธิภาพ SRAM</li><li>ZHBM ของ Samsung เป็นอีกแนวทางหนึ่ง เพราะ Samsung มีทั้ง logic และ DRAM ของตัวเอง</li></ul></div>
+<p><strong>ผู้ถาม:</strong> คำถามผมเกี่ยวกับ <strong>3D DRAM</strong> ครับ ดูเหมือนมีบางบริษัทที่มีซิลิคอนออกมาแล้วหรืออยากเดินเส้นทางนี้ และพวกเขาแสดงว่าคุณได้ความเร็วระดับ SRAM จาก DRAM ที่มีความจุสูงกว่าได้ คุณก็มีสิ่งนี้อยู่ในโรดแมปกับ <strong>CS6</strong> โดยพื้นฐานคือต้อง bond ทั้งเวเฟอร์ซ้อนอยู่บน— ซึ่งผมคิดว่าเป็นโจทย์ที่ท้าทายมาก</p>
+<p><strong>Andrew:</strong> &quot;เพราะคุณกำลังจับคู่เทคโนโลยี 2 แบบที่ต่างกัน ซึ่งต้องทำแบบนั้นในการ bond DRAM ทุกครั้ง เพราะมันออกมาจากโรงงานคนละแห่ง ใช่ มันมาจากโรงงานอื่น และคำถามคือใครจะเป็นคนทำ? ทุกคนเลยใช่ไหม? เพราะในอดีต TSMC ไม่เคยยอมให้เวเฟอร์ DRAM เข้าโรงงานเลย ทุกคนบอกว่า— ใช่ ไม่มีใครอยากให้โรงงานตัวเองปนเปื้อน แล้วคนที่ทำอยู่ตอนนี้ ใครทำ? ส่วนใหญ่ก็เป็นที่อย่าง <strong>IMEC</strong> หรือ <strong>LETI</strong> หรือโรงงานเล็ก ๆ ที่ไม่ค่อยมีใครรู้จัก แต่ TSMC กับเรามีข้อตกลงกันแล้ว — TSMC จะเป็นคนทำ bond เวเฟอร์ พวกเขาตกลงที่จะ bond เวเฟอร์ให้ และนั่นเป็นเรื่องใหญ่มาก ใครจะรู้เรื่องเวเฟอร์ของ TSMC ดีกว่า TSMC?&quot;</p>
+<p><strong>ผู้ถาม:</strong> ผมคิดว่า <strong>Samsung</strong> อยากทำ ZHBM</p>
+<p><strong>Andrew:</strong> &quot;ZHBM เป็นอีกเรื่องหนึ่ง และเป็นเทคโนโลยีแบบ Samsung-Samsung ใช่ไหม เพราะพวกเขามี DRAM ด้วย ซึ่งก็ชัดเจนว่าเป็นจุดได้เปรียบของพวกเขา คือพวกเขาจะใช้ logic ของตัวเองกับหน่วยความจำของตัวเองในสแต็ก แต่ถ้าคุณใช้เวเฟอร์ของ TSMC คุณต้องมีคำตอบว่าใครจะเป็นคน bond และคุณควรไปถามคนพวกนั้นเพราะมันไม่ค่อยสมเหตุสมผล นั่นคือข้อหนึ่ง ข้อสอง ผมคิดว่าคำถามคือ คุณ bond ไปทำไม? และคุณได้อะไร? เป็นไปได้ว่าคุณ bond เพื่อได้ความจุเพิ่ม แต่ถ้าคุณเอา DRAM ธรรมดามา bond คุณจะไม่ได้อะไรใกล้เคียง SRAM เลย&quot;</p>
+<p>&quot;มันผิดโดยสิ้นเชิง คุณจะได้ประสิทธิภาพ DRAM ที่ดีขึ้นเล็กน้อย ทีนี้ถ้าคุณทำอะไรที่สร้างสรรค์กว่ามาก — ถ้าคุณย้าย memory controller ออกจาก logic ออกจากเวเฟอร์ DRAM แล้วไปไว้บนเวเฟอร์ logic ถ้าคุณออกแบบ <strong>หน่วยความจำแบบ custom</strong> ยังอยู่ในตระกูล DRAM แต่มีการแลกระหว่าง bandwidth กับความจุที่ต่างออกไปมาก — นั่นแหละถึงจะน่าคุย แต่คุณต้องถามพวกเขาว่ากำลังออกแบบหน่วยความจำ custom หรือใช้หน่วยความจำสำเร็จรูป ถ้าเป็นหน่วยความจำสำเร็จรูป มันก็ให้ประสิทธิภาพดีกว่าการวางห่างกันไม่กี่มิลลิเมตรเล็กน้อย มันไม่ได้ให้ประสิทธิภาพแบบ SRAM ไม่มีใครดึงประสิทธิภาพแบบ SRAM ออกจาก DRAM ได้ ไม่มีวัน ไม่มีวันจริง ๆ และถ้าใครบอกคุณว่าทำได้ พวกเขาโม้ทั้งเพ สิ่งที่เรามุ่งหวังด้วยการออกแบบหน่วยความจำ custom ร่วมกับ TSMC คือได้ <strong>ประมาณครึ่งหนึ่งของประสิทธิภาพ SRAM</strong> ไม่มีใครให้ประสิทธิภาพ SRAM ได้ มันเป็นหน่วยความจำคนละแบบ ระยะห่างจาก bit cell ถึง bit line ต่างกัน มันเป็นไปไม่ได้ เพราะฉะนั้นคุณต้อง— มันเป็นโจทย์ที่ยาก คุณเกาหัวแล้วถามว่า เราใช้หน่วยความจำสำเร็จรูป แล้วมันจะทำงานแบบเดียวกับ SRAM ได้อย่างไร? ไม่ได้หรอก เป็นคำถามที่ดีมาก และบางทีเราควรทำงานเพิ่มอีกนิดในการแบ่งปันกับชุมชนถึงความท้าทายของการทำ hybrid bond ระหว่างหน่วยความจำต่างชนิดกัน สิ่งที่คุณได้คือหน่วยความจำความจุสูงที่ประสิทธิภาพสูงขึ้นเล็กน้อย นั่นคือสิ่งที่ได้ ขอบคุณครับ&quot;</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ใครบอกว่าได้ความเร็วระดับ SRAM จาก DRAM — Feldman บอกว่าโม้</p><ul class="rn-sum-list"><li>คำถามสำคัญคือใช้หน่วยความจำ custom หรือสำเร็จรูป และใครเป็นคน bond</li></ul></div>
+
+</div>
+
+</section>
+<section class="rn-sec has-rail" id="rn-p-s5" role="tabpanel" aria-labelledby="rn-t-s5" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">05</span><span>XPU, เศรษฐศาสตร์ของ token และกลยุทธ์การเข้าตลาด</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>XPU ของไฮเปอร์สเกลเลอร์คือกลยุทธ์ private label แบบ AWS — ดีน้อยลงหน่อยแต่ถูกกว่า</li><li>AWS ไม่ได้บอกว่าจะซื้อ NVIDIA น้อยลง ชิปถูกใช้เป็น price leader และอำนาจต่อรอง</li><li>เข้าตลาด compute ได้แค่ 2 ทาง: เร็วที่สุดหรือถูกที่สุด ไม่มีจุดเข้าแบบ Camry</li><li>Cerebras จะอยู่ตลาดระดับบนในอนาคตที่มองเห็นได้</li></ul></div>
+<p><strong>ผู้ถาม:</strong> งั้นคุยเรื่อง <strong>XPU</strong> กันครับ ไฮเปอร์สเกลเลอร์และแล็บโมเดลต่างก็ทำ XPU ของตัวเอง พยายามรองรับ workload ของตัวเองจำนวนมากที่ระดับ interactivity ต่ำกว่า และดูเหมือนพวกเขาเชื่อว่า workload เหล่านั้นจำนวนมากรับได้กับ token ที่ &quot;ดีและเร็วพอ&quot; แล้วก็จะเถียงว่ามันอาจถูกกว่า token ความเร็วสูงระดับพรีเมียม ผมเชื่อในวิสัยทัศน์ของคุณเต็มที่ว่า — ทุก token ควรเป็น token ที่เร็วไม่ใช่หรือ? เหมือนตอนนี้ที่ผมได้ใช้ <strong>Starlink</strong> บนเครื่องบินแล้ว พอใช้อินเทอร์เน็ตอื่นก็รู้สึกแย่ที่สุด ใช่เลย แล้วผมก็แบบ อยากให้อินเทอร์เน็ตแบบอื่นใช้ไม่ได้ไปเลย</p>
+<p><strong>Andrew:</strong> &quot;ช่วง IPO <strong>Morgan Stanley</strong> ส่งผมขึ้นเครื่องบินที่ไม่มี Starlink และก่อนเครื่องลงจอด เราอธิบายกับพวกเขาว่าเรายอมบินเครื่องพาณิชย์ไปโรดโชว์ IPO ดีกว่าขึ้นเครื่องส่วนตัวอีกลำที่ไม่มี Starlink วันนั้นเราประชุมไป และก็มีเครื่องที่มี Starlink มารอ&quot;</p>
+<p>&quot;ไม่ล้อเล่นนะ เวลาแบบนั้น— มันเสียเปล่าโดยสมบูรณ์ เรากำลังจะอยู่บนเครื่องบิน 20 ชั่วโมงในช่วง 4 วันข้างหน้า ใช่ไหม? 20 ชั่วโมง นั่นมันครึ่งโปรเจกต์เลยนะเว้ย สำหรับผม นั่นคือเวลามีค่าแค่ไหน และนั่นคือสิ่งที่คุณได้จากความเร็ว&quot;</p>
+<p><strong>ผู้ถาม:</strong> งั้นคำถามผมคือ ผู้ผลิต XPU ทั้งหลาย อย่าง <strong>Trainium</strong> หรืออะไรทำนองนั้น ทำไมพวกเขาถึงเดิมพันกับ token แบบงั้น ๆ?</p>
+<p><strong>Andrew:</strong> &quot;ผมว่าเป็นคำถามที่น่าสนใจมาก ผมคิดว่าสำหรับผู้ท้าชิง ภูมิทัศน์ต่างจากเจ้าตลาดที่มีทราฟฟิกมหาศาล ถ้าคุณดูกลยุทธ์ของ <strong>AWS</strong> ตลอดสินค้าหลายร้อย อาจถึงหลายพันชนิด &#x27;ดีน้อยลงหน่อยแต่ถูกกว่า&#x27; คือกลยุทธ์พื้นฐานของคนขายของ พวกเขาทำแบบนั้น นั่นคือกลยุทธ์สินค้า private label ของ <strong>Safeway</strong> นั่นคือกลยุทธ์กับสินค้าสำนักงานทั้งหมดของพวกเขา เป็นกลยุทธ์ที่ใช้ซ้ำแล้วซ้ำอีก ผมจึงคิดว่าสิ่งที่พวกเขาคิดคือ ฉันมีทราฟฟิกก้อนมหึมา ฉันเขียน router ฉันจะส่งทราฟฟิกบางส่วนไปที่ชั้นราคาถูกสุด ๆ ที่ฉันควบคุมเอง และสังเกตนะว่าพวกเขาไม่ได้บอกว่าจะซื้อ NVIDIA น้อยลง ทำไมล่ะ? ทำไมไม่แทนที่— เพราะมันถูกออกแบบมาเพื่อทำอย่างอื่น มันถูกออกแบบมาให้พวกเขามีสินค้าดึงราคา (price leader) มีของถูกมาก ๆ ไว้ทำการตลาด แล้วพยายามดันคุณขึ้นไปในสแต็ก หรือบางทีก็แจกฟรีถ้าคุณซื้อ S3 instance จำนวนมาก ทำไม? เพราะ S3 instance ทำกำไรมหาศาล ใช่ เมื่อคุณเป็นบริษัทขนาดนั้นที่มีทราฟฟิกขนาดนั้น คุณมีทางเลือกสารพัดที่ผู้ท้าชิงไม่มี และนั่นจริงสำหรับ AWS โดยเฉพาะ ผมคิดว่าคุณต้องจำไว้ด้วยว่าพวกเขาอยู่ในเกมที่เล่นซ้ำ ๆ กับ NVIDIA และพวกเขาเบื่อที่ต้องพึ่งพา&quot;</p>
+<p>&quot;และการที่สามารถพูดได้ว่า &#x27;เราไปต่อได้โดยไม่มีคุณ&#x27; แม้จะเป็นแค่คำขู่ก็ตาม — ใช่ แน่นอน&quot;</p>
+<p><strong>ผู้ถาม:</strong> แล้วคุณจะลงไปเล่นในส่วนนั้นของเส้นโค้ง interactivity ไหม หรือจะบอกว่า เฮ้ ส่วนนั้นอาจเป็น 80% ของ token ทั้งหมด แต่เราจะโฟกัส token ที่ทำกำไร? แบบกลยุทธ์พรีเมียม?</p>
+<p><strong>Andrew:</strong> &quot;ในอนาคตที่มองเห็นได้ เราคือตลาดระดับบน&quot;</p>
+<p>&quot;ผมคิดว่าในโลกของ compute — และพวกคุณลองคิดตามดู — มีแค่ 2 ทางที่จะเข้าสู่ตลาด compute ได้จริง ๆ: เป็นตัวที่ <strong>เร็วที่สุด</strong> หรือ <strong>ถูกที่สุด</strong> ไม่มีจุดเข้าแบบ <strong>Camry</strong> ใช่ไหม? พ่อคุณเคยมีสักคัน ตอนนี้คุณมีลูกสองคน คุณอยากได้ Camry มันเป็นรถที่เพอร์เฟกต์สำหรับทุกอย่าง มีที่ท้ายรถพอใส่อิฐได้— ใช่ไหม Camry นั่นแหละคือเหตุผลที่มันเป็นรถขายดีที่สุดในโลก เพราะมันไม่ใช่ทั้งตัวที่เร็วที่สุด แต่— พวกเขาไม่ได้เข้าตลาดตรงนั้น พวกเขาเข้ามาในฐานะตัวที่ถูกที่สุด แล้วตลอดช่วง 15 หรือ 25 ปีก็ไต่ขึ้นมาจาก <strong>Tercel</strong> ตอนเข้าตลาดช่วงกลางยุค &#x27;70 แล้วค่อย ๆ ขยับขึ้น และเมื่อถึงระดับที่พา Toyota ไปต่อไม่ได้แล้ว พวกเขาก็ซื้อ <strong>Lexus</strong> (ถอดเสียงได้ว่า &#x27;Alexis&#x27;) เพื่อไปต่อข้างบน และ compute ก็คล้ายกันมาก การเข้าตลาดตรงกลางนั้นยากมาก คุณต้องเข้าในฐานะตัวที่เร็วที่สุด หรือไม่ก็ตัวที่ถูกที่สุด และเมื่อคนอย่าง Nvidia เป็นผู้ซื้อซิลิคอนอันดับหนึ่งของโลก ทางที่คุณจะเข้าได้คือการเป็นตัวที่ถูกที่สุด— ทุกอย่างที่พวกเขาซื้อ พวกเขาได้ราคาต่ำกว่าคุณ พวกเขาจ่ายน้อยกว่า พวกเขาซื้อหน่วยความจำในราคาที่ถูกกว่าคุณ เราพยายามไม่ใช้มัน กลยุทธ์ที่ดีใช่ไหม? แต่ถ้าคุณเข้ามาแบบเดียวกับพวกเขา พวกเขาซื้อซิลิคอนได้ถูกกว่า ซื้อกำลังการผลิตได้ถูกกว่า แล้วคุณจะเป็นตัวที่ถูกที่สุดได้อย่างไร? เพราะฉะนั้นอย่าเล่นเกมของพวกเขา เล่นในฐานะตัวที่เร็วที่สุด เล่นในพื้นที่ที่พวกเขาทำไม่ได้เพราะสถาปัตยกรรมของพวกเขามีข้อจำกัด&quot;</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Nvidia ซื้อทุกอย่างได้ถูกกว่า ผู้ท้าชิงจึงต้องแข่งด้วยความเร็ว ไม่ใช่ราคา</p><ul class="rn-sum-list"><li>Toyota เข้าตลาดด้วยราคาถูกสุด (Tercel) แล้วไต่ขึ้นไปจนถึง Lexus</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">20 ชั่วโมง</div><div class="rn-stat-c">เวลาบนเครื่องบินช่วง IPO — ครึ่งโปรเจกต์</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s6" role="tabpanel" aria-labelledby="rn-t-s6" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">06</span><span>คูเมืองที่ยั่งยืน — เมื่อ CUDA ไม่ใช่คูเมืองแบบเดิมอีกต่อไป</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>เมื่อผู้ผลิตฮาร์ดแวร์หันไปพูดเรื่องซอฟต์แวร์ แปลว่าฮาร์ดแวร์ถูกไล่ทันแล้ว — Cisco ปลายยุค 90 และ Nvidia กับ CUDA</li><li>การเขียนโค้ดระดับล่างเป็นโดเมนที่โมเดลขนาดใหญ่จะทำได้ดีมาก</li><li>ถ้าตัดซอฟต์แวร์ออก GPU ของ AMD กับ NVIDIA คล้ายกันมาก</li><li>โซลูชัน SRAM บนชิปเล็กเจอ hop-to-hop penalty เมื่อต้องกระจาย model weights ข้ามชิปนับพัน</li></ul></div>
+<p><strong>ผู้ถาม:</strong> ตามปรัชญาการลงทุนของผม เราควรตั้งคำถามกับคูเมืองทุกแบบ ฟังดูเหมือน <strong>CUDA</strong> ไม่ใช่คูเมืองแบบที่เคยเป็นอีกแล้ว เมื่อมองไปข้างหน้าในโลกของชิป ดูเหมือนเทคโนโลยีคือความได้เปรียบ เทคโนโลยีคือคูเมือง คุณช่วยขยายความได้ไหมว่ามันยั่งยืนอย่างไรสำหรับ Cerebras และอาจรวมถึงบริษัทใดก็ได้ในอนาคต ถ้าไม่มีคูเมืองแบบดั้งเดิมแบบเดิมแล้ว?</p>
+<p><strong>Andrew:</strong> &quot;ก่อนอื่น เป็นคำถามที่น่าสนใจมาก และผมคิดว่ามีสองสามอย่าง ในอดีต มีสัญญาณที่ฟ้องว่าผู้ผลิตฮาร์ดแวร์ไม่ได้มองฮาร์ดแวร์ของตัวเองเป็นคูเมืองอีกแล้ว ช่วงปลายยุค &#x27;90 <strong>Cisco</strong> เริ่ม— เลิกพูดเรื่องฮาร์ดแวร์ แล้วหันไปพูดเรื่องการเชื่อมต่อ การทำงานร่วมกัน และความใช้งานง่าย เพราะพวกเขาโดนถล่มเรื่องฮาร์ดแวร์ ใช่ <strong>Nvidia</strong> เริ่มพูดเรื่อง CUDA และคูเมืองซอฟต์แวร์อื่น ๆ ทั้งหมด— ทำไมพวกเขาไม่พูดเรื่องฮาร์ดแวร์อีกแล้ว? ฮาร์ดแวร์ล้วน ๆ? เพราะสถาปัตยกรรมของพวกเขาไม่ได้— ถูกไล่ทันแล้ว ผมคิดว่าซอฟต์แวร์ระดับล่างเป็นโดเมนที่น่าสนใจเป็นพิเศษสำหรับ AI เพราะมันเป็นเชิงคณิตศาสตร์มากกว่า และสิ่งที่ทำให้มันยากสำหรับมนุษย์ — การจำพื้นที่ register ทั้งหมดไว้ในหัว การคิดเรื่องโครงสร้างข้อมูล — ทุกอย่างที่ทำให้การเขียน assembly ที่จูนด้วยมือยากสำหรับมนุษย์ ไม่ได้ยากสำหรับเครื่องจักร ใช่ไหม? และนั่นน่าสนใจ โอเค ผมจึงคิดว่าการเขียนโค้ดระดับล่างเป็นโดเมนที่เราจะเห็นโมเดลขนาดใหญ่ทำได้ดีมาก ๆ ถ้าคุณตัดส่วนนั้นออก แล้วถามว่ายังมีความได้เปรียบเชิงสถาปัตยกรรมเหลืออยู่ไหม? ถ้าคุณเอาซอฟต์แวร์ออก GPU ของ <strong>AMD</strong> ต่างจาก GPU ของ <strong>NVIDIA</strong> มากไหม? มันคล้ายกันมาก ใช่ไหม? ชิปเทรนนิ่ง (Trainium) ต่างจาก TPU อื่น ๆ หลายตัวที่ออกมาจากตระกูล <strong>Broadcom</strong> มากไหม? systolic array ซึ่งเป็นสิ่งที่ TPU ทำ ใช่ไหม ต่างจากตัวอื่นแค่ไหน? ผมคิดว่านี่คือคำถามที่ถูกต้องอย่างยิ่ง และจะเป็นตัวกำหนดความยั่งยืนของความได้เปรียบใด ๆ ใช่ คุณจะไล่ทันเราด้วยโซลูชันที่ไม่ใช่ SRAM ได้ไหม? ถ้าคุณใช้โซลูชัน SRAM บนชิปเล็ก อย่างที่ <strong>Groq</strong> (ถอดเสียงได้ว่า &#x27;Brock&#x27;) พยายามทำ บทลงโทษจากการกระโดดข้ามชิป (hop-to-hop penalty) คืออะไร เมื่อคุณต้องกระโดดข้ามชิปเป็นร้อย หรืออาจเป็นพันตัว เพราะคุณเก็บ model weights ไว้ไม่ได้? คุณจะทำแบบนั้นกับชิป 1,000 ตัวได้อย่างไร? นี่คือคำถามที่ถูกต้องอย่างยิ่ง แต่ผมไม่คิดว่ามีทางง่าย เมื่อคุณทำลายคูเมืองที่เห็นได้ชัดลงไปแล้ว คุณต้องหาคำตอบว่า ทำไม&quot;</p>
+<p>&quot;ทีมฮาร์ดแวร์ทีมหนึ่งถึงยังคงทำผลิตภัณฑ์ที่สร้างสรรค์ได้เรื่อย ๆ? อะไรที่— สำหรับเรา wafer scale จะยังให้ความได้เปรียบต่อไปได้อย่างไรตลอดหลายปีข้างหน้า?&quot;</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">เมื่อคูเมืองที่เห็นได้ชัดถูกทำลาย ความได้เปรียบเชิงสถาปัตยกรรมคือสิ่งที่เหลือ</p><ul class="rn-sum-list"><li>คำถามที่ถูกต้องคือ wafer scale จะยังให้ความได้เปรียบต่อไปได้อย่างไรตลอดหลายปี</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">1,000</div><div class="rn-stat-c">จำนวนชิปที่ต้องกระโดดข้ามถ้าเก็บ weights บนชิปเล็กไม่ได้</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s7" role="tabpanel" aria-labelledby="rn-t-s7" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">07</span><span>Orbital compute — แยก &quot;อะไร&quot; ออกจาก &quot;เมื่อไร&quot;</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Orbital compute เกิดขึ้นแน่นอน 100%</li><li>Elon ถูกเรื่อง &quot;อะไร&quot; เสมอ แต่ผิดเรื่อง &quot;เมื่อไร&quot; เสมอ</li><li>Feldman คาดว่ายังห่างอีก 10-15 ปี แม้อาจมีงานเล็ก ๆ ขึ้นไปก่อน</li><li>ราคาการปล่อยจรวดยังต้องลดลงอีกมหาศาล</li></ul></div>
+<p><strong>ผู้ถาม:</strong> ผมโฟกัสเรื่องอวกาศ เลยขอถามเรื่อง <strong>orbital compute</strong> ผมอยากรู้ความเห็นของคุณ อาจจากมุมมองเฉพาะของคุณ หรือในฐานะผู้เชี่ยวชาญในอุตสาหกรรม</p>
+<p><strong>Andrew:</strong> &quot;เกิดขึ้นแน่นอน 100% 100%&quot;</p>
+<p><strong>ผู้ถาม:</strong> แล้วไทม์ไลน์ของคุณคือเมื่อไร?</p>
+<p><strong>Andrew:</strong> &quot;ผมคิดว่าสิ่งที่เราต้องทำเวลามองนักวิสัยทัศน์ตัวจริง คือต้องแยก &#x27;อะไร&#x27; ออกจาก &#x27;เมื่อไร&#x27; <strong>Elon</strong> ถูกเรื่อง &#x27;อะไร&#x27; ครั้งแล้วครั้งเล่า และผิดอย่างสิ้นเชิงเรื่อง &#x27;เมื่อไร&#x27; ครั้งแล้วครั้งเล่า ใช่ไหม? นั่นเป็นเพราะการจะมีวิสัยทัศน์แบบนั้น สิ่งหนึ่งที่คุณต้องตัดออกจากความคิดคือเรื่องเล็กเรื่องน้อยมากมายที่ทำให้ล่าช้า เพราะถ้าคุณเก็บมันไว้ในหัว คุณจะไปไม่ถึง &#x27;อะไร&#x27; เลย ถ้าคุณคิดถึงทุกปัญหาที่ต้องเจอในการสร้างจรวด คุณจะไม่มีวันไปถึงจุดที่บอกว่า &#x27;เราสร้างบริษัทจรวดได้&#x27; ใช่ไหม? เพราะฉะนั้นมีอัจฉริยะน้อยมากที่ทำทั้ง &#x27;อะไร&#x27; และ &#x27;เมื่อไร&#x27; ได้ถูก และเมื่อผมดูสิ่งที่เขาทำครั้งแล้วครั้งเล่า เขาถูกเรื่อง &#x27;อะไร&#x27; ผิดเรื่อง &#x27;เมื่อไร&#x27; ถูกเรื่อง &#x27;อะไร&#x27; ในรถขับเคลื่อนอัตโนมัติ ผิดเรื่อง &#x27;เมื่อไร&#x27; ไปเป็นทศวรรษ ใช่ไหม? ถูกเรื่อง &#x27;อะไร&#x27; ในการผลิตรถยนต์ในแคลิฟอร์เนีย ซึ่งเป็นตลาดแรงงานแพงที่สุดแห่งหนึ่งบนโลก ใช่ ผิดเรื่อง &#x27;เมื่อไร&#x27; คุณไล่ดูไปเรื่อย ๆ แล้วจะพูดว่า โอเค มีแพตเทิร์นอยู่ตรงนี้ ไม่กลัวปัญหาที่ยากเกินจินตนาการ รู้ว่าหาทางออกได้ ใช่ไหม? แต่ประเมินผิดว่าต้องใช้เวลานานแค่ไหนกว่าจะไปถึง ผมคิดว่าเรายังห่างอีก 10, 15 ปี ฟังดูสมเหตุสมผลไหม? ผมก็อยากรู้นะว่าพวกคุณคิดยังไง Brett ก็บอกว่าอีกปีครึ่งเหมือนกัน ใช่ ไม่รู้สิ และผมยัง— ทีนี้ นั่นไม่ได้แปลว่าเราจะไม่มีอะไรขึ้นไปทำงานเล็ก ๆ น้อย ๆ บนนั้น ผมคิดว่าคุณต้องทำซ้ำและปรับปรุงไปเรื่อย ๆ ต้องทำซ้ำ และเขายังบอกด้วยว่าราคาการปล่อยจรวด&quot;</p>
+<p>&quot;ต้องลดลงเท่าไร? มหาศาลเลย ใช่ไหม? แล้วมันจะเกิดขึ้นได้อย่างไร? มีอีกหลายอย่างที่ต้องเกิดขึ้น แล้วคุณต้องทำซ้ำ และคุณต้องทำซ้ำ คุณต้องทำผิดบ้าง แล้วถึงจะเริ่มทำถูก และมันก็ไม่ได้ถูกสมบูรณ์แบบ มันถูกนิดหน่อย ลองนึกถึงรถขับเคลื่อนอัตโนมัติดู — นี่คือปัญหาที่ยากกว่ารถขับเคลื่อนอัตโนมัติมาก&quot;</p>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">ทิศทางถูก แต่ไทม์ไลน์ยาวกว่าที่นักวิสัยทัศน์บอกมาก</p><ul class="rn-sum-list"><li>ต้องทำซ้ำ ทำผิด แล้วจึงค่อย ๆ ทำถูก — ยากกว่ารถขับเคลื่อนอัตโนมัติมาก</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">100%</div><div class="rn-stat-c">ความมั่นใจว่า orbital compute จะเกิดขึ้น</div></div><div class="rn-stat"><div class="rn-stat-v">10-15 ปี</div><div class="rn-stat-c">ไทม์ไลน์ที่ Feldman คาด</div></div></aside>
+</section>
+<section class="rn-sec has-rail" id="rn-p-s8" role="tabpanel" aria-labelledby="rn-t-s8" hidden>
+<div class="rn-col">
+<h2><span class="rn-num">08</span><span>การสร้าง 700 MW กระแสเงินสด และการระดมทุน</span></h2>
+<div class="rn-keypoints"><div class="rn-label"><span>Key points</span></div><ul class="rn-kp-list"><li>Cerebras จะส่งมอบ 700 MW ภายในสิ้นปี 2027</li><li>กระแสเงินสดจากการดำเนินงานติดลบราว $400 ล้านนับตั้งแต่ต้นปี</li><li>เงินมัดจำลูกค้าลดลงเพราะกำลังใช้เงินจ่ายล่วงหน้าก้อนใหญ่ที่สุด 2 ก้อนในประวัติศาสตร์บริษัท</li><li>Feldman บอกว่าไม่ต้องการกู้เงินมาสร้างส่วนขยายนี้</li></ul></div>
+<p><strong>ผู้ถาม:</strong> คุณจะส่งมอบกำลังไฟ <strong>700 เมกะวัตต์</strong> ภายในสิ้นปี 2027 กระแสเงินสดจากการดำเนินงานติดลบราว <strong>$400 ล้าน</strong> นับตั้งแต่ต้นปี และเงินมัดจำจากลูกค้าก็ลดลง</p>
+<p><strong>Andrew:</strong> &quot;คือ— เงินมัดจำจากลูกค้าลดลงเพราะเรา เราใช้ไป 2 ก้อน— เรากำลังใช้เงินมัดจำจากลูกค้า 2 ก้อนที่ใหญ่ที่สุดในประวัติศาสตร์ธุรกิจของเรา ใช่ มันเป็นเงินจ่ายล่วงหน้า มันเป็นเงินจ่ายล่วงหน้า ใช่&quot;</p>
+<p><strong>ผู้ถาม:</strong> CapEx รวมทุกอย่างต่อเมกะวัตต์ของคุณเท่าไร? คุณคิดว่าจะใช้เงินสด <strong>$8 พันล้าน</strong> ที่มีอยู่ในมือสร้างทั้งหมดนี้ได้ไหม หรือเราควรคาดว่าจะมีการระดมทุนผ่านหนี้หรือเพิ่มทุน?</p>
+<p><strong>Andrew:</strong> &quot;สมัยก่อนรายการทีวีดึก ๆ มีโฆษณาแบบนี้ — &#x27;ซื้ออสังหาฯ โดยไม่ต้องมีเงินสักบาททำอย่างไร?&#x27; และดาต้าเซ็นเตอร์บางแห่งก็— ดาต้าเซ็นเตอร์ โทรหาผู้พัฒนาที่ชาญฉลาด ทำอย่างไร? แต่แล้วพวกเขาก็ไม่มีเงินเหลือ แหล่งเงินทุนอีกแบบก็จะบอกว่า ฉันอยากซื้อ GPU แต่อยากให้คุณให้ฉันยืมเงินไปซื้อ GPU แล้วคุณเอา GPU ไปเป็นหลักประกัน นั่นคือวิธีที่คุณซื้อมัน สร้างดาต้าเซ็นเตอร์โดยไม่ต้องลงเงินเอง เราเอาอุปกรณ์ของเราไปวางในดาต้าเซ็นเตอร์ — เมื่อเราเอาอุปกรณ์ไปวางในดาต้าเซ็นเตอร์ มันมีประสิทธิภาพกว่ามาก&quot;</p>
+<blockquote>📝 <em>(หมายเหตุจากผู้ถอดความ)</em> ผมไม่สามารถเก็บส่วนที่เหลือของบทสนทนาได้ครบพอจะถอดความ แต่ Andrew บอกว่าพวกเขาไม่ต้องการกู้เงินใด ๆ มาใช้สร้างส่วนขยายนี้</blockquote>
+<hr>
+<div class="rn-summary"><div class="rn-label"><span>Section summary</span></div><p class="rn-sum-lead">Cerebras วางอุปกรณ์ในดาต้าเซ็นเตอร์ของผู้อื่นแทนการลงเงินสร้างเอง</p><ul class="rn-sum-list"><li>คำถาม CapEx ต่อเมกะวัตต์ยังไม่มีคำตอบเป็นตัวเลข</li></ul></div>
+
+</div>
+<aside class="rn-rail"><div class="rn-stat"><div class="rn-stat-v">700 MW</div><div class="rn-stat-c">กำลังที่จะส่งมอบภายในสิ้นปี 2027</div></div><div class="rn-stat"><div class="rn-stat-v">$400 ล้าน</div><div class="rn-stat-c">กระแสเงินสดดำเนินงานติดลบนับตั้งแต่ต้นปี</div></div><div class="rn-stat"><div class="rn-stat-v">$8 พันล้าน</div><div class="rn-stat-c">เงินสดในมือ</div></div></aside>
+</section>
+<section class="rn-sec" id="rn-p-s9" role="tabpanel" aria-labelledby="rn-t-s9" hidden>
+<div class="rn-col rn-wide">
+<div class="rn-takeaways"><div class="rn-label"><span class="rn-th">ประเด็นสำคัญ</span><span class="rn-en">Key takeaways</span></div><ol>
+<li><strong>🧠 AI ทำลายคูเมืองซอฟต์แวร์ระดับล่าง</strong> — Feldman มองว่าถ้าย้ายจาก NVIDIA ไป AMD ได้ใน 3 วันจริง มูลค่าของคอมไพเลอร์และซอฟต์แวร์ระดับล่างจะหายไป สิ่งที่เหลือคือสถาปัตยกรรมชิป — นี่คือข้อโต้แย้งหลักที่ทำให้ wafer-scale ของ Cerebras น่าสนใจขึ้น</li>
+<li><strong>🏰 CUDA ไม่ใช่คูเมืองแบบเดิมแล้ว</strong> — เขาเทียบ Nvidia กับ Cisco ปลายยุค &#x27;90 ที่หันไปพูดเรื่องซอฟต์แวร์เมื่อฮาร์ดแวร์ถูกไล่ทัน และตั้งคำถามว่าถ้าตัดซอฟต์แวร์ออก GPU ของ AMD กับ NVIDIA ต่างกันแค่ไหน</li>
+<li><strong>🚀 เข้าตลาด compute ได้แค่ 2 ทาง: เร็วสุดหรือถูกสุด</strong> — Nvidia ซื้อซิลิคอน หน่วยความจำ และกำลังการผลิตได้ถูกกว่าทุกคน ผู้ท้าชิงจึงต้องชนะด้วยความเร็ว Cerebras ประกาศชัดว่า &quot;ในอนาคตที่มองเห็นได้ เราคือตลาดระดับบน&quot;</li>
+<li><strong>💸 XPU ของไฮเปอร์สเกลเลอร์คือกลยุทธ์ private label</strong> — AWS ใช้ชิปราคาถูกเป็น price leader และอำนาจต่อรองกับ NVIDIA ไม่ได้มาแทนที่ NVIDIA สังเกตว่าพวกเขาไม่ได้บอกว่าจะซื้อ NVIDIA น้อยลง</li>
+<li><strong>🧱 3D DRAM ไม่มีทางได้ความเร็วระดับ SRAM</strong> — DRAM สำเร็จรูปที่ bond แล้วดีขึ้นแค่เล็กน้อย Cerebras มุ่งหน่วยความจำ custom กับ TSMC ให้ได้ราวครึ่งหนึ่งของ SRAM และ TSMC ตกลงจะ bond เวเฟอร์ให้เอง (โรดแมป CS6)</li>
+<li><strong>⏱ AI บีบได้แค่เวลาออกแบบ</strong> — ส่วนของ TSMC ราว 120 วัน และ OSAT อีก 5-6 สัปดาห์บีบไม่ได้ รวมราว 180-200 วัน ประโยชน์จริงอยู่ที่ simulation, DV และ formal verification ไม่ใช่ RTL; ชิปเจเนอเรชันแรกมักไม่ดีเสมอ (คาดว่าใน 90 วันคนจะหันไปพูดถึง Cilantro แทน Jalapeño)</li>
+<li><strong>🏗 700 MW ภายในสิ้นปี 2027 โดยไม่อยากกู้เงิน</strong> — กระแสเงินสดจากการดำเนินงานติดลบราว $400 ล้านนับตั้งแต่ต้นปี มีเงินสดราว $8 พันล้าน เงินมัดจำลูกค้าลดลงเพราะกำลังใช้เงินจ่ายล่วงหน้าก้อนใหญ่ที่สุด 2 ก้อน — ประเด็น CapEx ต่อ MW ยังไม่มีคำตอบเป็นตัวเลข</li>
+<li><strong>🛰 Orbital compute เกิดแน่ 100% แต่อีก 10-15 ปี</strong> — Feldman แยก &quot;อะไร&quot; กับ &quot;เมื่อไร&quot; ของ Elon: ถูกเรื่องทิศทาง แต่ผิดเรื่องเวลาเสมอ ต้นทุนการปล่อยจรวดยังต้องลดลงอีกมหาศาล</li>
+</ol>
+<hr></div>
+</div>
+</section>
+<section class="rn-sec rn-refs" id="rn-p-refs" role="tabpanel" aria-labelledby="rn-t-refs" hidden>
+<div class="rn-col rn-wide"><div class="rn-label"><span class="rn-th">แหล่งอ้างอิง</span><span class="rn-en">References &amp; sources</span></div><ul>
+<li>[TomorrowX | Cerebras Q&amp;A — P Equity Research](https://pequityresearch.substack.com/p/tomorrowx-cerebras-q-and-a) (PDF: <code>drive-1oRw2h0fFrsnGGJa.pdf</code>, 10 หน้า)</li>
+</ul></div>
+</section>
+<footer class="rn-foot">
+P Equity Research<span class="rn-sep">·</span><span class="rn-th">บทวิเคราะห์นี้จัดทำเพื่อการศึกษา ไม่ใช่คำแนะนำการลงทุน</span><span class="rn-en">For informational purposes only. Not investment advice.</span>
+</footer>
+<script>
+(function(){
+var root=document.documentElement,bar=document.querySelector('.rn-tabs');
+if(!bar)return;
+var tabs=[].slice.call(bar.querySelectorAll('.rn-tab')),
+    pill=bar.querySelector('.rn-pill'),
+    wrap=document.querySelector('.rn-tabwrap'),
+    anchor=document.querySelector('.rn-tabanchor'),
+    PAD=5;
+
+/* D1 — the pill is driven by MEASURED geometry, so it tracks the real label at
+   whatever face the reader's machine resolved, with no width formula to drift. */
+function movePill(){
+  var on=bar.querySelector('.rn-tab[aria-selected="true"]');
+  if(!on||!pill)return;
+  pill.style.width=on.offsetWidth+'px';
+  pill.style.transform='translateX('+(on.offsetLeft-PAD)+'px)';
+}
+/* liquid-segmented.js:scrollToIndex — smooth-CENTRE the active option, and no-op
+   when the options already fit. `scroll-behavior:smooth` is deliberately not in the
+   shell CSS (it fights the drag handler, which writes scrollLeft per pointermove),
+   so smoothness is per call. The DOM path is used, not the widths path: D1 — we
+   measure. This replaced scrollIntoView({inline:'nearest'}), which only nudged a
+   deep tab barely into view; a 13-tab bar could sit with tab 11 hard against the
+   right edge. */
+function centreTab(t){
+  /* a wheel animation still decaying would fight this smooth scrollTo — hand over. */
+  if(typeof wheelStop==='function')wheelStop();
+  if(bar.scrollWidth<=bar.clientWidth+1)return;
+  var to=t.offsetLeft-(bar.clientWidth-t.offsetWidth)/2;
+  to=Math.max(0,Math.min(bar.scrollWidth-bar.clientWidth,to));
+  if(bar.scrollTo)bar.scrollTo({left:to,behavior:'smooth'});else bar.scrollLeft=to;
+}
+function select(id,scroll){
+  tabs.forEach(function(t){
+    var on=t.getAttribute('data-sec')===id;
+    t.setAttribute('aria-selected',on?'true':'false');
+    if(on)centreTab(t);
+  });
+  [].forEach.call(document.querySelectorAll('.rn-sec'),function(s){
+    var on=s.id==='rn-p-'+id;
+    s.classList.toggle('is-on',on);
+    if(on)s.removeAttribute('hidden');else s.setAttribute('hidden','');
+  });
+  movePill();
+  /* README §Tab switching — only pull the page UP to the bar; never shove a reader
+     who is already above it. The anchor is measured instead of the wrapper because
+     a pinned sticky element reports its pinned position, not its flow position. */
+  if(scroll!==false&&anchor){
+    var top=anchor.getBoundingClientRect().top+window.pageYOffset;
+    if(window.pageYOffset>top)window.scrollTo(0,Math.max(0,top-10));
+  }
+}
+
+/* drag-to-pan, per design/Tabbar.js:dragScroll — a move past 4px marks the gesture
+   as a drag and swallows the click that follows, so panning never switches tabs.
+
+   🔒 Deliberately NO setPointerCapture, unlike the Tabbar.js reference. Capturing
+   on the capsule retargets the whole rest of the gesture to it — measured here as
+   `pointerdown -> BUTTON.rn-tab` but `pointerup -> DIV.rn-tabs` and
+   `click -> DIV.rn-tabs` — so the per-tab click listeners never fire and EVERY tab
+   is dead to the mouse. Window-level move/up listeners give the one thing capture
+   was for (panning continues when the pointer leaves the capsule) while leaving
+   the click on the button, which also keeps jump-nav's programmatic
+   `it.el.click()` and keyboard activation on the single, normal code path. */
+var drag=null,dragged=false;
+bar.addEventListener('pointerdown',function(e){
+  drag={x:e.clientX,left:bar.scrollLeft,moved:false};dragged=false;
+  bar.classList.add('is-drag');
+});
+window.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var dx=e.clientX-drag.x;
+  if(Math.abs(dx)>4)drag.moved=true;
+  bar.scrollLeft=drag.left-dx;
+});
+function endDrag(){
+  if(!drag)return;
+  bar.classList.remove('is-drag');
+  dragged=drag.moved;drag=null;
+  if(dragged)setTimeout(function(){dragged=false},0);
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* D20 — wheel-to-pan. D17 refused design/Tabbar.js:wheelScroll for a real reason: a
+   non-passive listener that ALWAYS preventDefaults, on a bar pinned over a long
+   article, freezes the page whenever the cursor happens to rest on it. That objection
+   is answered here rather than overridden — the event is consumed ONLY when the bar
+   can actually absorb it, so scrolling always chains back to the page:
+     · the bar does not overflow             -> not consumed
+     · already at that end of the track      -> not consumed
+   Easing runs in a rAF loop instead of writing scrollLeft straight: a notched wheel
+   delivers one ~100px jump per detent, which reads as a snap, not a scroll.
+   `scroll-behavior:smooth` deliberately stays OUT of the shell CSS (it fights the drag
+   handler, which writes scrollLeft per pointermove), so smoothness is per-gesture —
+   the same way centreTab() does it. A pointerdown cancels the animation so a drag
+   never fights a decaying wheel. */
+/* 🔒 The eased position is tracked in wPos, NOT read back from scrollLeft. Reading it
+   back never converges: as the remaining distance shrinks the per-frame step goes
+   sub-pixel, the browser rounds the write away, scrollLeft stops changing, and the
+   distance therefore never falls under the .5 exit threshold — an rAF loop that spins
+   for as long as the page is open. Measured 2026-08-31: parked at 238 of a 240 target
+   with the loop still running after 4s. */
+var wTo=null,wRaf=0,wPos=0;
+function wheelStop(){
+  if(wRaf)cancelAnimationFrame(wRaf);
+  wRaf=0;wTo=null;bar.style.scrollSnapType='';
+}
+function wheelStep(){
+  var max=bar.scrollWidth-bar.clientWidth,
+      want=Math.max(0,Math.min(max,wTo)),d=want-wPos;
+  if(Math.abs(d)<.5){wPos=want;bar.scrollLeft=want;wheelStop();return}
+  wPos+=d*.22;bar.scrollLeft=wPos;
+  wRaf=requestAnimationFrame(wheelStep);
+}
+bar.addEventListener('wheel',function(e){
+  var max=bar.scrollWidth-bar.clientWidth;
+  /* 🔒 The ONLY escape hatch: a bar whose tabs already fit has nothing to pan, so it
+     must not swallow the page's scroll. Everything else below is deliberate capture. */
+  if(max<=0)return;
+  /* deltaMode 1 = lines (some mice); 16px is the conventional line box. */
+  var k=e.deltaMode===1?16:1,
+      d=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*k;
+  if(!d)return;
+  var at=wTo===null?bar.scrollLeft:wTo;
+  /* 🔒 NO end-chaining. The pointer is on the bar, so the gesture belongs to the bar,
+     even at the end of the track — user directive 2026-09-01, after seeing the chaining
+     version: "แก้ tabbar scroll แค่ใน tabbar เมื่อ mouse ชี้เท่านั้น". Scoping to "when the
+     mouse points at it" needs no code: the listener is on `bar`, and a wheel over body text
+     is not consumed (measured, and it is a fixture). */
+  e.preventDefault();
+  /* 🔒 Snap fights a programmatic scroll: with `scroll-snap-type:x` live, writing
+     scrollLeft per frame settles SHORT — measured 272px for a requested 300. An active
+     pointer drag gets this latitude from the browser for free, which is why the drag
+     handler never needed it. Suspend for the animation, restore in wheelStop(). */
+  if(wTo===null)wPos=bar.scrollLeft;   /* fresh gesture — seed from where we are */
+  bar.style.scrollSnapType='none';
+  wTo=Math.max(0,Math.min(max,at+d));
+  if(!wRaf)wRaf=requestAnimationFrame(wheelStep);
+},{passive:false});
+bar.addEventListener('pointerdown',wheelStop);
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    if(dragged)return;
+    select(t.getAttribute('data-sec'),true);
+  });
+});
+/* Keyboard: a tablist is expected to move with the arrow keys. */
+bar.addEventListener('keydown',function(e){
+  var i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:
+        e.key==='Home'?0:e.key==='End'?tabs.length-1:-1;
+  if(j<0||j>=tabs.length)return;
+  e.preventDefault();tabs[j].focus();select(tabs[j].getAttribute('data-sec'),false);
+});
+
+/* Tab labels swap their single text node rather than stacking two spans, so
+   jump-nav keeps reading one label of one language. See the note in render(). */
+function applyLang(l){
+  tabs.forEach(function(t){
+    t.textContent=t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent;
+    var full=t.getAttribute(l==='en'?'data-en-full':'data-th-full');
+    if(full)t.setAttribute('title',full);
+  });
+  publishSections(l);
+  movePill();                        /* labels changed width */
+}
+
+/* Hand the floating jump sheet this page's sections. Its auto-detect reads only
+   VISIBLE headings, which on a tabbed page is the one open panel — so without this
+   the sheet offers a single row. __jnSections is the documented override and makes
+   it a pure table of contents. */
+function publishSections(l){
+  window.__jnSections=tabs.map(function(t){
+    return {id:'rn-p-'+t.getAttribute('data-sec'),
+            label:t.getAttribute(l==='en'?'data-en':'data-th')||t.textContent};
+  });
+}
+/* Those rows are anchors that jump-nav only scrollIntoViews, and the target panel
+   is hidden until its tab is active — so switch the tab here. Delegated on
+   document because jump-nav rebuilds the rows on every open; it preventDefaults
+   but never stops propagation, so this still fires. */
+document.addEventListener('click',function(e){
+  var a=e.target&&e.target.closest?e.target.closest('.jn-item'):null;
+  if(!a)return;
+  var h=a.getAttribute('href')||'';
+  if(h.lastIndexOf('#rn-p-',0)!==0)return;
+  select(h.slice(6),true);
+});
+publishSections(root.getAttribute('data-lang')||'th');
+
+/* §2 language toggle — a two-option segmented control. Both options are always in
+   the DOM; the pill marks the active one and is MEASURED, exactly like the tab
+   pill (D1), so it tracks the label at whatever face the reader's machine resolved
+   rather than at the README's glyph-width formula. */
+var lang=document.getElementById('rn-lang'),
+    lopts=lang?[].slice.call(lang.querySelectorAll('.rn-lopt')):[],
+    lpill=lang?lang.querySelector('.rn-lpill'):null,
+    LPAD=4;
+function moveLangPill(){
+  var on=lang&&lang.querySelector('.rn-lopt[aria-pressed="true"]');
+  if(!on||!lpill)return;
+  lpill.style.width=on.offsetWidth+'px';
+  lpill.style.transform='translateX('+(on.offsetLeft-LPAD)+'px)';
+}
+lopts.forEach(function(o){
+  o.addEventListener('click',function(){
+    var next=o.getAttribute('data-lang-opt');
+    if(root.getAttribute('data-lang')===next)return;
+    lopts.forEach(function(x){
+      x.setAttribute('aria-pressed',x===o?'true':'false');
+    });
+    root.setAttribute('data-lang',next);
+    moveLangPill();
+    applyLang(next);
+  });
+});
+
+function remeasure(){movePill();moveLangPill();}
+window.addEventListener('resize',remeasure);
+/* Fonts settle after first paint and would leave both pills on stale geometry. */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
+remeasure();
+/* liquid-segmented.js: "call once from componentDidMount so a bar that opens on a
+   later tab isn't parked at the far left". */
+var first=bar.querySelector('.rn-tab[aria-selected="true"]');
+if(first)centreTab(first);
+})();
+</script>
+<!-- shared hub nav (article reading widget — inject_article_widgets.py) -->
+
+
+</body></html>
